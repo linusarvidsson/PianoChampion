@@ -3,22 +3,33 @@
 
 #include <stdio.h>
 #include <vector>
-#include "Options.h"
 #include "MidiFile.h"
 using namespace smf;
 
-struct MIDI_note {
+struct MidiNote {
     int start;
     int keyNumber;
     int duration;
 };
 
-class MidiEvent{
-public:
-    int trackNumber;
-    
+class MidiTrack{
 private:
-    MidiEvent(const std::string& filename);
+    int trackNumber;
+    int numNotes;
+    int trackTPQ;
+    int trackBPM;
+    float trackTPS;
+    
+    std::vector<MidiNote> trackNotes;
+    
+public:
+    MidiTrack(const std::string& filename, int track);
+    
+    int size();
+    int tpq();
+    int bpm();
+    float tps();
+    MidiNote* note(int index);
 };
 
 #endif /* MidiTrack_hpp */

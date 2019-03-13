@@ -20,55 +20,21 @@ using namespace glm;
 
 // MidiFile
 #include "midifile/MidiFile.h"
+#include "midifile/MidiTrack.hpp"
 using namespace smf;
 
 
 int main(void) {
+    MidiTrack track = MidiTrack("MusicLibrary/twinkle.mid", 1);
     
-    MidiFile midifile;
-    midifile.read("MusicLibrary/twinkle.mid");
-    midifile.doTimeAnalysis();
-    midifile.linkNotePairs();
+    float tps = track.tps();
     
-    int tpq = midifile.getTicksPerQuarterNote();
-    int bpm = 100;
+    GLfloat vertex_array_data[track.size()*12];
+    GLfloat color_array_data[track.size()*12];
+    GLuint index_array_data[track.size()*6];
     
-    struct MIDI_note {
-        int start; // time
-        int keyNumber; // note
-        int duration;
-    };
-    
-    int track = 1;
-
-    int numNotes = 0;
-    for (int event=0; event<midifile[track].size(); event++) {
-        if (midifile[track][event].isNoteOn()){
-            numNotes++;
-        }
-    }
-    
-    cout << "TPQ: " << tpq << "\nBPM: " << bpm << "\nNotes: " << numNotes << endl;
-    
-    MIDI_note notes[numNotes];
-    
-    int current_note = 0;
-    for (int event=0; event<midifile[track].size(); event++) {
-        
-        if (midifile[track][event].isNoteOn()){
-            notes[current_note] = {midifile[track][event].tick, midifile[track][event].getKeyNumber() -12, midifile[track][event].getTickDuration()};
-            current_note++;
-        }
-    }
-
-    float tps = (float)tpq * (float)bpm / 60.0f;
-    
-    GLfloat vertex_array_data[numNotes*12];
-    GLfloat color_array_data[numNotes*12];
-    GLuint index_array_data[numNotes*6];
-    
-    for(int i = 0; i < numNotes; i++){
-        note n_i = note(notes[i].keyNumber, (GLfloat)(notes[i].start) / tps, (GLfloat)(notes[i].start + notes[i].duration) / tps);
+    for(int i = 0; i < track.size(); i++){
+        note n_i = note(track.note(i)->keyNumber, (GLfloat)(track.note(i)->start) / tps, (GLfloat)(track.note(i)->start + track.note(i)->duration) / tps);
         
         vertex_array_data[i*12] = vertex_array_data[i*12 +6] = n_i.left();
         vertex_array_data[i*12 +3] = vertex_array_data[i*12 +9] = n_i.right();
@@ -310,7 +276,7 @@ int main(void) {
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
         
         // Draw the notes
-        glDrawElements(GL_TRIANGLES, numNotes*6, GL_UNSIGNED_INT, NULL);
+        glDrawElements(GL_TRIANGLES, track.size()*6, GL_UNSIGNED_INT, NULL);
         
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
