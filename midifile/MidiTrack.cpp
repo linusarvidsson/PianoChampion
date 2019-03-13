@@ -7,3 +7,45 @@
 //
 
 #include "MidiTrack.hpp"
+
+
+MidiTrack::MidiTrack(const std::string& filename, int track){
+    MidiFile midifile;
+    midifile.read(filename);
+    midifile.doTimeAnalysis();
+    midifile.linkNotePairs();
+    
+    trackNumber = track;
+    trackTPQ = midifile.getTicksPerQuarterNote();
+    trackBPM = 100;
+    trackTPS = (float)trackTPQ * (float)trackBPM / 60.0f;
+    
+    // Räkna antalet notes i spåret
+    numNotes = 0;
+    for (int event=0; event<midifile[track].size(); event++) {
+        if (midifile[track][event].isNoteOn()){
+            numNotes++;
+        }
+    }
+    
+    // Reservera utrymme för alla noter i vektorn trackNotes 
+    trackNotes.reserve(numNotes);
+    
+    // Lägg till noter i trackNotes
+    int current_note = 0;
+    for (int event=0; event<midifile[track].size(); event++) {
+        if (midifile[track][event].isNoteOn()){
+            trackNotes.push_back({midifile[track][event].tick, midifile[track][event].getKeyNumber() -12, midifile[track][event].getTickDuration()});
+            current_note++;
+        }
+    }
+}
+
+// Funktioner för åtkomst till spårets innehåll och egenskaper
+int MidiTrack::size() { return numNotes; }
+int MidiTrack::tpq() { return trackTPQ; }
+int MidiTrack::bpm() { return trackBPM; }
+float MidiTrack::tps() { return trackTPS; }
+MidiNote* MidiTrack::note(int index) { return &trackNotes[index]; }
+
+
