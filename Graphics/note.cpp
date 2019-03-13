@@ -13,7 +13,7 @@ note::note(int noteNumber_, GLfloat start_, GLfloat end_){
     endPoint = end_;
     
     // Lokalt notnummer för positionsberäkningar. C4 är centrum med position 0 och lokalt notnummer 0.
-    localNote = noteNumber - 60 +24;
+    localNote = noteNumber - 60;
     
     // OBS. Ej äkta oktav. Justerad för beräkningar där 3:e och 4:e oktaven har oktavnummer 0 vilket ger symmetri.
     if(localNote > 0) octave = glm::sign(localNote) * floor(abs((float)localNote / 12.0f));
