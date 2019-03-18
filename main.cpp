@@ -30,6 +30,8 @@ using namespace smf;
 #define TML_IMPLEMENTATION
 #include "MidiPlayer/tml.h"
 
+#include <vector>
+
 
 /* ––– DECLARATIONS FOR MIDIPLAYER –– */
 // Holds the global instance pointer
@@ -56,7 +58,7 @@ int main(void) {
     // Initialize the audio system
     SDL_AudioInit(TSF_NULL);
     // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/mountainking.mid");
+    TinyMidiLoader = tml_load_filename("MusicLibrary/grieg_mountain_king.mid");
     //Set up the global MidiMessage pointer to the first MIDI message
     g_MidiMessage = TinyMidiLoader;
     // Load the SoundFont from a file
@@ -72,19 +74,55 @@ int main(void) {
     //while (g_MidiMessage != NULL) SDL_Delay(100);
     //tsf_close(g_TinySoundFont);
     //tml_free(TinyMidiLoader);
+    /* –– */
+
+
+    MidiTrack track = MidiTrack("MusicLibrary/grieg_mountain_king.mid", 1);
     
-
- 
-    MidiTrack track = MidiTrack("MusicLibrary/mountainking.mid", 1);
-    float tps = track.tps();
-
+    std::vector<GLfloat> vertex_data(track.size()*12);
+    std::vector<GLfloat> color_data(track.size()*12);
+    std::vector<GLuint> index_data(track.size()*6);
+    
     GLfloat vertex_array_data[track.size()*12];
     GLfloat color_array_data[track.size()*12];
     GLuint index_array_data[track.size()*6];
+    
+    
 
     for(int i = 0; i < track.size(); i++){
-        note n_i = note(track.note(i)->keyNumber, (GLfloat)(track.note(i)->start) / tps, (GLfloat)(track.note(i)->start + track.note(i)->duration) / tps);
-
+        note n_i = note(track.note(i)->keyNumber, (GLfloat)(track.note(i)->start) / track.tps(), (GLfloat)(track.note(i)->start + track.note(i)->duration) / track.tps());
+        
+        // Vertex 1
+        vertex_data.push_back( n_i.left() );
+        vertex_data.push_back( n_i.start() );
+        vertex_data.push_back( 0.0f );
+        // Vertex 2
+        vertex_data.push_back( n_i.right() );
+        vertex_data.push_back( n_i.start() );
+        vertex_data.push_back( 0.0f );
+        // Vertex 3
+        vertex_data.push_back( n_i.left() );
+        vertex_data.push_back( n_i.end() );
+        vertex_data.push_back( 0.0f );
+        // Vertex 4
+        vertex_data.push_back( n_i.right() );
+        vertex_data.push_back( n_i.end() );
+        vertex_data.push_back( 0.0f );
+        
+        for (int vertex = 0; vertex < 4; vertex++){
+            color_data.push_back( n_i.color()[0] );
+            color_data.push_back( n_i.color()[1] );
+            color_data.push_back( n_i.color()[2] );
+        }
+        
+        index_data.push_back( i*4 );
+        index_data.push_back( i*4 +1 );
+        index_data.push_back( i*4 +2 );
+        index_data.push_back( i*4 +2 );
+        index_data.push_back( i*4 +1 );
+        index_data.push_back( i*4 +3 );
+        
+        
         vertex_array_data[i*12] = vertex_array_data[i*12 +6] = n_i.left();
         vertex_array_data[i*12 +3] = vertex_array_data[i*12 +9] = n_i.right();
         vertex_array_data[i*12 +1] = vertex_array_data[i*12 +4] = n_i.start();
@@ -216,7 +254,13 @@ int main(void) {
     glGenBuffers(1, &vertexbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_array_data), vertex_array_data, GL_STATIC_DRAW);
-
+    /*
+    GLuint vertexbuffer;
+    glGenBuffers(1, &vertexbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+    glBufferData(GL_ARRAY_BUFFER, vertex_data.size(), &vertex_data[0], GL_STATIC_DRAW);
+    */
+    
     // Create background vertex buffer
     GLuint background_vertexbuffer;
     glGenBuffers(1, &background_vertexbuffer);
@@ -224,17 +268,31 @@ int main(void) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(background_vertex_array_data), background_vertex_array_data, GL_STATIC_DRAW);
 
     // Vreate color buffer
+    
     GLuint colorbuffer;
     glGenBuffers(1, &colorbuffer);
     glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(color_array_data), color_array_data, GL_STATIC_DRAW);
-
+    /*
+    GLuint colorbuffer;
+    glGenBuffers(1, &colorbuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+    glBufferData(GL_ARRAY_BUFFER, color_data.size(), &color_data[0], GL_STATIC_DRAW);
+    */
+    
     // Generate buffers for the indices
+    
     GLuint indexbuffer;
     glGenBuffers(1, &indexbuffer);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_array_data), index_array_data, GL_STATIC_DRAW);
-
+    /*
+    GLuint indexbuffer;
+    glGenBuffers(1, &indexbuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data.size() * sizeof(GLfloat), &index_data[0], GL_STATIC_DRAW);
+    */
+    
     //background_indexbuffer
     GLuint background_indexbuffer;
     glGenBuffers(1, &background_indexbuffer);
@@ -283,18 +341,18 @@ int main(void) {
         // Attribute buffer 1: vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, background_vertexbuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         // Attribute buffer 2: UVs
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         // Index buffer
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, background_indexbuffer);
 
         // Draw the triangles
-        glDrawElements(GL_TRIANGLES, sizeof(background_index_array_data), GL_UNSIGNED_INT, NULL);
+        glDrawElements(GL_TRIANGLES, sizeof(background_index_array_data), GL_UNSIGNED_INT, (void*)0);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
@@ -313,19 +371,19 @@ int main(void) {
         // Attribute buffer 1: vertices
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
 
         // Attribute buffer 2: colors
         glEnableVertexAttribArray(1);
         glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, (void*)0);
 
         // Index buffer
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
 
         // Draw the notes
-        glDrawElements(GL_TRIANGLES, track.size()*6, GL_UNSIGNED_INT, NULL);
+        glDrawElements(GL_TRIANGLES, track.size()*6, GL_UNSIGNED_INT, (void*)0 );
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
