@@ -43,7 +43,8 @@ static void AudioCallback(void* data, Uint8 *stream, int len);
 
 int main(void) {
 
-    /* –– PLAY MIDI */
+    
+    // PLAY MIDI
     tml_message* TinyMidiLoader = NULL;
     // Define the desired audio output format we request
     SDL_AudioSpec OutputAudioSpec;
@@ -55,7 +56,7 @@ int main(void) {
     // Initialize the audio system
     SDL_AudioInit(TSF_NULL);
     // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/impromptu.mid");
+    TinyMidiLoader = tml_load_filename("MusicLibrary/mountainking.mid");
     //Set up the global MidiMessage pointer to the first MIDI message
     g_MidiMessage = TinyMidiLoader;
     // Load the SoundFont from a file
@@ -71,10 +72,10 @@ int main(void) {
     //while (g_MidiMessage != NULL) SDL_Delay(100);
     //tsf_close(g_TinySoundFont);
     //tml_free(TinyMidiLoader);
-    /* –– */
+    
 
-
-    MidiTrack track = MidiTrack("MusicLibrary/impromptu.mid", 1);
+ 
+    MidiTrack track = MidiTrack("MusicLibrary/mountainking.mid", 1);
     float tps = track.tps();
 
     GLfloat vertex_array_data[track.size()*12];
