@@ -31,6 +31,21 @@ using namespace smf;
 #include "MidiPlayer/tml.h"
 
 #include <vector>
+#include "MidiIn/cmidiin.h"
+#include <RtMidi.h>
+
+
+/* –– STUFF FOR GAME LOGIC */
+void toggle(bool &a) {
+    if (a) a = false;
+    else a = true;
+}
+
+bool midiFile[127];
+bool playerInput[127];
+bool notes_to_be_turned_on[127];
+bool notes_to_be_turned_off[127];
+/* – – – */
 
 
 /* ––– DECLARATIONS FOR MIDIPLAYER –– */
@@ -42,9 +57,52 @@ static tml_message* g_MidiMessage;  //next message to be played
 static void AudioCallback(void* data, Uint8 *stream, int len);
 
 
+/*void mycallback( double deltatime, std::vector< unsigned char > *message, void *){
+    unsigned int nBytes = message->size();
+    for ( unsigned int i=0; i<nBytes; i++ )
+      //   std::cout << "Byte " << i << " = " << (int)message->at(i) << ", ";
+        if ( nBytes > 0 )
+            //  std::cout << "stamp = " << deltatime << std::endl;
+            
+            //bool array if clicked 
+            if ((int)message->at(0) == 144) {
+                //std::cout << (int)message->at(0) << std::endl;
+                playerInput[(int)message->at(1)] = true;
+                notes_to_be_turned_on[(int)message->at(1)] = true;
+            }
+            else {
+                playerInput[(int)message->at(1)] = false;
+                notes_to_be_turned_off[(int)message->at(1)] = true;
+            }
+}
+ */
 
 int main(void) {
-
+    MidiInputReader *reader = new MidiInputReader();
+    reader->getUserInput();
+    ////////////////
+   /* RtMidiIn *midiin = 0;
+    try {
+        
+        // RtMidiIn constructor
+        midiin = new RtMidiIn();
+        
+        // Call function to select port.
+        chooseMidiPort( midiin );
+        
+        // Set our callback function.  This should be done immediately after
+        // opening the port to avoid having incoming messages written to the
+        // queue instead of sent to the callback function.
+        midiin->setCallback( &mycallback );
+        
+        // Don't ignore sysex, timing, or active sensing messages.
+        midiin->ignoreTypes( false, false, false );
+        
+    } catch ( RtMidiError &error ) {
+        error.printMessage();
+    }
+*/
+//////////////////
     
     // PLAY MIDI
     tml_message* TinyMidiLoader = NULL;
@@ -76,9 +134,7 @@ int main(void) {
     //tml_free(TinyMidiLoader);
     /* –– */
 
-
     MidiTrack track = MidiTrack("MusicLibrary/grieg_mountain_king.mid", 1);
-    
     std::vector<GLfloat> vertex_data(track.size()*12);
     std::vector<GLfloat> color_data(track.size()*12);
     std::vector<GLuint> index_data(track.size()*6);
@@ -402,6 +458,9 @@ int main(void) {
     glDeleteVertexArrays(1, &VertexArrayID);
     glDeleteProgram(colorShader);
 
+    // Cleanup RtMIDI
+   // delete midiin;
+    
     glfwTerminate();
     return 0;
 }
@@ -414,20 +473,45 @@ static void AudioCallback(void* data, Uint8 *stream, int len)
     {
         //We progress the MIDI playback and then process TSF_RENDER_EFFECTSAMPLEBLOCK samples at once
         if (SampleBlock > SampleCount) SampleBlock = SampleCount;
+        
+        //tsf_channel_note_on(g_TinySoundFont, 1, 52, 0.3);
+        //toggle(midiFile[int(g_MidiMessage->key)]);
 
+    
+    
         //Loop through all MIDI messages which need to be played up until the current playback time
         for (g_Msec += SampleBlock * (1000.0 / 44100.0); g_MidiMessage && g_Msec >= g_MidiMessage->time; g_MidiMessage = g_MidiMessage->next)
         {
+            // Det kanske funkar här inne?
+            for (int i = 0; i < 127; i++) {
+                if (notes_to_be_turned_on[i]) {
+                    if (midiFile[i]) {
+                        tsf_channel_note_on(g_TinySoundFont, 1, i, 0.7);
+                    } else {
+                        tsf_channel_note_on(g_TinySoundFont, 1, i, 0.2);
+                    }
+                    notes_to_be_turned_on[i] = false;
+                }
+            }
+            for (int i = 0; i < 127; i++) {
+                if (notes_to_be_turned_off[i]) {
+                    tsf_channel_note_off(g_TinySoundFont, 1, i);
+                    notes_to_be_turned_off[i] = false;
+                }
+            }
+            
             switch (g_MidiMessage->type)
             {
                 case TML_PROGRAM_CHANGE: //channel program (preset) change (special handling for 10th MIDI channel with drums)
                     tsf_channel_set_presetnumber(g_TinySoundFont, g_MidiMessage->channel, g_MidiMessage->program, (g_MidiMessage->channel == 9));
                     break;
                 case TML_NOTE_ON: //play a note
-                    tsf_channel_note_on(g_TinySoundFont, g_MidiMessage->channel, g_MidiMessage->key, g_MidiMessage->velocity / 127.0f);
+                    /*tsf_channel_note_on(g_TinySoundFont, g_MidiMessage->channel, g_MidiMessage->key, g_MidiMessage->velocity / 127.0f); */
+                    toggle(midiFile[int(g_MidiMessage->key)]);
                     break;
                 case TML_NOTE_OFF: //stop a note
-                    tsf_channel_note_off(g_TinySoundFont, g_MidiMessage->channel, g_MidiMessage->key);
+                    /* tsf_channel_note_off(g_TinySoundFont, g_MidiMessage->channel, g_MidiMessage->key); */
+                    toggle(midiFile[int(g_MidiMessage->key)]);
                     break;
                 case TML_PITCH_BEND: //pitch wheel modification
                     tsf_channel_set_pitchwheel(g_TinySoundFont, g_MidiMessage->channel, g_MidiMessage->pitch_bend);

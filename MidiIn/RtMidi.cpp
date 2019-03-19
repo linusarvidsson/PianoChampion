@@ -524,7 +524,7 @@ MidiInApi :: ~MidiInApi( void )
   if ( inputData_.queue.ringSize > 0 ) delete [] inputData_.queue.ring;
 }
 
-void MidiInApi :: setCallback( RtMidiIn::RtMidiCallback callback, void *userData )
+void MidiInApi :: setCallback(RtMidiIn::RtMidiCallback callback, void *userData)
 {
   if ( inputData_.usingCallback ) {
     errorString_ = "MidiInApi::setCallback: a callback function is already set!";

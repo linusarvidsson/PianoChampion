@@ -8,7 +8,22 @@
 
 #ifndef cmidiin_h
 #define cmidiin_h
+#include <iostream>
+#include <cstdlib>
+#include <RtMidi.h>
 
-void getUserFeedback();
-int getNote(int note);
+class MidiInputReader{
+public:
+    MidiInputReader();
+    void getUserInput();
+    RtMidiIn *midiin;
+    bool playerInput[127] = {false};
+private:
+    std::vector<unsigned char> inputQueue;
+    unsigned int nPorts ;
+    void cleanup();
+};
+
+extern bool keys[127];
+
 #endif /* cmidiin_h */
