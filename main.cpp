@@ -38,7 +38,12 @@ static tsf* g_TinySoundFont;
 static double g_Msec = 0;       //current playback time
 static tml_message* g_MidiMessage;  //next message to be played
 static void AudioCallback(void* data, Uint8 *stream, int len);
+void get_resolution(int* w, int* h) {
+    const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
+    *w = mode->width;
+    *h = mode->height;
+}
 
 
 int main(void) {
@@ -134,8 +139,11 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
 
     // Create a windowed mode window and its OpenGL context
+    int w, h;
+    get_resolution(&w,&h);
+
     GLFWwindow *window;
-    window = glfwCreateWindow(1280, 800, "Piano Champion", NULL, NULL);
+    window = glfwCreateWindow(w, h, "Piano Champion", glfwGetPrimaryMonitor(), NULL);
     if (!window) {
         fprintf(stderr, "Failed to open GLFW window");
         glfwTerminate();
@@ -296,7 +304,36 @@ int main(void) {
     // ModelViewProjection
     glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
+    
+    //----- PLAY MIDI -----//
 
+    tml_message* TinyMidiLoader = NULL;
+    // Define the desired audio output format we request
+    SDL_AudioSpec OutputAudioSpec;
+    OutputAudioSpec.freq = 44100;
+    OutputAudioSpec.format = AUDIO_F32;
+    OutputAudioSpec.channels = 2;
+    OutputAudioSpec.samples = 4096;
+    OutputAudioSpec.callback = AudioCallback;
+    // Initialize the audio system
+    SDL_AudioInit(TSF_NULL);
+    // Load MIDI
+    TinyMidiLoader = tml_load_filename("MusicLibrary/pianoman.mid");
+    //Set up the global MidiMessage pointer to the first MIDI message
+    g_MidiMessage = TinyMidiLoader;
+    // Load the SoundFont from a file
+    g_TinySoundFont = tsf_load_filename("MusicLibrary/kawai.sf2");
+    // Set the SoundFont rendering output mode
+    tsf_set_output(g_TinySoundFont, TSF_STEREO_INTERLEAVED, OutputAudioSpec.freq, 0.0f);
+    // Request the desired audio output format
+    SDL_OpenAudio(&OutputAudioSpec, TSF_NULL);
+    // Start the actual audio playback here
+    // The audio thread will begin to call our AudioCallback function
+    SDL_PauseAudio(0);
+    //Wait until the entire MIDI file has been played back (until the end of the linked message list is reached)
+    //while (g_MidiMessage != NULL) SDL_Delay(100);
+    //tsf_close(g_TinySoundFont);
+    //tml_free(TinyMidiLoader);
 
 
 
