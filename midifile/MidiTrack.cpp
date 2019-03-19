@@ -53,7 +53,8 @@ int MidiTrack::searchNote(double time, int key){
     return 0;
 }
 
-void MidiTrack::updateCurrentNotes(bool (&currentNotes)[], double time){
+void MidiTrack::updateCurrentNotes(bool currentNotes[], double time){
+    
     for(int i = 0; i < 127; i++){
         currentNotes[i] = false;
     }

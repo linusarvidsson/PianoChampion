@@ -31,7 +31,7 @@ public:
     void bpm(int BPM);
     float tps();
     MidiNote* note(int index);
-    void updateCurrentNotes(bool (&currentNotes)[], double time);
+    void updateCurrentNotes(bool currentNotes[], double time);
     int searchNote(double time, int key);
     void transpose(int keyshift);
 };

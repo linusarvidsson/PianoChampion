@@ -30,7 +30,6 @@
 #include <vector>
 #include <chrono>
 #include "MidiIn/cmidiin.h"
-#include <RtMidi.h>
 
 
 /* –– STUFF FOR GAME LOGIC –– */
@@ -407,6 +406,7 @@ int main(void) {
         //–– UPDATE MIDIFILE ––//
         auto current_time = std::chrono::steady_clock::now();
         double elapsed_sec = (double)std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000;
+        track.updateCurrentNotes(midiFile, elapsed_sec);
         
         for (int n = 0; n < track.size(); n++){
             if(track.note(n)->start < glfwGetTime()){
@@ -446,21 +446,23 @@ static void AudioCallback(void* data, Uint8 *stream, int len)
     
     reader->getUserInput();
     
-    // Turn on notes according to player input
-    for (int i = 0; i < reader->toBeTurnedOn.size(); i++) {
-        int key = reader->toBeTurnedOn[i];
-        if (midiFile[key]) {
-            tsf_channel_note_on(g_TinySoundFont, 1, key, 0.7);
-        } else {
-            tsf_channel_note_on(g_TinySoundFont, 1, key, 0.05);
-        }
-    } reader->toBeTurnedOn.clear();
-    
-    // Turn off notes according to player input
-    for (int i = 0; i < reader->toBeTurnedOff.size(); i++) {
-        int key = reader->toBeTurnedOff[i];
-        tsf_channel_note_off(g_TinySoundFont, 1, key);
-    } reader->toBeTurnedOff.clear();
+    if (midiFile != nullptr) {
+        // Turn on notes according to player input
+        for (int i = 0; i < reader->toBeTurnedOn.size(); i++) {
+            int key = reader->toBeTurnedOn[i];
+            if (midiFile[key]) {
+                tsf_channel_note_on(g_TinySoundFont, 1, key, 0.7);
+            } else {
+                tsf_channel_note_on(g_TinySoundFont, 1, key, 0.05);
+            }
+        } reader->toBeTurnedOn.clear();
+        
+        // Turn off notes according to player input
+        for (int i = 0; i < reader->toBeTurnedOff.size(); i++) {
+            int key = reader->toBeTurnedOff[i];
+            tsf_channel_note_off(g_TinySoundFont, 1, key);
+        } reader->toBeTurnedOff.clear();
+    }
     
     //Number of samples to process
     int SampleBlock, SampleCount = (len / (2 * sizeof(float))); //2 output channels

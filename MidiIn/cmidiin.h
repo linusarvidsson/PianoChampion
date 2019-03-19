@@ -10,7 +10,7 @@
 #define cmidiin_h
 #include <iostream>
 #include <cstdlib>
-#include <RtMidi.h>
+#include "RtMidi.h"
 
 class MidiInputReader{
 public:
