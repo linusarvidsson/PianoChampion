@@ -41,6 +41,19 @@ MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
     }
 }
 
+void MidiTrack::transpose(int keyshift){
+    for (int n = 0; n < numNotes; n++){
+        trackNotes[n].keyNumber += keyshift;
+    }
+}
+
+void MidiTrack::bpm(int BPM){
+    if (BPM > 0) {
+        trackBPM = BPM;
+        trackTPS = (float)trackTPQ * (float)trackBPM / 60.0f;
+    }
+}
+
 // Funktioner för åtkomst till spårets innehåll och egenskaper
 int MidiTrack::size() { return numNotes; }
 int MidiTrack::tpq() { return trackTPQ; }

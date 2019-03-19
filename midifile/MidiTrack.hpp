@@ -28,8 +28,10 @@ public:
     int size();
     int tpq();
     int bpm();
+    void bpm(int BPM);
     float tps();
     MidiNote* note(int index);
+    void transpose(int keyshift);
 };
 
 #endif /* MidiTrack_hpp */
