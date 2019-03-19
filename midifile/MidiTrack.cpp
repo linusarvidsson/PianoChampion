@@ -9,7 +9,7 @@
 #include "MidiTrack.hpp"
 
 
-MidiTrack::MidiTrack(const std::string& filename, int track){
+MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
     MidiFile midifile;
     midifile.read(filename);
     midifile.doTimeAnalysis();
@@ -17,7 +17,7 @@ MidiTrack::MidiTrack(const std::string& filename, int track){
     
     trackNumber = track;
     trackTPQ = midifile.getTicksPerQuarterNote();
-    trackBPM = 100;
+    trackBPM = bpm;
     trackTPS = (float)trackTPQ * (float)trackBPM / 60.0f;
     
     // Räkna antalet notes i spåret
@@ -35,7 +35,7 @@ MidiTrack::MidiTrack(const std::string& filename, int track){
     int current_note = 0;
     for (int event=0; event<midifile[track].size(); event++) {
         if (midifile[track][event].isNoteOn()){
-            trackNotes.push_back({midifile[track][event].tick, midifile[track][event].getKeyNumber() -12, midifile[track][event].getTickDuration()});
+            trackNotes.push_back({midifile[track][event].tick, midifile[track][event].getKeyNumber(), midifile[track][event].getTickDuration()});
             current_note++;
         }
     }

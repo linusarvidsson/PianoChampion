@@ -23,7 +23,7 @@ private:
     std::vector<MidiNote> trackNotes;
     
 public:
-    MidiTrack(const std::string& filename, int track);
+    MidiTrack(const std::string& filename, int track, int BPM);
     
     int size();
     int tpq();
