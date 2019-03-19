@@ -95,16 +95,16 @@ int main(void) {
     noteIndices.reserve(track.size()*6);
 
     for(int i = 0; i < track.size(); i++){
-        note n_i = note(track.note(i)->keyNumber, (GLfloat)(track.note(i)->start) / track.tps(), (GLfloat)(track.note(i)->start + track.note(i)->duration) / track.tps());
+        note n_i = note(track.note(i)->keyNumber, (GLfloat)track.note(i)->start, (GLfloat)track.note(i)->end);
 
         // Vertex 1
         noteVertices.push_back( glm::vec3(n_i.left(), n_i.start(), 0.0f) );
         // Vertex 2
         noteVertices.push_back( glm::vec3(n_i.right(), n_i.start(), 0.0f) );
         // Vertex 3
-        noteVertices.push_back( glm::vec3(n_i.left(), n_i.end(), 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.left(), n_i.end() - 0.03, 0.0f) );
         // Vertex 4
-        noteVertices.push_back( glm::vec3(n_i.right(), n_i.end(), 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.right(), n_i.end() - 0.03, 0.0f) );
 
         // Color
         for (int vertex = 0; vertex < 4; vertex++){
@@ -143,7 +143,8 @@ int main(void) {
     get_resolution(&w,&h);
 
     GLFWwindow *window;
-    window = glfwCreateWindow(w, h, "Piano Champion", glfwGetPrimaryMonitor(), NULL);
+    //window = glfwCreateWindow(w, h, "Piano Champion", glfwGetPrimaryMonitor(), NULL);
+    window = glfwCreateWindow(1280, 800, "Piano Champion", NULL, NULL);
     if (!window) {
         fprintf(stderr, "Failed to open GLFW window");
         glfwTerminate();
@@ -390,7 +391,7 @@ int main(void) {
         glfwPollEvents();
         
         for (int n = 0; n < track.size(); n++){
-            if(track.note(n)->start / track.tps() < glfwGetTime()){
+            if(track.note(n)->start < glfwGetTime()){
                 for(int v = 0; v < 4; v++){
                     noteColors[4*n + v] = glm::vec3(0.0f, 0.0f, 1.0f);
                 }

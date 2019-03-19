@@ -7,9 +7,9 @@
 using namespace smf;
 
 struct MidiNote {
-    int start;
+    double start;
+    double end;
     int keyNumber;
-    int duration;
 };
 
 class MidiTrack{
@@ -31,6 +31,7 @@ public:
     void bpm(int BPM);
     float tps();
     MidiNote* note(int index);
+    int searchNote(double time, int key);
     void transpose(int keyshift);
 };
 
