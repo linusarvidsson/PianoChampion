@@ -53,7 +53,12 @@ static tsf* g_TinySoundFont;
 static double g_Msec = -4000;       //current playback time
 static tml_message* g_MidiMessage;  //next message to be played
 static void AudioCallback(void* data, Uint8 *stream, int len);
+void get_resolution(int* w, int* h) {
+    const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
+    *w = mode->width;
+    *h = mode->height;
+}
 
 int main(void) {
     reader = new MidiInputReader();
@@ -70,7 +75,7 @@ int main(void) {
     // Initialize the audio system
     SDL_AudioInit(TSF_NULL);
     // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/pianoman.mid");
+    TinyMidiLoader = tml_load_filename("MusicLibrary/grieg_mountain_king.mid");
     //Set up the global MidiMessage pointer to the first MIDI message
     g_MidiMessage = TinyMidiLoader;
     // Load the SoundFont from a file
@@ -87,11 +92,14 @@ int main(void) {
     //tsf_close(g_TinySoundFont);
     //tml_free(TinyMidiLoader);
 
+    
+    
+    
 
     //----- Note Data -----//
 
     // Read track from a MIDI-file to get note data
-    MidiTrack track = MidiTrack("MusicLibrary/pianoman.mid", 1, 100);
+    MidiTrack track = MidiTrack("MusicLibrary/grieg_mountain_king.mid", 1, 100);
 
     std::vector<glm::vec3> noteVertices;
     noteVertices.reserve(track.size()*4);
@@ -101,16 +109,16 @@ int main(void) {
     noteIndices.reserve(track.size()*6);
 
     for(int i = 0; i < track.size(); i++){
-        note n_i = note(track.note(i)->keyNumber, (GLfloat)(track.note(i)->start) / track.tps(), (GLfloat)(track.note(i)->start + track.note(i)->duration) / track.tps());
+        note n_i = note(track.note(i)->keyNumber, (GLfloat)track.note(i)->start, (GLfloat)track.note(i)->end);
 
         // Vertex 1
         noteVertices.push_back( glm::vec3(n_i.left(), n_i.start(), 0.0f) );
         // Vertex 2
         noteVertices.push_back( glm::vec3(n_i.right(), n_i.start(), 0.0f) );
         // Vertex 3
-        noteVertices.push_back( glm::vec3(n_i.left(), n_i.end(), 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.left(), n_i.end() - 0.03, 0.0f) );
         // Vertex 4
-        noteVertices.push_back( glm::vec3(n_i.right(), n_i.end(), 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.right(), n_i.end() - 0.03, 0.0f) );
 
         // Color
         for (int vertex = 0; vertex < 4; vertex++){
@@ -145,7 +153,11 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
 
     // Create a windowed mode window and its OpenGL context
+    int w, h;
+    get_resolution(&w,&h);
+
     GLFWwindow *window;
+    //window = glfwCreateWindow(w, h, "Piano Champion", glfwGetPrimaryMonitor(), NULL);
     window = glfwCreateWindow(1280, 800, "Piano Champion", NULL, NULL);
     if (!window) {
         fprintf(stderr, "Failed to open GLFW window");
@@ -297,7 +309,7 @@ int main(void) {
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-                                 glm::vec3(0,0,10), // Camera position
+                                 glm::vec3(0,0,9), // Camera position
                                  glm::vec3(0,0,0),  // The point the camera looks at
                                  glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                                  );
@@ -307,10 +319,10 @@ int main(void) {
     // ModelViewProjection
     glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
+    
 
 
-
-
+    
     //---------- Render loop ----------//
 
     do{
@@ -318,6 +330,7 @@ int main(void) {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 
+        
         //----- Render Textured Objects -----//
 
         // Use texture shader for background
@@ -352,6 +365,7 @@ int main(void) {
         glDisableVertexAttribArray(1);
 
 
+        
         //----- Render Colored Objects -----//
 
         // Use color shader
@@ -390,12 +404,19 @@ int main(void) {
         // Poll for and process events
         glfwPollEvents();
 
-        // Play sound
-        SDL_Delay(30);
-
         //–– UPDATE MIDIFILE ––//
         auto current_time = std::chrono::steady_clock::now();
         double elapsed_sec = (double)std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000;
+        
+        for (int n = 0; n < track.size(); n++){
+            if(track.note(n)->start < glfwGetTime()){
+                for(int v = 0; v < 4; v++){
+                    noteColors[4*n + v] = glm::vec3(0.0f, 0.0f, 1.0f);
+                }
+                glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
+                glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
+            }
+        }
         
     }
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && !glfwWindowShouldClose(window));

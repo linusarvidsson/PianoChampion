@@ -35,18 +35,30 @@ MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
     int current_note = 0;
     for (int event=0; event<midifile[track].size(); event++) {
         if (midifile[track][event].isNoteOn()){
-            trackNotes.push_back({midifile[track][event].tick, midifile[track][event].getKeyNumber(), midifile[track][event].getTickDuration()});
+            trackNotes.push_back({midifile[track][event].tick / trackTPS, (midifile[track][event].tick + midifile[track][event].getTickDuration()) / trackTPS, midifile[track][event].getKeyNumber()});
             current_note++;
         }
     }
 }
 
+// Sök not. Returnerar notens index.
+int MidiTrack::searchNote(double time, int key){
+    for(int n = 0; n < numNotes; n++){
+        if(key == trackNotes[n].keyNumber && trackNotes[n].start <= time && trackNotes[n].end >= time){
+            return n;
+        }
+    }
+    return 0;
+}
+
+// Transpoerar alla noter med keyshift steg
 void MidiTrack::transpose(int keyshift){
     for (int n = 0; n < numNotes; n++){
         trackNotes[n].keyNumber += keyshift;
     }
 }
 
+// Ändrar spårets BPM
 void MidiTrack::bpm(int BPM){
     if (BPM > 0) {
         trackBPM = BPM;
