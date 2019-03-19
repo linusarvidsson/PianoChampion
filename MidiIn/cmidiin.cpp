@@ -2,9 +2,6 @@
 #include <cstdlib>
 #include "cmidiin.h"
 
-bool done;
-static void finish(int ignore){ done = true; }
-
 MidiInputReader:: MidiInputReader(){
     // Check available ports.
     midiin = new RtMidiIn();
@@ -15,24 +12,22 @@ MidiInputReader:: MidiInputReader(){
     midiin->openPort( 0 );
     // Don't ignore sysex, timing, or active sensing messages.
     midiin->ignoreTypes( false, false, false );
-    // Install an interrupt handler function.
-    done = false;
-    (void) signal(SIGINT, finish);
 }
 
 void MidiInputReader:: getUserInput(){
     // Periodically check input queue.
-    std::cout << "Reading MIDI from port ... quit with Ctrl-C.\n";
-    while ( !done ) {
+    int check_n = 20;
+    while (check_n != 0) {
         midiin->getMessage( &inputQueue );
         
         if (!inputQueue.empty()) {
             int instruction = (int)inputQueue[0];
             int key = (int)inputQueue[1];
             
-            if (instruction == 144) {playerInput[key] = true;}
-            if (instruction == 128) {playerInput[key] = false;}
+            if (instruction == 144) {playerInput[key] = true; toBeTurnedOn.push_back(key);}
+            if (instruction == 128) {playerInput[key] = false; toBeTurnedOff.push_back(key);}
         }
+        check_n--;
     }
 }
 

@@ -18,6 +18,8 @@ public:
     void getUserInput();
     RtMidiIn *midiin;
     bool playerInput[127] = {false};
+    std::vector<int> toBeTurnedOn;
+    std::vector<int> toBeTurnedOff;
 private:
     std::vector<unsigned char> inputQueue;
     unsigned int nPorts ;
