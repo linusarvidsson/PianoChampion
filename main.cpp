@@ -2,40 +2,40 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-using namespace std;
+//using namespace std;
 
 // Graphics libraries
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
-using namespace glm;
 
-#include "Graphics/stb_image.h"
 #include "Graphics/shader.hpp"
 #include "Graphics/note.hpp"
-
 #define STB_IMAGE_IMPLEMENTATION
 #include "Graphics/stb_image.h"
 
-// MidiFile
+// MidiFile libraries
 #include "midifile/MidiFile.h"
 #include "midifile/MidiTrack.hpp"
-using namespace smf;
 
-//MidiPlayer
+// MidiPlayer libraries
 #include "MidiPlayer/minisdl_audio.h"
 #define TSF_IMPLEMENTATION
 #include "MidiPlayer/tsf.h"
 #define TML_IMPLEMENTATION
 #include "MidiPlayer/tml.h"
 
+// Other Libraries
+#include <vector>
 
-/* ––– DECLARATIONS FOR MIDIPLAYER –– */
+
+//----- DECLARATIONS FOR MIDIPLAYER -----//
+
 // Holds the global instance pointer
 static tsf* g_TinySoundFont;
 // Holds global MIDI playback state
-static double g_Msec = -3900;               //current playback time
+static double g_Msec = -2700;       //current playback time
 static tml_message* g_MidiMessage;  //next message to be played
 static void AudioCallback(void* data, Uint8 *stream, int len);
 
@@ -43,7 +43,8 @@ static void AudioCallback(void* data, Uint8 *stream, int len);
 
 int main(void) {
 
-    /* –– PLAY MIDI */
+    //----- PLAY MIDI -----//
+
     tml_message* TinyMidiLoader = NULL;
     // Define the desired audio output format we request
     SDL_AudioSpec OutputAudioSpec;
@@ -71,37 +72,54 @@ int main(void) {
     //while (g_MidiMessage != NULL) SDL_Delay(100);
     //tsf_close(g_TinySoundFont);
     //tml_free(TinyMidiLoader);
-    /* –– */
 
 
+
+
+
+    //----- Note Data -----//
+
+    // Read track from a MIDI-file to get note data
     MidiTrack track = MidiTrack("MusicLibrary/pianoman.mid", 1, 100);
-    float tps = track.tps();
 
-    GLfloat vertex_array_data[track.size()*12];
-    GLfloat color_array_data[track.size()*12];
-    GLuint index_array_data[track.size()*6];
+    std::vector<glm::vec3> noteVertices;
+    noteVertices.reserve(track.size()*4);
+    std::vector<glm::vec3> noteColors;
+    noteColors.reserve(track.size()*4);
+    std::vector<GLuint> noteIndices;
+    noteIndices.reserve(track.size()*6);
 
     for(int i = 0; i < track.size(); i++){
-        note n_i = note(track.note(i)->keyNumber, (GLfloat)(track.note(i)->start) / tps, (GLfloat)(track.note(i)->start + track.note(i)->duration) / tps);
+        note n_i = note(track.note(i)->keyNumber, (GLfloat)(track.note(i)->start) / track.tps(), (GLfloat)(track.note(i)->start + track.note(i)->duration) / track.tps());
 
-        vertex_array_data[i*12] = vertex_array_data[i*12 +6] = n_i.left();
-        vertex_array_data[i*12 +3] = vertex_array_data[i*12 +9] = n_i.right();
-        vertex_array_data[i*12 +1] = vertex_array_data[i*12 +4] = n_i.start();
-        vertex_array_data[i*12 +7] = vertex_array_data[i*12 +10] = n_i.end() - 0.02;
-        vertex_array_data[i*12 +2] = vertex_array_data[i*12 +5] = vertex_array_data[i*12 +8] = vertex_array_data[i*12 +11] = 0.0f;
+        // Vertex 1
+        noteVertices.push_back( glm::vec3(n_i.left(), n_i.start(), 0.0f) );
+        // Vertex 2
+        noteVertices.push_back( glm::vec3(n_i.right(), n_i.start(), 0.0f) );
+        // Vertex 3
+        noteVertices.push_back( glm::vec3(n_i.left(), n_i.end(), 0.0f) );
+        // Vertex 4
+        noteVertices.push_back( glm::vec3(n_i.right(), n_i.end(), 0.0f) );
 
+        // Color
         for (int vertex = 0; vertex < 4; vertex++){
-            color_array_data[i*12 + vertex*3] = n_i.color()[0];
-            color_array_data[i*12 + vertex*3+1] = n_i.color()[1];
-            color_array_data[i*12 + vertex*3+2] = n_i.color()[2];
+            noteColors.push_back( glm::vec3(n_i.color()[0], n_i.color()[1], n_i.color()[2]) );
         }
 
-        index_array_data[i*6] = i*4;
-        index_array_data[i*6 +1] = index_array_data[i*6 +4] = i*4 +1;
-        index_array_data[i*6 +2] = index_array_data[i*6 +3] = i*4 +2;
-        index_array_data[i*6 +5] = i*4 +3;
+        // Indexing
+        noteIndices.push_back( i*4 );
+        noteIndices.push_back( i*4 +1 );
+        noteIndices.push_back( i*4 +2 );
+        noteIndices.push_back( i*4 +2 );
+        noteIndices.push_back( i*4 +1 );
+        noteIndices.push_back( i*4 +3 );
     }
 
+
+
+
+
+    //----- Initialization OpenGL -----//
 
     // Initialize GLFW
     if (!glfwInit()) {
@@ -112,19 +130,19 @@ int main(void) {
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy; should not be needed
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
 
     // Create a windowed mode window and its OpenGL context
     GLFWwindow *window;
-    window = glfwCreateWindow(1280, 800, "PianoMan", NULL, NULL);
+    window = glfwCreateWindow(1280, 800, "Piano Champion", NULL, NULL);
     if (!window) {
         fprintf(stderr, "Failed to open GLFW window");
         glfwTerminate();
         return -1;
     }
 
-    // Initialize GLEW (Make the window's context current)
+    // Initialize GLEW
     glfwMakeContextCurrent(window);
     if(glewInit() != GLEW_OK) {
         fprintf(stderr, "Failed to initialize GLEW\n");
@@ -152,21 +170,26 @@ int main(void) {
     GLuint textureShader = LoadShaders( "Graphics/Shaders/TextureVertexShader.vertexshader", "Graphics/Shaders/TextureFragmentShader.fragmentshader" );
 
 
+
+
+
+    //----- Background Data -----//
+
     GLfloat backgroundwidth = 5.45f;
     GLfloat backgroundheight = 5.0f;
 
-    GLfloat background_vertex_array_data[] = {
+    static const GLfloat backgroundVertices[] = {
         -backgroundwidth, -backgroundheight, -0.01f,
         backgroundwidth, -backgroundheight, -0.01f,
         -backgroundwidth, backgroundheight, -0.01f,
         backgroundwidth, backgroundheight, -0.01f
     };
 
-    static const GLuint background_index_array_data[] = {
+    static const GLuint backgroundIndices[] = {
         0,1,2,2,1,3
     };
 
-    static const GLfloat backgound_uv[] = {
+    static const GLfloat backgroundUV[] = {
         0.0f, 1.0f,   // top-left corner
         1.0f, 1.0f,  // top-right corner
         0.0f, 0.0f,  // lower-left corner
@@ -175,9 +198,9 @@ int main(void) {
     };
 
     // Create texture and set parameters for the UV-mapping
-    GLuint texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    GLuint backgroundTexture;
+    glGenTextures(1, &backgroundTexture);
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture);
 
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -199,153 +222,190 @@ int main(void) {
     // Handle for
     GLuint TextureID  = glGetUniformLocation(textureShader, "myTextureSampler");
 
-    // Get a handle for our "MVP" uniform
+    // Get a handle for the "MVP" uniform
     GLuint MVPcolor = glGetUniformLocation(colorShader, "MVP");
     GLuint MVPtexture = glGetUniformLocation(textureShader, "MVP");
 
 
-    // Create buffer for UV
-    GLuint uvbuffer;
-    glGenBuffers(1, &uvbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(backgound_uv), backgound_uv, GL_STATIC_DRAW);
+
+
+
+    //----- Background Buffers -----//
 
     // Create vertex buffer
-    GLuint vertexbuffer;
-    glGenBuffers(1, &vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertex_array_data), vertex_array_data, GL_STATIC_DRAW);
+    GLuint backgroundVertexBuffer;
+    glGenBuffers(1, &backgroundVertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, backgroundVertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
 
-    // Create background vertex buffer
-    GLuint background_vertexbuffer;
-    glGenBuffers(1, &background_vertexbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, background_vertexbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(background_vertex_array_data), background_vertex_array_data, GL_STATIC_DRAW);
+    // Create UV buffer
+    GLuint backgroundUVBuffer;
+    glGenBuffers(1, &backgroundUVBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, backgroundUVBuffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundUV), backgroundUV, GL_STATIC_DRAW);
 
-    // Vreate color buffer
-    GLuint colorbuffer;
-    glGenBuffers(1, &colorbuffer);
-    glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(color_array_data), color_array_data, GL_STATIC_DRAW);
-
-    // Generate buffers for the indices
-    GLuint indexbuffer;
-    glGenBuffers(1, &indexbuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index_array_data), index_array_data, GL_STATIC_DRAW);
-
-    //background_indexbuffer
-    GLuint background_indexbuffer;
-    glGenBuffers(1, &background_indexbuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, background_indexbuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(background_index_array_data), background_index_array_data, GL_STATIC_DRAW);
+    // Create index buffer
+    GLuint backgroundElementBuffer;
+    glGenBuffers(1, &backgroundElementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundElementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backgroundIndices), backgroundIndices, GL_STATIC_DRAW);
 
 
-    //********** Render loop ********** //
 
-    // Loop until the user closes the window
+
+
+    //----- Note Buffers -----//
+
+    // Create vertex buffer
+    GLuint noteVertexBuffer;
+    glGenBuffers(1, &noteVertexBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, noteVertexBuffer);
+    glBufferData(GL_ARRAY_BUFFER, noteVertices.size() * sizeof(glm::vec3), &noteVertices.front(), GL_STATIC_DRAW);
+
+    // Create color buffer
+    GLuint noteColorBuffer;
+    glGenBuffers(1, &noteColorBuffer);
+    glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
+
+
+    // Generate index buffer
+    GLuint noteElementBuffer;
+    glGenBuffers(1, &noteElementBuffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, noteElementBuffer);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, noteIndices.size() * sizeof(GLuint), &noteIndices.front(), GL_STATIC_DRAW);
+
+
+
+    //----- Camera Setup -----//
+
+    // Projection matrix : 45∞ Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
+    glm::mat4 Projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+    // Or, for an ortho camera:
+    //glm::mat4 Projection = glm::ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
+
+    // Camera matrix
+    glm::mat4 View = glm::lookAt(
+                                 glm::vec3(0,0,10), // Camera position
+                                 glm::vec3(0,0,0),  // The point the camera looks at
+                                 glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+                                 );
+
+    // Model matrix : an identity matrix (model will be at the origin)
+    glm::mat4 Model = glm::mat4(1.0f);
+    // ModelViewProjection
+    glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
+
+
+
+
+
+    //---------- Render loop ----------//
+
     do{
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Projection matrix : 45∞ Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-        mat4 Projection = perspective(radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-        // Or, for an ortho camera:
-        //mat4 Projection = ortho(-10.0f,10.0f,-10.0f,10.0f,0.0f,100.0f); // In world coordinates
 
-        // Camera matrix
-        mat4 View = lookAt(
-                           vec3(0,0,9), // Camera position
-                           vec3(0,0,0),  // The point the camera looks at
-                           vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-                           );
-
-        // Model matrix : an identity matrix (model will be at the origin)
-        mat4 Model = mat4(1.0f);
-        // Our ModelViewProjection : multiplication of our 3 matrices
-        mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
-
+        //----- Render Textured Objects -----//
 
         // Use texture shader for background
         glUseProgram(textureShader);
 
-        // Send our transformation to the currently bound shader,
-        // in the "MVP" uniform
+        // Send MVP transformation to the currently bound shader
         glUniformMatrix4fv(MVPtexture, 1, GL_FALSE, &MVP[0][0]);
 
-        // Bind our texture in Texture Unit 0
+        // Bind texture in Texture Unit 0
         glActiveTexture(GL_TEXTURE0);
-        glBindTexture(GL_TEXTURE_2D, texture);
-        // Set our "myTextureSampler" sampler to use Texture Unit 0
+        glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+        // Set "myTextureSampler" sampler to use Texture Unit 0
         glUniform1i(TextureID, 0);
 
         // Attribute buffer 1: vertices
         glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, background_vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, backgroundVertexBuffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
         // Attribute buffer 2: UVs
         glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, uvbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, backgroundUVBuffer);
         glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
 
         // Index buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, background_indexbuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundElementBuffer);
 
-        // Draw the triangles
-        glDrawElements(GL_TRIANGLES, sizeof(background_index_array_data), GL_UNSIGNED_INT, NULL);
+        // Draw the textured elements
+        glDrawElements(GL_TRIANGLES, sizeof(backgroundIndices), GL_UNSIGNED_INT, NULL);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
 
+
+        //----- Render Colored Objects -----//
 
         // Use color shader
         glUseProgram(colorShader);
 
-        mat4 noteTranslation = Projection * View * translate(mat4(1.0f), vec3(0.0f, -glfwGetTime(), 0.0f)) * Model;
+        // MVP for notes. Translates notes with time.
+        glm::mat4 noteTranslation = Projection * View * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime(), 0.0f)) * Model;
 
-        // Send our transformation to the currently bound shader,
-        // in the "MVP" uniform
+        // Send the transformation to the currently bound shader,
         glUniformMatrix4fv(MVPcolor, 1, GL_FALSE, &noteTranslation[0][0]);
-
 
         // Attribute buffer 1: vertices
         glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, noteVertexBuffer);
         glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
 
         // Attribute buffer 2: colors
         glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, colorbuffer);
+        glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
         glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
         // Index buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexbuffer);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, noteElementBuffer);
 
-        // Draw the notes
-        glDrawElements(GL_TRIANGLES, track.size()*6, GL_UNSIGNED_INT, NULL);
+        // Draw the colored elements
+        glDrawElements(GL_TRIANGLES, (GLsizei)noteIndices.size(), GL_UNSIGNED_INT, NULL);
 
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
+
+
+        //----- Render -----//
 
         // Swap front and back buffers
         glfwSwapBuffers(window);
         // Poll for and process events
         glfwPollEvents();
 
-        SDL_Delay(30); //Play sound
+        // Play sound
+        SDL_Delay(30);
+
     }
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && !glfwWindowShouldClose(window));
+    // Loop until user closes the window
+
 
     // Cleanup VBO
-    glDeleteBuffers(1, &vertexbuffer);
+    glDeleteBuffers(1, &noteVertexBuffer);
+    glDeleteBuffers(1, &noteColorBuffer);
+    glDeleteBuffers(1, &noteElementBuffer);
+    glDeleteBuffers(1, &backgroundVertexBuffer);
+    glDeleteBuffers(1, &backgroundUVBuffer);
+    glDeleteBuffers(1, &backgroundElementBuffer);
+
     glDeleteVertexArrays(1, &VertexArrayID);
     glDeleteProgram(colorShader);
+    glDeleteProgram(textureShader);
 
     glfwTerminate();
     return 0;
 }
+
+
+
+
 
 static void AudioCallback(void* data, Uint8 *stream, int len)
 {

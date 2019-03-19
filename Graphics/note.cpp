@@ -3,9 +3,6 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
-#include <iostream>
-using namespace std;
-
 // Constructor
 note::note(int noteNumber_, GLfloat start_, GLfloat end_){
     noteNumber = noteNumber_;
@@ -13,9 +10,9 @@ note::note(int noteNumber_, GLfloat start_, GLfloat end_){
     endPoint = end_;
     
     // Lokalt notnummer för positionsberäkningar. C4 är centrum med position 0 och lokalt notnummer 0.
-    localNote = noteNumber - 60;
+    localNote = noteNumber -60;
     
-    // OBS. Ej äkta oktav. Justerad för beräkningar där 3:e och 4:e oktaven har oktavnummer 0 vilket ger symmetri.
+    // OBS. EJ äkta oktav. Justerad för beräkningar där 3:e och 4:e oktaven har oktavnummer 0 vilket ger symmetri.
     if(localNote > 0) octave = glm::sign(localNote) * floor(abs((float)localNote / 12.0f));
     else octave = glm::sign(localNote) * floor((abs((float)localNote + 1) / 12.0f));
     
@@ -24,7 +21,6 @@ note::note(int noteNumber_, GLfloat start_, GLfloat end_){
     setNoteColor();
     if(black) setBlackOffset();
     
-    cout << "\nNote number: " << noteNumber + 24 << "\nLocal note: " << localNote << "\nOctave: " << octave << "\nPosition: " << position << endl;
 }
 
 // Funktioner för åtkomst till notens egenskaper
@@ -51,7 +47,7 @@ void note::setPosition(){
         }
         // Intervallet F - B
         else{
-            localNote = (GLfloat)(localNote + 2*octave + 1) / 10.f;
+            position = (GLfloat)(localNote + 2*octave + 1) / 10.f;
         }
     }
     
