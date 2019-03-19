@@ -61,7 +61,7 @@ int main(void) {
     // Initialize the audio system
     SDL_AudioInit(TSF_NULL);
     // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/grieg_mountain_king.mid");
+    TinyMidiLoader = tml_load_filename("MusicLibrary/pianoman.mid");
     //Set up the global MidiMessage pointer to the first MIDI message
     g_MidiMessage = TinyMidiLoader;
     // Load the SoundFont from a file
@@ -85,7 +85,7 @@ int main(void) {
     //----- Note Data -----//
 
     // Read track from a MIDI-file to get note data
-    MidiTrack track = MidiTrack("MusicLibrary/grieg_mountain_king.mid", 1, 100);
+    MidiTrack track = MidiTrack("MusicLibrary/pianoman.mid", 1, 100);
 
     std::vector<glm::vec3> noteVertices;
     noteVertices.reserve(track.size()*4);
@@ -295,8 +295,8 @@ int main(void) {
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-                                 glm::vec3(0,0,9), // Camera position
-                                 glm::vec3(0,0,0),  // The point the camera looks at
+                                 glm::vec3(0,-5,5), // Camera position
+                                 glm::vec3(0,1,0),  // The point the camera looks at
                                  glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                                  );
 

@@ -41,6 +41,8 @@ MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
     }
 }
 
+// 
+
 // Sök not. Returnerar notens index.
 int MidiTrack::searchNote(double time, int key){
     for(int n = 0; n < numNotes; n++){
@@ -49,6 +51,18 @@ int MidiTrack::searchNote(double time, int key){
         }
     }
     return 0;
+}
+
+void MidiTrack::updateCurrentNotes(bool (&currentNotes)[], double time){
+    for(int i = 0; i < 127; i++){
+        currentNotes[i] = false;
+    }
+    
+    for(int n = 0; n < numNotes; n++){
+        if(trackNotes[n].start <= time && trackNotes[n].end >= time){
+            currentNotes[ trackNotes[n].keyNumber ] = true;
+        }
+    }
 }
 
 // Transpoerar alla noter med keyshift steg
