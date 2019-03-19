@@ -35,7 +35,7 @@ using namespace smf;
 // Holds the global instance pointer
 static tsf* g_TinySoundFont;
 // Holds global MIDI playback state
-static double g_Msec = -2700;               //current playback time
+static double g_Msec = -3900;               //current playback time
 static tml_message* g_MidiMessage;  //next message to be played
 static void AudioCallback(void* data, Uint8 *stream, int len);
 
@@ -55,7 +55,7 @@ int main(void) {
     // Initialize the audio system
     SDL_AudioInit(TSF_NULL);
     // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/impromptu.mid");
+    TinyMidiLoader = tml_load_filename("MusicLibrary/pianoman.mid");
     //Set up the global MidiMessage pointer to the first MIDI message
     g_MidiMessage = TinyMidiLoader;
     // Load the SoundFont from a file
@@ -74,7 +74,7 @@ int main(void) {
     /* –– */
 
 
-    MidiTrack track = MidiTrack("MusicLibrary/impromptu.mid", 1);
+    MidiTrack track = MidiTrack("MusicLibrary/pianoman.mid", 1, 100);
     float tps = track.tps();
 
     GLfloat vertex_array_data[track.size()*12];
@@ -152,14 +152,14 @@ int main(void) {
     GLuint textureShader = LoadShaders( "Graphics/Shaders/TextureVertexShader.vertexshader", "Graphics/Shaders/TextureFragmentShader.fragmentshader" );
 
 
-    GLfloat backgroundwidth = 8.0f;
-    GLfloat backgroundheight = 4.5f;
+    GLfloat backgroundwidth = 5.45f;
+    GLfloat backgroundheight = 5.0f;
 
     GLfloat background_vertex_array_data[] = {
-        -backgroundwidth, -backgroundheight, -0.1f,
-        backgroundwidth, -backgroundheight, -0.1f,
-        -backgroundwidth, backgroundheight, -0.1f,
-        backgroundwidth, backgroundheight, -0.1f
+        -backgroundwidth, -backgroundheight, -0.01f,
+        backgroundwidth, -backgroundheight, -0.01f,
+        -backgroundwidth, backgroundheight, -0.01f,
+        backgroundwidth, backgroundheight, -0.01f
     };
 
     static const GLuint background_index_array_data[] = {
@@ -186,7 +186,7 @@ int main(void) {
 
     // Import texture
     int width, height, nrChannels;
-    unsigned char *data = stbi_load("Graphics/Images/syntesia_bakgrund-01.png", &width, &height, &nrChannels, 0);
+    unsigned char *data = stbi_load("Graphics/Images/pianoklaviatur.png", &width, &height, &nrChannels, 0);
     if (data){
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
         glGenerateMipmap(GL_TEXTURE_2D);
@@ -255,7 +255,7 @@ int main(void) {
 
         // Camera matrix
         mat4 View = lookAt(
-                           vec3(0,0,10), // Camera position
+                           vec3(0,0,9), // Camera position
                            vec3(0,0,0),  // The point the camera looks at
                            vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                            );

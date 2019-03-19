@@ -8,8 +8,7 @@
 
 #include "MidiTrack.hpp"
 
-
-MidiTrack::MidiTrack(const std::string& filename, int track){
+MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
     MidiFile midifile;
     midifile.read(filename);
     midifile.doTimeAnalysis();
@@ -17,7 +16,7 @@ MidiTrack::MidiTrack(const std::string& filename, int track){
     
     trackNumber = track;
     trackTPQ = midifile.getTicksPerQuarterNote();
-    trackBPM = 168;
+    trackBPM = bpm;
     trackTPS = (float)trackTPQ * (float)trackBPM / 60.0f;
     
     // Räkna antalet notes i spåret
