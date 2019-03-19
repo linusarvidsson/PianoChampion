@@ -47,9 +47,9 @@ void get_resolution(int* w, int* h) {
 
 
 int main(void) {
-
+    
     //----- PLAY MIDI -----//
-
+    
     tml_message* TinyMidiLoader = NULL;
     // Define the desired audio output format we request
     SDL_AudioSpec OutputAudioSpec;
@@ -77,11 +77,11 @@ int main(void) {
     //while (g_MidiMessage != NULL) SDL_Delay(100);
     //tsf_close(g_TinySoundFont);
     //tml_free(TinyMidiLoader);
-    
 
     
     
     
+
     //----- Note Data -----//
 
     // Read track from a MIDI-file to get note data
@@ -305,38 +305,9 @@ int main(void) {
     glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
 
     
-    //----- PLAY MIDI -----//
-
-    tml_message* TinyMidiLoader = NULL;
-    // Define the desired audio output format we request
-    SDL_AudioSpec OutputAudioSpec;
-    OutputAudioSpec.freq = 44100;
-    OutputAudioSpec.format = AUDIO_F32;
-    OutputAudioSpec.channels = 2;
-    OutputAudioSpec.samples = 4096;
-    OutputAudioSpec.callback = AudioCallback;
-    // Initialize the audio system
-    SDL_AudioInit(TSF_NULL);
-    // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/pianoman.mid");
-    //Set up the global MidiMessage pointer to the first MIDI message
-    g_MidiMessage = TinyMidiLoader;
-    // Load the SoundFont from a file
-    g_TinySoundFont = tsf_load_filename("MusicLibrary/kawai.sf2");
-    // Set the SoundFont rendering output mode
-    tsf_set_output(g_TinySoundFont, TSF_STEREO_INTERLEAVED, OutputAudioSpec.freq, 0.0f);
-    // Request the desired audio output format
-    SDL_OpenAudio(&OutputAudioSpec, TSF_NULL);
-    // Start the actual audio playback here
-    // The audio thread will begin to call our AudioCallback function
-    SDL_PauseAudio(0);
-    //Wait until the entire MIDI file has been played back (until the end of the linked message list is reached)
-    //while (g_MidiMessage != NULL) SDL_Delay(100);
-    //tsf_close(g_TinySoundFont);
-    //tml_free(TinyMidiLoader);
 
 
-
+    
     //---------- Render loop ----------//
 
     do{
