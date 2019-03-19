@@ -19,17 +19,19 @@ private:
     int trackTPQ;
     int trackBPM;
     float trackTPS;
-    
+
     std::vector<MidiNote> trackNotes;
-    
+
 public:
-    MidiTrack(const std::string& filename, int track);
-    
+    MidiTrack(const std::string& filename, int track, int BPM);
+
     int size();
     int tpq();
     int bpm();
+    void bpm(int BPM);
     float tps();
     MidiNote* note(int index);
+    void transpose(int keyshift);
 };
 
 #endif /* MidiTrack_hpp */

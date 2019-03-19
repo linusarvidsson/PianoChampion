@@ -4,6 +4,10 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 
+struct vertex {
+    GLfloat x, y, z;
+};
+
 class note{
 private:
     // Noternas bredd. Avståndet mätt från centrum av noten till kanten i x-led, den riktiga bredden är alltså x2.
