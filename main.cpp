@@ -21,10 +21,11 @@
 
 // MidiPlayer libraries
 #include "MidiPlayer/minisdl_audio.h"
-#define TSF_IMPLEMENTATION
+/*#define TSF_IMPLEMENTATION
 #include "MidiPlayer/tsf.h"
 #define TML_IMPLEMENTATION
-#include "MidiPlayer/tml.h"
+#include "MidiPlayer/tml.h" */
+#include "MidiPlayer/sfPlayer.hpp"
 
 // Other Libraries
 #include <vector>
@@ -41,17 +42,15 @@ MidiInputReader *reader;
 bool midiFile[127];
 /* – – – */
 
-/* –– TID TILL MIDI-LÄSNING –– */
+// –– TID TILL MIDI-LÄSNING –– //
 auto start_time = std::chrono::steady_clock::now();
 
-//----- DECLARATIONS FOR MIDIPLAYER -----//
-
-// Holds the global instance pointer
-static tsf* g_TinySoundFont;
-// Holds global MIDI playback state
-static double g_Msec = -4000;       //current playback time
-static tml_message* g_MidiMessage;  //next message to be played
+//----- DECLARATIONS FOR SOUNDFONT PLAYER -----//
+//static tsf* g_TinySoundFont;
+sfPlayer* soundfont;
 static void AudioCallback(void* data, Uint8 *stream, int len);
+
+
 void get_resolution(int* w, int* h) {
     const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
 
@@ -60,43 +59,12 @@ void get_resolution(int* w, int* h) {
 }
 
 int main(void) {
+    // Skapa midiläsare
     reader = new MidiInputReader();
-    
-    // PLAY MIDI
-    tml_message* TinyMidiLoader = NULL;
-    // Define the desired audio output format we request
-    SDL_AudioSpec OutputAudioSpec;
-    OutputAudioSpec.freq = 44100;
-    OutputAudioSpec.format = AUDIO_F32;
-    OutputAudioSpec.channels = 2;
-    OutputAudioSpec.samples = 4096;
-    OutputAudioSpec.callback = AudioCallback;
-    // Initialize the audio system
-    SDL_AudioInit(TSF_NULL);
-    // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/pianoman.mid");
-    //Set up the global MidiMessage pointer to the first MIDI message
-    g_MidiMessage = TinyMidiLoader;
-    // Load the SoundFont from a file
-    g_TinySoundFont = tsf_load_filename("MusicLibrary/kawai.sf2");
-    // Set the SoundFont rendering output mode
-    tsf_set_output(g_TinySoundFont, TSF_STEREO_INTERLEAVED, OutputAudioSpec.freq, 0.0f);
-    // Request the desired audio output format
-    SDL_OpenAudio(&OutputAudioSpec, TSF_NULL);
-    // Start the actual audio playback here
-    // The audio thread will begin to call our AudioCallback function
-    SDL_PauseAudio(0);
-    //Wait until the entire MIDI file has been played back (until the end of the linked message list is reached)
-    //while (g_MidiMessage != NULL) SDL_Delay(100);
-    //tsf_close(g_TinySoundFont);
-    //tml_free(TinyMidiLoader);
-
-    
-    
-    
+    // Skapa soundfont
+    soundfont = new sfPlayer(AudioCallback, "MusicLibrary/kawai.sf2");
 
     //----- Note Data -----//
-
     // Read track from a MIDI-file to get note data
     MidiTrack track = MidiTrack("MusicLibrary/pianoman.mid", 1, 100);
 
@@ -442,7 +410,7 @@ int main(void) {
 
 static void AudioCallback(void* data, Uint8 *stream, int len)
 {
-    tsf_channel_set_presetnumber(g_TinySoundFont, 1, 0, false);
+    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 0, false);
     
     reader->getUserInput();
     
@@ -451,16 +419,16 @@ static void AudioCallback(void* data, Uint8 *stream, int len)
         for (int i = 0; i < reader->toBeTurnedOn.size(); i++) {
             int key = reader->toBeTurnedOn[i];
             if (midiFile[key]) {
-                tsf_channel_note_on(g_TinySoundFont, 1, key, 0.7);
+                tsf_channel_note_on(soundfont->soundfont, 1, key, 0.7);
             } else {
-                tsf_channel_note_on(g_TinySoundFont, 1, key, 0.05);
+                tsf_channel_note_on(soundfont->soundfont, 1, key, 0.05);
             }
         } reader->toBeTurnedOn.clear();
         
         // Turn off notes according to player input
         for (int i = 0; i < reader->toBeTurnedOff.size(); i++) {
             int key = reader->toBeTurnedOff[i];
-            tsf_channel_note_off(g_TinySoundFont, 1, key);
+            tsf_channel_note_off(soundfont->soundfont, 1, key);
         } reader->toBeTurnedOff.clear();
     }
     
@@ -472,6 +440,6 @@ static void AudioCallback(void* data, Uint8 *stream, int len)
         if (SampleBlock > SampleCount) SampleBlock = SampleCount;
 
         // Render the block of audio samples in float format
-        tsf_render_float(g_TinySoundFont, (float*)stream, SampleBlock, 0);
+        tsf_render_float(soundfont->soundfont, (float*)stream, SampleBlock, 0);
     }
 }

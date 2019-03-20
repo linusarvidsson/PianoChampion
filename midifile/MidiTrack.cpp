@@ -53,6 +53,16 @@ int MidiTrack::searchNote(double time, int key){
     return 0;
 }
 
+void MidiTrack::searchNotes(double time, std::vector<int> *noteNumbers, bool playerInput[]){
+    for(int n = 0; n < numNotes; n++){
+        if(trackNotes[n].start <= time && trackNotes[n].end >= time){
+            if(playerInput[trackNotes[n].keyNumber]) {
+                noteNumbers->push_back(n);
+            }
+        }
+    }
+}
+
 void MidiTrack::updateCurrentNotes(bool currentNotes[], double time){
     
     for(int i = 0; i < 127; i++){
