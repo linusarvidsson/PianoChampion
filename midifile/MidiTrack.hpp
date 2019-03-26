@@ -33,7 +33,7 @@ public:
     MidiNote* note(int index);
     void updateCurrentNotes(bool currentNotes[], double time);
     int searchNote(double time, int key);
-    void searchNotes(double time, std::vector<int> *noteNumbers, bool playerInput[]);
+    void searchNotes(double time, std::vector<int> &noteNumbers, bool playerInput[]);
     void transpose(int keyshift);
 };
 

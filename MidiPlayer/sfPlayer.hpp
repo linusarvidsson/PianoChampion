@@ -27,7 +27,7 @@ sfPlayer::sfPlayer(void (*callback)(void*, Uint8*, int), const char* filename) {
     OutputAudioSpec.freq = 44100;
     OutputAudioSpec.format = AUDIO_F32;
     OutputAudioSpec.channels = 2;
-    OutputAudioSpec.samples = 4096;
+    OutputAudioSpec.samples = 100; // Den här var 4096;
     OutputAudioSpec.callback = callback;
     // Initialize the audio system
     SDL_AudioInit(TSF_NULL);

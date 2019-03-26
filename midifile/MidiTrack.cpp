@@ -7,6 +7,7 @@
 //
 
 #include "MidiTrack.hpp"
+#include <iostream>
 
 
 MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
@@ -53,14 +54,16 @@ int MidiTrack::searchNote(double time, int key){
     return 0;
 }
 
-void MidiTrack::searchNotes(double time, std::vector<int> *noteNumbers, bool playerInput[]){
+void MidiTrack::searchNotes(double time, std::vector<int> &noteNumbers, bool notes[]){
+    noteNumbers.clear();
     for(int n = 0; n < numNotes; n++){
         if(trackNotes[n].start <= time && trackNotes[n].end >= time){
-            if(playerInput[trackNotes[n].keyNumber]) {
-                noteNumbers->push_back(n);
+            if(notes[trackNotes[n].keyNumber]) {
+                noteNumbers.push_back(n);
             }
         }
     }
+    //if (!noteNumbers.empty()) std::cout << noteNumbers[0];
 }
 
 void MidiTrack::updateCurrentNotes(bool currentNotes[], double time){

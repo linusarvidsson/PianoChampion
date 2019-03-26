@@ -24,8 +24,18 @@ void MidiInputReader:: getUserInput(){
             int instruction = (int)inputQueue[0];
             int key = (int)inputQueue[1];
             
+            // Tangentbordet är korkat och togglar så vi får göra så här
+            if (instruction == 144) {
+                if (playerInput[key]){
+                    playerInput[key] = false; toBeTurnedOff.push_back(key);
+                } else {
+                    playerInput[key] = true; toBeTurnedOn.push_back(key);
+                }
+            }
+            
+            /*
             if (instruction == 144) {playerInput[key] = true; toBeTurnedOn.push_back(key);}
-            if (instruction == 128) {playerInput[key] = false; toBeTurnedOff.push_back(key);}
+            if (instruction == 128) {playerInput[key] = false; toBeTurnedOff.push_back(key);} */
         }
         check_n--;
     }

@@ -19,6 +19,9 @@
 #include "midifile/MidiFile.h"
 #include "midifile/MidiTrack.hpp"
 
+// Score handler
+#include "ScoreHandler.hpp"
+
 // MidiPlayer libraries
 #include "MidiPlayer/minisdl_audio.h"
 /*#define TSF_IMPLEMENTATION
@@ -38,12 +41,10 @@ void toggle(bool &a) {
     if (a) a = false;
     else a = true;
 }
+ScoreHandler *score;
 MidiInputReader *reader;
 bool midiFile[127];
 /* – – – */
-
-// –– TID TILL MIDI-LÄSNING –– //
-auto start_time = std::chrono::steady_clock::now();
 
 //----- DECLARATIONS FOR SOUNDFONT PLAYER -----//
 //static tsf* g_TinySoundFont;
@@ -59,14 +60,17 @@ void get_resolution(int* w, int* h) {
 }
 
 int main(void) {
+    // Skapa poängräknare
+    score = new ScoreHandler();
     // Skapa midiläsare
     reader = new MidiInputReader();
     // Skapa soundfont
     soundfont = new sfPlayer(AudioCallback, "MusicLibrary/kawai.sf2");
+    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 0, false);
 
     //----- Note Data -----//
     // Read track from a MIDI-file to get note data
-    MidiTrack track = MidiTrack("MusicLibrary/pianoman.mid", 1, 100);
+    MidiTrack track = MidiTrack("MusicLibrary/chromatic.mid", 0, 140);
 
     std::vector<glm::vec3> noteVertices;
     noteVertices.reserve(track.size()*4);
@@ -166,7 +170,7 @@ int main(void) {
     //----- Background Data -----//
 
     GLfloat backgroundwidth = 5.45f;
-    GLfloat backgroundheight = 5.0f;
+    GLfloat backgroundheight = 4.15f;
 
     static const GLfloat backgroundVertices[] = {
         -backgroundwidth, -backgroundheight, -0.01f,
@@ -276,8 +280,8 @@ int main(void) {
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-                                 glm::vec3(0,-5,5), // Camera position
-                                 glm::vec3(0,1,0),  // The point the camera looks at
+                                 glm::vec3(0,-0.5,10), // Camera position
+                                 glm::vec3(0,-0.5,0),  // The point the camera looks at
                                  glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                                  );
 
@@ -288,7 +292,8 @@ int main(void) {
 
     
 
-
+    // –– TID TILL MIDI-LÄSNING –– //
+    auto start_time = std::chrono::steady_clock::now();
     
     //---------- Render loop ----------//
 
@@ -374,16 +379,31 @@ int main(void) {
         //–– UPDATE MIDIFILE ––//
         auto current_time = std::chrono::steady_clock::now();
         double elapsed_sec = (double)std::chrono::duration_cast<std::chrono::milliseconds>(current_time - start_time).count() / 1000;
+        elapsed_sec -= 3.6;
         track.updateCurrentNotes(midiFile, elapsed_sec);
         
-        for (int n = 0; n < track.size(); n++){
-            if(track.note(n)->start < glfwGetTime()){
-                for(int v = 0; v < 4; v++){
-                    noteColors[4*n + v] = glm::vec3(0.0f, 0.0f, 1.0f);
-                }
-                glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
-                glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
+
+        // Räkna ut vilka tangenter som matchar
+        bool matchingKeys[127];
+        for (int i = 0; i < 127; i++) {
+            matchingKeys[i] = (reader->playerInput[i] && midiFile[i]);
+            //std::cout << reader->playerInput[i];
+        }
+        // Dela ut poäng
+        score->scoreHeldNotes(midiFile, reader->playerInput, 0.03f);
+        std::cout << score->getScore() << std::endl;
+        
+        // Färga de toner som matchar
+        std::vector<int> matchingIndexes;
+        track.searchNotes(elapsed_sec, matchingIndexes, matchingKeys);
+        
+        for (size_t i = 0, i_end = matchingIndexes.size(); i < i_end; ++i){
+            int index = matchingIndexes[i];
+            for(int v = 0; v < 4; v++){
+                noteColors[4*index + v] = glm::vec3(0.0f, 0.0f, 1.0f);
             }
+            glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
+            glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
         }
         
     }
@@ -410,35 +430,30 @@ int main(void) {
 
 static void AudioCallback(void* data, Uint8 *stream, int len)
 {
-    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 0, false);
     
     reader->getUserInput();
     
-    if (midiFile != nullptr) {
-        // Turn on notes according to player input
-        for (int i = 0; i < reader->toBeTurnedOn.size(); i++) {
-            int key = reader->toBeTurnedOn[i];
-            if (midiFile[key]) {
-                tsf_channel_note_on(soundfont->soundfont, 1, key, 0.7);
-            } else {
-                tsf_channel_note_on(soundfont->soundfont, 1, key, 0.05);
-            }
-        } reader->toBeTurnedOn.clear();
-        
-        // Turn off notes according to player input
-        for (int i = 0; i < reader->toBeTurnedOff.size(); i++) {
-            int key = reader->toBeTurnedOff[i];
-            tsf_channel_note_off(soundfont->soundfont, 1, key);
-        } reader->toBeTurnedOff.clear();
-    }
+    // Turn on notes according to player input
+    for (int i = 0; i < reader->toBeTurnedOn.size(); i++) {
+        int key = reader->toBeTurnedOn[i];
+        if (midiFile[key]) {
+            tsf_channel_note_on(soundfont->soundfont, 1, key, 0.7);
+        } else {
+            tsf_channel_note_on(soundfont->soundfont, 1, key, 0.05);
+        }
+    } reader->toBeTurnedOn.clear();
+    
+    // Turn off notes according to player input
+    for (int i = 0; i < reader->toBeTurnedOff.size(); i++) {
+        int key = reader->toBeTurnedOff[i];
+        tsf_channel_note_off(soundfont->soundfont, 1, key);
+    } reader->toBeTurnedOff.clear();
     
     //Number of samples to process
     int SampleBlock, SampleCount = (len / (2 * sizeof(float))); //2 output channels
     for (SampleBlock = TSF_RENDER_EFFECTSAMPLEBLOCK; SampleCount; SampleCount -= SampleBlock, stream += (SampleBlock * (2 * sizeof(float))))
     {
-        //We progress the MIDI playback and then process TSF_RENDER_EFFECTSAMPLEBLOCK samples at once
         if (SampleBlock > SampleCount) SampleBlock = SampleCount;
-
         // Render the block of audio samples in float format
         tsf_render_float(soundfont->soundfont, (float*)stream, SampleBlock, 0);
     }
