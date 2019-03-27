@@ -1,11 +1,3 @@
-//
-//  MidiTrack.cpp
-//  PianoMan
-//
-//  Created by Linus Arvidsson on 2019-03-13.
-//  Copyright © 2019 Linus Arvidsson. All rights reserved.
-//
-
 #include "MidiTrack.hpp"
 
 
@@ -53,7 +45,15 @@ int MidiTrack::searchNote(double time, int key){
     return 0;
 }
 
-void MidiTrack::updateCurrentNotes(bool (&currentNotes)[], double time){
+void MidiTrack::searchNotes(double time, std::vector<int> *noteNumbers){
+    for(int n = 0; n < numNotes; n++){
+        if(trackNotes[n].start <= time && trackNotes[n].end >= time){
+            noteNumbers->push_back(n);
+        }
+    }
+}
+
+void MidiTrack::updateCurrentNotes(bool currentNotes[], double time){
     for(int i = 0; i < 127; i++){
         currentNotes[i] = false;
     }

@@ -10,6 +10,7 @@ struct MidiNote {
     double start;
     double end;
     int keyNumber;
+    
 };
 
 class MidiTrack{
@@ -31,9 +32,10 @@ public:
     void bpm(int BPM);
     float tps();
     MidiNote* note(int index);
-    void updateCurrentNotes(bool (&currentNotes)[], double time);
+    void updateCurrentNotes(bool currentNotes[], double time);
     int searchNote(double time, int key);
+    void searchNotes(double time, std::vector<int> *noteNumbers);
     void transpose(int keyshift);
 };
 
-#endif /* MidiTrack_hpp */
+#endif
