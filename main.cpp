@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <iostream>
-//using namespace std;
 
 // Graphics libraries
 #include <GL/glew.h>
@@ -10,10 +9,13 @@
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
 
-#include "Graphics/shader.hpp"
-#include "Graphics/note.hpp"
+#include "Graphics/Font.hpp"
+#include "Graphics/GraphicsTools.hpp"
+#include "Graphics/Note.hpp"
+
 #define STB_IMAGE_IMPLEMENTATION
 #include "Graphics/stb_image.h"
+
 
 // MidiFile libraries
 #include "midifile/MidiFile.h"
@@ -38,12 +40,6 @@ static tsf* g_TinySoundFont;
 static double g_Msec = 0;       //current playback time
 static tml_message* g_MidiMessage;  //next message to be played
 static void AudioCallback(void* data, Uint8 *stream, int len);
-void get_resolution(int* w, int* h) {
-    const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
-
-    *w = mode->width;
-    *h = mode->height;
-}
 
 
 int main(void) {
@@ -61,7 +57,7 @@ int main(void) {
     // Initialize the audio system
     SDL_AudioInit(TSF_NULL);
     // Load MIDI
-    TinyMidiLoader = tml_load_filename("MusicLibrary/pianoman.mid");
+    TinyMidiLoader = tml_load_filename("MusicLibrary/chromatic.mid");
     //Set up the global MidiMessage pointer to the first MIDI message
     g_MidiMessage = TinyMidiLoader;
     // Load the SoundFont from a file
@@ -85,7 +81,7 @@ int main(void) {
     //----- Note Data -----//
 
     // Read track from a MIDI-file to get note data
-    MidiTrack track = MidiTrack("MusicLibrary/pianoman.mid", 1, 100);
+    MidiTrack track = MidiTrack("MusicLibrary/chromatic.mid", 0, 140);
 
     std::vector<glm::vec3> noteVertices;
     noteVertices.reserve(track.size()*4);
@@ -95,7 +91,7 @@ int main(void) {
     noteIndices.reserve(track.size()*6);
 
     for(int i = 0; i < track.size(); i++){
-        note n_i = note(track.note(i)->keyNumber, (GLfloat)track.note(i)->start, (GLfloat)track.note(i)->end);
+        Note n_i = Note(track.note(i)->keyNumber, (GLfloat)track.note(i)->start, (GLfloat)track.note(i)->end);
 
         // Vertex 1
         noteVertices.push_back( glm::vec3(n_i.left(), n_i.start(), 0.0f) );
@@ -139,20 +135,24 @@ int main(void) {
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
 
     // Create a windowed mode window and its OpenGL context
-    int w, h;
-    get_resolution(&w,&h);
-
+    int screenWidth, screenHeight;
+    GraphicsTools::getResolution(&screenWidth, &screenHeight);
+    
     GLFWwindow *window;
-    //window = glfwCreateWindow(w, h, "Piano Champion", glfwGetPrimaryMonitor(), NULL);
+    //window = glfwCreateWindow(screenWidth, screenHeight, "Piano Champion", glfwGetPrimaryMonitor(), NULL);
     window = glfwCreateWindow(1280, 800, "Piano Champion", NULL, NULL);
     if (!window) {
-        fprintf(stderr, "Failed to open GLFW window");
+        fprintf(stderr, "Failed to open GLFW window\n");
         glfwTerminate();
         return -1;
     }
-
-    // Initialize GLEW
     glfwMakeContextCurrent(window);
+    
+    // Define the viewport dimensions
+    glViewport(0, 0, 1280, 800);
+    
+    // Initialize GLEW
+    glewExperimental = GL_TRUE;
     if(glewInit() != GLEW_OK) {
         fprintf(stderr, "Failed to initialize GLEW\n");
         return -1;
@@ -161,27 +161,24 @@ int main(void) {
     // Set computer keyboard as input. Needed for ESC key, to close window.
     glfwSetInputMode(window, GLFW_STICKY_KEYS, GL_TRUE);
 
-    // Dark green background
-    glClearColor(0.0f, 0.4f, 0.0f, 0.0f);
-
+    // Enable culling
+    glEnable(GL_CULL_FACE);
     // Enable depth test
     glEnable(GL_DEPTH_TEST);
     // Accept fragment if it closer to the camera than the former one
     glDepthFunc(GL_LESS);
+    // Blend function for text background transparency
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    
 
-    // Generate and bind VAO
-    GLuint VertexArrayID;
-    glGenVertexArrays(1, &VertexArrayID);
-    glBindVertexArray(VertexArrayID);
+    // Create and compile GLSL programs from the shaders
+    GLuint colorShader = GraphicsTools::LoadShaders( "Graphics/Shaders/ColorVertexShader.vertexshader", "Graphics/Shaders/ColorFragmentShader.fragmentshader" );
+    GLuint textureShader = GraphicsTools::LoadShaders( "Graphics/Shaders/TextureVertexShader.vertexshader", "Graphics/Shaders/TextureFragmentShader.fragmentshader" );
+    GLuint textShader = GraphicsTools::LoadShaders( "Graphics/Shaders/TextVertexShader.vertexshader", "Graphics/Shaders/TextFragmentShader.fragmentshader" );
+    
 
-    // Create and compile our GLSL programs from the shaders
-    GLuint colorShader = LoadShaders( "Graphics/Shaders/ColorVertexShader.vertexshader", "Graphics/Shaders/ColorFragmentShader.fragmentshader" );
-    GLuint textureShader = LoadShaders( "Graphics/Shaders/TextureVertexShader.vertexshader", "Graphics/Shaders/TextureFragmentShader.fragmentshader" );
-
-
-
-
-
+    
+    
     //----- Background Data -----//
 
     GLfloat backgroundwidth = 5.45f;
@@ -224,21 +221,15 @@ int main(void) {
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else{
-        std::cout << "Failed to load texture" << std::endl;
+        std::cout << "Failed to load texture\n" << std::endl;
     }
     stbi_image_free(data);
 
-    // Handle for
-    GLuint TextureID  = glGetUniformLocation(textureShader, "myTextureSampler");
-
-    // Get a handle for the "MVP" uniform
-    GLuint MVPcolor = glGetUniformLocation(colorShader, "MVP");
-    GLuint MVPtexture = glGetUniformLocation(textureShader, "MVP");
 
 
-
-
-
+    
+    
+    
     //----- Background Buffers -----//
 
     // Create vertex buffer
@@ -246,13 +237,11 @@ int main(void) {
     glGenBuffers(1, &backgroundVertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, backgroundVertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
-
     // Create UV buffer
     GLuint backgroundUVBuffer;
     glGenBuffers(1, &backgroundUVBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, backgroundUVBuffer);
     glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundUV), backgroundUV, GL_STATIC_DRAW);
-
     // Create index buffer
     GLuint backgroundElementBuffer;
     glGenBuffers(1, &backgroundElementBuffer);
@@ -270,14 +259,11 @@ int main(void) {
     glGenBuffers(1, &noteVertexBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, noteVertexBuffer);
     glBufferData(GL_ARRAY_BUFFER, noteVertices.size() * sizeof(glm::vec3), &noteVertices.front(), GL_STATIC_DRAW);
-
     // Create color buffer
     GLuint noteColorBuffer;
     glGenBuffers(1, &noteColorBuffer);
     glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
     glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
-
-
     // Generate index buffer
     GLuint noteElementBuffer;
     glGenBuffers(1, &noteElementBuffer);
@@ -295,8 +281,8 @@ int main(void) {
 
     // Camera matrix
     glm::mat4 View = glm::lookAt(
-                                 glm::vec3(0,-5,5), // Camera position
-                                 glm::vec3(0,1,0),  // The point the camera looks at
+                                 glm::vec3(0,0,9), // Camera position
+                                 glm::vec3(0,0,0),  // The point the camera looks at
                                  glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                                  );
 
@@ -304,24 +290,65 @@ int main(void) {
     glm::mat4 Model = glm::mat4(1.0f);
     // ModelViewProjection
     glm::mat4 MVP = Projection * View * Model; // Remember, matrix multiplication is the other way around
+    
+    
+    // Handles for shader uniform locations
+    GLuint TextureID  = glGetUniformLocation(textureShader, "myTextureSampler");
+    GLuint MVPcolor = glGetUniformLocation(colorShader, "MVP");
+    GLuint MVPtexture = glGetUniformLocation(textureShader, "MVP");
 
     
+    // Note VAO
+    GLuint noteVAO;
+    glGenVertexArrays(1, &noteVAO);
+    glBindVertexArray(noteVAO);
+    // Attribute buffer 1: Vertices
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, noteVertexBuffer);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    // Attribute buffer 2: Colors
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    // Index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, noteElementBuffer);
+    
+    
+    // Background VAO
+    GLuint backgroundVAO;
+    glGenVertexArrays(1, &backgroundVAO);
+    glBindVertexArray(backgroundVAO);
+    // Attribute buffer 1: Vertices
+    glEnableVertexAttribArray(0);
+    glBindBuffer(GL_ARRAY_BUFFER, backgroundVertexBuffer);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
+    // Attribute buffer 2: UVs
+    glEnableVertexAttribArray(1);
+    glBindBuffer(GL_ARRAY_BUFFER, backgroundUVBuffer);
+    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
+    // Index buffer
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundElementBuffer);
+  
 
-
+    // Create font
+    Font arial = Font("Graphics/Fonts/arial.ttf", textShader, 1280, 800);
+    
+    
+    
     
     //---------- Render loop ----------//
 
     do{
         // Clear the screen
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-
         
-        //----- Render Textured Objects -----//
-
+        
+        //----- Render Background -----//
+        
         // Use texture shader for background
         glUseProgram(textureShader);
-
+        glBindVertexArray(backgroundVAO);
+        
         // Send MVP transformation to the currently bound shader
         glUniformMatrix4fv(MVPtexture, 1, GL_FALSE, &MVP[0][0]);
 
@@ -330,66 +357,32 @@ int main(void) {
         glBindTexture(GL_TEXTURE_2D, backgroundTexture);
         // Set "myTextureSampler" sampler to use Texture Unit 0
         glUniform1i(TextureID, 0);
-
-        // Attribute buffer 1: vertices
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, backgroundVertexBuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-        // Attribute buffer 2: UVs
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, backgroundUVBuffer);
-        glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-
-        // Index buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundElementBuffer);
-
+        
         // Draw the textured elements
         glDrawElements(GL_TRIANGLES, sizeof(backgroundIndices), GL_UNSIGNED_INT, NULL);
-
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-
-
         
-        //----- Render Colored Objects -----//
+        glBindVertexArray(0);
+        glBindTexture(GL_TEXTURE_2D, 0);
+        
+        
+        
+        //----- Render Notes -----//
 
         // Use color shader
         glUseProgram(colorShader);
+        glBindVertexArray(noteVAO);
 
         // MVP for notes. Translates notes with time.
         glm::mat4 noteTranslation = Projection * View * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime(), 0.0f)) * Model;
 
         // Send the transformation to the currently bound shader,
         glUniformMatrix4fv(MVPcolor, 1, GL_FALSE, &noteTranslation[0][0]);
-
-        // Attribute buffer 1: vertices
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, noteVertexBuffer);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-        // Attribute buffer 2: colors
-        glEnableVertexAttribArray(1);
-        glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
-        glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-
-        // Index buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, noteElementBuffer);
-
-        // Draw the colored elements
-        glDrawElements(GL_TRIANGLES, (GLsizei)noteIndices.size(), GL_UNSIGNED_INT, NULL);
-
-        glDisableVertexAttribArray(0);
-        glDisableVertexAttribArray(1);
-
-
-        //----- Render -----//
-
-        // Swap front and back buffers
-        glfwSwapBuffers(window);
-        // Poll for and process events
-        glfwPollEvents();
         
+        glDrawElements(GL_TRIANGLES, (GLsizei)noteIndices.size(), GL_UNSIGNED_INT, NULL);
+        
+        glBindVertexArray(0);
+        
+        // Update Note Color
         for (int n = 0; n < track.size(); n++){
             if(track.note(n)->start < glfwGetTime()){
                 for(int v = 0; v < 4; v++){
@@ -399,6 +392,27 @@ int main(void) {
                 glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
             }
         }
+        
+        
+        
+        //----- Render Text -----//
+        
+        arial.setScale(0.5f);
+        arial.setColor(glm::vec3(0.3, 0.7f, 0.9f));
+        arial.renderText("play twinkle like a", 810.0f, 720.0f);
+        
+        arial.setScale(1.0f);
+        arial.setColor(glm::vec3(0.5, 0.8f, 0.2f));
+        arial.renderText("PIANO CHAMPION", 800.0f, 670.0f);
+        
+
+
+        //----- Render -----//
+        
+         // Swap front and back buffers
+         glfwSwapBuffers(window);
+         // Poll for and process events
+         glfwPollEvents();
         
     }
     while (glfwGetKey(window, GLFW_KEY_ESCAPE) != GLFW_PRESS && !glfwWindowShouldClose(window));
@@ -413,9 +427,13 @@ int main(void) {
     glDeleteBuffers(1, &backgroundUVBuffer);
     glDeleteBuffers(1, &backgroundElementBuffer);
 
-    glDeleteVertexArrays(1, &VertexArrayID);
+    glDeleteVertexArrays(1, &noteVAO);
+    glDeleteVertexArrays(1, &backgroundVAO);
+    
+    
     glDeleteProgram(colorShader);
     glDeleteProgram(textureShader);
+    glDeleteProgram(textShader);
 
     glfwTerminate();
     return 0;
