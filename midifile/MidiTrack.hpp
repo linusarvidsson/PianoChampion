@@ -10,11 +10,12 @@ struct MidiNote {
     double start;
     double end;
     int keyNumber;
-    
+    bool triggered;
 };
 
 class MidiTrack{
 private:
+    //std::string trackPath;
     int trackNumber;
     int numNotes;
     int trackTPQ;
@@ -25,17 +26,25 @@ private:
 
 public:
     MidiTrack(const std::string& filename, int track, int BPM);
-
+    MidiTrack();
+    
     int size();
     int tpq();
     int bpm();
     void bpm(int BPM);
     float tps();
+    
     MidiNote* note(int index);
     void updateCurrentNotes(bool currentNotes[], double time);
+    void updateQueues(double last_time, double current_time);
     int searchNote(double time, int key);
-    void searchNotes(double time, std::vector<int> *noteNumbers);
+    void searchNotes(double time, std::vector<int> &noteNumbers, bool playerInput[]);
+    void triggerNotes(std::vector<int> &noteNumbers);
+    bool missedNotes(double time, double offset);
     void transpose(int keyshift);
+    
+    std::vector<int> toBeTurnedOn;
+    std::vector<int> toBeTurnedOff;
 };
 
 #endif

@@ -15,9 +15,12 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
+#include "stb_image.h"
+
 class GraphicsTools{
 public:
-    static GLuint LoadShaders(const char * vertex_file_path,const char * fragment_file_path);
+    static GLuint loadShaders(const char * vertex_file_path,const char * fragment_file_path);
+    static GLuint loadTexture(const char* filepath);
     static void getResolution(int* displayWidth, int* displayHeight);
 private:
     GraphicsTools() { }

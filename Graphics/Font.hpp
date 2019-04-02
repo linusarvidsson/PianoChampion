@@ -9,6 +9,7 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
@@ -23,6 +24,7 @@ struct Character {
 
 class Font{
 public:
+    ~Font();
     Font(const char* fontPath, GLuint& shader, GLuint windowWidth, GLuint windowHeight);
     
     void renderText(std::string text, GLfloat x, GLfloat y);

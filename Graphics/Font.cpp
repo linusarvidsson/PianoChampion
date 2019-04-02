@@ -1,5 +1,10 @@
 #include "Font.hpp"
 
+Font::~Font() {
+    
+}
+
+
 Font::Font(const char* fontPath, GLuint& shader, GLuint windowWidth, GLuint windowHeight){
     projection = glm::ortho(0.0f, static_cast<GLfloat>(windowWidth), 0.0f, static_cast<GLfloat>(windowHeight));
     initFont(fontPath);

@@ -1,6 +1,7 @@
 #include "GraphicsTools.hpp"
 
-GLuint GraphicsTools::LoadShaders(const char * vertex_file_path,const char * fragment_file_path){
+
+GLuint GraphicsTools::loadShaders(const char * vertex_file_path,const char * fragment_file_path){
     
     // Create the shaders
     GLuint VertexShaderID = glCreateShader(GL_VERTEX_SHADER);
@@ -95,9 +96,37 @@ GLuint GraphicsTools::LoadShaders(const char * vertex_file_path,const char * fra
 }
 
 
+
 void GraphicsTools::getResolution(int* displayWidth, int* displayHeight) {
     const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     
     *displayWidth = mode->width;
     *displayHeight = mode->height;
 }
+
+
+GLuint GraphicsTools::loadTexture(const char* filepath){
+    GLuint texture;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    // Import texture
+    int width, height, nrChannels;
+    unsigned char *data = stbi_load(filepath, &width, &height, &nrChannels, 0);
+    if (data){
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+    }
+    else{
+        std::cout << "Failed to load texture\n" << std::endl;
+    }
+    stbi_image_free(data);
+    
+    return texture;
+}
+

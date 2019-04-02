@@ -16,8 +16,9 @@ Note::Note(int noteNumber_, GLfloat start_, GLfloat end_){
     setPosition();
     blackOrWhite();
     setNoteColor();
+    noteHeight = 0.0f;
     
-    std::cout << "\nNote number: " << noteNumber_ << "\nLocal note: " << localNote << "\nPosition: " << position << "\nBlack: " << black << std::endl;
+    //std::cout << "\nNote number: " << noteNumber_ << "\nLocal note: " << localNote << "\nPosition: " << position << "\nBlack: " << black << std::endl;
     
     if(black) setBlackOffset();
 }
@@ -27,12 +28,13 @@ GLfloat Note::start() { return startPoint; }
 GLfloat Note::end() { return endPoint; }
 GLfloat Note::right() { return rightBorder; }
 GLfloat Note::left() { return leftBorder; }
+GLfloat Note::height() { return noteHeight; }
 glm::vec3 Note::color() { return noteColor; }
 bool Note::isBlack() { return black; }
 
 // Bestämmer notens färg
 void Note::setNoteColor(){
-    if(black) noteColor = glm::vec3(1.0f, 0.0f, 0.0f);
+    if(black) noteColor = glm::vec3(0.0f, 0.7f, 0.8f);
     else noteColor = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
@@ -80,7 +82,7 @@ void Note::blackOrWhite(){
 // Korrigerar svarta tangenters placering. C#, D#, F# och A# är inte helt centrerade mellan två vita tangenter.
 void Note::setBlackOffset(){
     GLfloat offsetCD = 0.06f;
-    GLfloat offsetFA = 1.0f / 17.5f;
+    GLfloat offsetFA = 0.058f;
     
     if(localNote > 0){
         if (localNote - 12*octave == 1) position -= offsetCD;
@@ -93,5 +95,18 @@ void Note::setBlackOffset(){
         else if (localNote - 12*octave == -9) position += offsetCD;
         else if (localNote - 12*octave == -6) position -= offsetFA;
         else if (localNote - 12*octave == -2) position += offsetFA;
+    }
+}
+
+void Note::pianoSettings(){
+    if(black){
+        startPoint = -3.4f;
+        endPoint = -2.5f;
+        noteHeight = -0.001f;
+    }
+    else{
+        startPoint = -3.8f;
+        endPoint = -2.5f;
+        noteHeight = -0.002f;
     }
 }

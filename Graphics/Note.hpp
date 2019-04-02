@@ -15,8 +15,10 @@ public:
     GLfloat end();
     GLfloat right();
     GLfloat left();
+    GLfloat height();
     glm::vec3 color();
     bool isBlack();
+    void pianoSettings();
     
 private:
     // Noternas bredd. Avståndet mätt från centrum av noten till kanten i x-led, den riktiga bredden är alltså x2.
@@ -26,6 +28,7 @@ private:
     bool black;
     GLfloat startPoint;
     GLfloat endPoint;
+    GLfloat noteHeight;
     GLfloat position;
     GLfloat rightBorder;
     GLfloat leftBorder;

@@ -1,7 +1,9 @@
 #include "MidiTrack.hpp"
+#include <iostream>
 
 
 MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
+    //trackPath = filename;
     MidiFile midifile;
     midifile.read(filename);
     midifile.doTimeAnalysis();
@@ -27,13 +29,19 @@ MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
     int current_note = 0;
     for (int event=0; event<midifile[track].size(); event++) {
         if (midifile[track][event].isNoteOn()){
-            trackNotes.push_back({midifile[track][event].tick / trackTPS, (midifile[track][event].tick + midifile[track][event].getTickDuration()) / trackTPS, midifile[track][event].getKeyNumber()});
+            trackNotes.push_back({midifile[track][event].tick / trackTPS, (midifile[track][event].tick + midifile[track][event].getTickDuration()) / trackTPS, midifile[track][event].getKeyNumber(), false});
             current_note++;
         }
     }
 }
 
-// 
+MidiTrack::MidiTrack() {
+    trackNumber = 0;
+    trackTPQ = 0;
+    trackBPM = 0;
+    trackTPS = 0;
+    trackNotes.clear();
+}
 
 // Sök not. Returnerar notens index.
 int MidiTrack::searchNote(double time, int key){
@@ -45,15 +53,37 @@ int MidiTrack::searchNote(double time, int key){
     return 0;
 }
 
-void MidiTrack::searchNotes(double time, std::vector<int> *noteNumbers){
+void MidiTrack::searchNotes(double time, std::vector<int> &noteNumbers, bool notes[]){
+    noteNumbers.clear();
     for(int n = 0; n < numNotes; n++){
         if(trackNotes[n].start <= time && trackNotes[n].end >= time){
-            noteNumbers->push_back(n);
+            if(notes[trackNotes[n].keyNumber]) {
+                noteNumbers.push_back(n);
+            }
         }
+    }
+    //if (!noteNumbers.empty()) std::cout << noteNumbers[0];
+}
+
+void MidiTrack::triggerNotes(std::vector<int> &noteNumbers) {
+    int n;
+    for (int i = 0; i < noteNumbers.size(); i++){
+        n = noteNumbers[i];
+        trackNotes[n].triggered = true;
     }
 }
 
+bool MidiTrack::missedNotes(double time, double offset){
+    for(int n = 0; n < numNotes; n++){
+        if(trackNotes[n].end < time && trackNotes[n].end > time - offset){
+            if (trackNotes[n].triggered == false) return true;
+        }
+    }
+    return false;
+}
+
 void MidiTrack::updateCurrentNotes(bool currentNotes[], double time){
+    
     for(int i = 0; i < 127; i++){
         currentNotes[i] = false;
     }
@@ -61,6 +91,19 @@ void MidiTrack::updateCurrentNotes(bool currentNotes[], double time){
     for(int n = 0; n < numNotes; n++){
         if(trackNotes[n].start <= time && trackNotes[n].end >= time){
             currentNotes[ trackNotes[n].keyNumber ] = true;
+        }
+    }
+}
+
+void MidiTrack::updateQueues(double last_time, double current_time) {
+    toBeTurnedOn.clear();
+    toBeTurnedOff.clear();
+    for(int n = 0; n < numNotes; n++){
+        if(trackNotes[n].start <= current_time && trackNotes[n].start >= last_time){
+            toBeTurnedOn.push_back(trackNotes[n].keyNumber);
+        }
+        if(trackNotes[n].end <= current_time && trackNotes[n].end >= last_time){
+            toBeTurnedOff.push_back(trackNotes[n].keyNumber);
         }
     }
 }
