@@ -67,12 +67,14 @@ void Game::render(){
     if(State == SETTINGS){
         renderSettings();
     }
-    
-    
+	if (State == SONG_SETTINGS) {
+		renderSongSettings();
+	}
     // Draw Title
     standardFont->setScale(0.7f);
     standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
     standardFont->renderText("KEY SLAYER", screenWidth - 290, screenHeight - 60);
+
 }
 
 
@@ -91,6 +93,9 @@ void Game::renderSong(){
     activeSong->renderNotes();
     activeSong->renderPiano();
     activeSong->updatePiano(playerInput);
+
+	displaySongPercent();
+	
     
     // Update ther current notes array. The notes in the track that should currently be played.
     activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f);
@@ -124,17 +129,8 @@ void Game::renderSongMenu(){
     // Check player Input
     if(Keys[GLFW_KEY_ENTER]){
         // Switch to song state
-        State = SONG_ACTIVE;
-        
-        // Load new selected song
-        delete activeTrack;
-        delete activeSong;
-        activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, songs[activeElement].bpm);
-        activeSong = new Song(*activeTrack, colorShader, textureShader);
-        // Reset score
-        score.reset();
-        // Reset time
-        glfwSetTime(0);
+        State = SONG_SETTINGS;
+		activeBPM = songs[activeElement].bpm;
         
         // Reset active element. Next menu should start at element 0.
         //activeElement = 0;
@@ -218,4 +214,83 @@ void Game::renderSettings(){
     standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
     standardFont->renderText("SETTINGS", 270, screenHeight - screenHeight/10);
     standardFont->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+}
+void Game::renderSongSettings() {
+	if (Keys[GLFW_KEY_ENTER])
+	{
+		State = SONG_ACTIVE;
+
+		// Load new selected song
+		delete activeTrack;
+		delete activeSong;
+		activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
+		activeSong = new Song(*activeTrack, colorShader, textureShader);
+		// Reset time
+		glfwSetTime(0);
+
+		Keys[GLFW_KEY_ENTER] = GL_FALSE;
+	}
+
+	else if (Keys[GLFW_KEY_LEFT]) {
+		// Go to leaderboard
+		State = SONG_SELECT;
+		// Reset active element. Next menu should start at element 0.
+		
+		Keys[GLFW_KEY_LEFT] = GL_FALSE;
+	}
+	else if (Keys[GLFW_KEY_UP]) {
+
+		activeBPM++;
+		Keys[GLFW_KEY_UP] = GL_FALSE;
+
+	}
+	else if (Keys[GLFW_KEY_DOWN] && activeBPM > 0) {
+
+		activeBPM--;
+		Keys[GLFW_KEY_DOWN] = GL_FALSE;
+
+	}
+	standardFont->setScale(1.0f);
+	standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
+	standardFont->renderText("Bpm: " + std::to_string(activeBPM), screenWidth/2, screenHeight/2);
+
+	// Draw list header
+	standardFont->setScale(1.0f);
+	standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
+	standardFont->renderText("SONGS", 20, screenHeight - screenHeight / 10);
+	standardFont->setColor(glm::vec3(0.3f, 0.3f, 0.3f));
+	standardFont->renderText("SETTINGS", 270, screenHeight - screenHeight / 10);
+
+	// Draw song list
+	for (int i = 0; i < songs.size(); i++) {
+		standardFont->setColor(glm::vec3(0.3f, 0.3f, 0.3f));
+		// Highlight active element in list
+		if (i == activeElement) {
+			standardFont->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+			standardFont->renderText(songs[i].name, 20, screenHeight - (i + 2)*(screenHeight / 10));
+			standardFont->setColor(glm::vec3(0.3f, 0.3f, 0.3f));
+		}
+		// Draw list non-active list elements
+		standardFont->renderText(songs[i].name, 20, screenHeight - (i + 2)*(screenHeight / 10));
+	}
+
+
+}
+
+void Game::displaySongPercent() {
+
+	int percent = 0;
+	if (glfwGetTime() > 2.5) {
+
+		double time = activeTrack->note(activeTrack->size() - 1)->end;
+		double dummy = 100 * (glfwGetTime() - 2.5) / time;
+		percent = (int)(dummy);
+	}
+	if (percent >= 100)
+		percent = 100;
+
+	standardFont->setScale(0.7f);
+	standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
+	standardFont->renderText(std::to_string(percent), screenWidth - 1900, screenHeight - 60);
+	standardFont->renderText(" % of song completed", screenWidth - 1830, screenHeight - 60);
 }

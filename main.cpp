@@ -39,7 +39,7 @@ int main(void) {
         fprintf(stderr, "Failed to initialize GLFW\n");
         return -1;
     }
-
+	 
     glfwWindowHint(GLFW_SAMPLES, 4); // 4x antialiasing
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3); // We want OpenGL 3.3
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
