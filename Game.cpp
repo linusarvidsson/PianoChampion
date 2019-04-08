@@ -115,11 +115,11 @@ void Game::renderSong(){
     // Render score and multiplier
     standardFont->setScale(0.5f);
     standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
-    standardFont->renderText("SCORE", 20, screenHeight - 50);
-    standardFont->renderText(std::to_string(score.getScore()), 20, screenHeight - 80);
+    standardFont->renderText("SCORE", 20, screenHeight - 80);
+    standardFont->renderText(std::to_string(score.getScore()), 20, screenHeight - 110);
     standardFont->setColor(glm::vec3(0.6f, 0.4f, 0.8f));
-    standardFont->renderText("MULTIPLIER", 20, screenHeight - 120);
-    standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 150);
+    standardFont->renderText("MULTIPLIER", 20, screenHeight - 150);
+    standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 180);
 }
 
 
@@ -289,8 +289,8 @@ void Game::displaySongPercent() {
 	if (percent >= 100)
 		percent = 100;
 
-	standardFont->setScale(0.7f);
+	standardFont->setScale(0.4f);
 	standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
-	standardFont->renderText(std::to_string(percent), screenWidth - 1900, screenHeight - 60);
-	standardFont->renderText(" % of song completed", screenWidth - 1830, screenHeight - 60);
+	standardFont->renderText(std::to_string(percent), 20, screenHeight - 30);
+	standardFont->renderText(" % of song completed", 55, screenHeight - 30);
 }
