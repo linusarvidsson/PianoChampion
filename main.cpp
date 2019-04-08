@@ -107,7 +107,8 @@ int main(void) {
 }
 
 
- 
+int octave = 4;
+
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
     // When a user presses the escape key, we set the WindowShouldClose property to true, closing the application
@@ -123,4 +124,113 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             KeySlayer.Keys[key] = GL_FALSE;
         
     }
+    
+    if(key == GLFW_KEY_UP && octave < 8){
+        if (action == GLFW_PRESS)
+            octave++;
+    }
+    if(key == GLFW_KEY_DOWN && octave > -1){
+        if (action == GLFW_PRESS)
+            octave--;
+    }
+    
+    if(key >= 65 && key <= 90){
+        if(key == GLFW_KEY_A) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[12 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[12 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_W) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[13 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[13 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_S) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[14 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[14 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_E) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[15 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[15 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_D) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[16 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[16 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_F) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[17 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[17 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_T) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[18 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[18 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_G) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[19 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[19 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_Y) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[20 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[20 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_H) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[21 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[21 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_U) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[22 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[22 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_J) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[23 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[23 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_K) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[24 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[24 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_O) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[25 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[25 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_L) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[26 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[26 + octave*12] = false;
+        }
+        if(key == GLFW_KEY_P) {
+            if (action == GLFW_PRESS)
+                KeySlayer.playerInput[27 + octave*12] = true;
+            else if (action == GLFW_RELEASE)
+                KeySlayer.playerInput[27 + octave*12] = false;
+        }
+    }
+    
 }

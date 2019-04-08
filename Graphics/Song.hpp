@@ -12,6 +12,19 @@
 #include "../midifile/MidiTrack.hpp"
 #include "Note.hpp"
 
+static bool black[128] = {
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0,1,0,1,0,
+    0,1,0,1,0,0,1,0
+};
 
 class Song{
 public:
@@ -22,6 +35,7 @@ public:
     void renderNotes();
     void renderBackground();
     void renderPiano();
+    void updatePiano(bool playerInput[]);
     
 private:
     // Note data
