@@ -28,7 +28,8 @@ struct songItem{
 enum GameState{
     MAIN_MENU,
     SONG_SELECT,
-    SONG_ACTIVE
+    SONG_ACTIVE,
+    SETTINGS
 };
 
 class Game{
@@ -40,6 +41,7 @@ public:
     void init(int displayWidth, int displayHeight);
     void render();
     
+    bool playerInput[128];
     GLboolean Keys[1024];
     GameState State;
     
@@ -65,6 +67,7 @@ private:
     void renderSongMenu();
     void renderSong();
     void renderMainMenu();
+    void renderSettings();
     
 };
 
