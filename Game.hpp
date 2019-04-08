@@ -28,6 +28,7 @@ struct songItem{
 enum GameState{
     MAIN_MENU,
     SONG_SELECT,
+	SONG_SETTINGS,
     SONG_ACTIVE,
     SETTINGS
 };
@@ -54,6 +55,7 @@ private:
     std::vector<songItem> songs;
     Song* activeSong;
     MidiTrack* activeTrack;
+	int activeBPM;
     
     
     // Menu data
@@ -68,6 +70,8 @@ private:
     void renderSong();
     void renderMainMenu();
     void renderSettings();
+	void renderSongSettings();
+	void displaySongPercent();
     
 };
 
