@@ -125,11 +125,11 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         
     }
     
-    if(key == GLFW_KEY_UP && octave < 8){
+    if(key == GLFW_KEY_2 && octave < 8){
         if (action == GLFW_PRESS)
             octave++;
     }
-    if(key == GLFW_KEY_DOWN && octave > -1){
+    if(key == GLFW_KEY_1 && octave > -1){
         if (action == GLFW_PRESS)
             octave--;
     }
