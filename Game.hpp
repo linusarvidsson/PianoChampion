@@ -16,6 +16,7 @@
 #include "Graphics/GraphicsTools.hpp"
 
 #include "midifile/MidiTrack.hpp"
+#include "GameSystems/ScoreHandler.hpp"
 
 struct songItem{
     std::string name;
@@ -50,10 +51,14 @@ private:
     GLuint colorShader, textureShader;
     
     // Song data
+    ScoreHandler score;
     std::vector<songItem> songs;
     Song* activeSong;
     MidiTrack* activeTrack;
     
+    // Logic arrays for the game mechanics
+    bool currentNotes[128];
+    bool matchingKeys[128];
     
     // Menu data
     int activeElement;

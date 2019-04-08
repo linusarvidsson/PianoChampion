@@ -86,11 +86,35 @@ void Game::renderSong(){
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
     
-    activeSong->updateNotes();
+    activeSong->updateNotes(matchingKeys);
     activeSong->renderBackground();
     activeSong->renderNotes();
     activeSong->renderPiano();
     activeSong->updatePiano(playerInput);
+    
+    // Update ther current notes array. The notes in the track that should currently be played.
+    activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f);
+    // Check if the player input matches with current notes. Update matchingKeys.
+    for(int i = 0; i < 128; i++){
+        if(playerInput[i] && currentNotes[i])
+            matchingKeys[i] = true;
+        else
+            matchingKeys[i] = false;
+    }
+    
+    // Update score
+    score.scoreHeldNotes(currentNotes, playerInput, 0.03f);
+    // Stop streak if player missed note
+    if (activeTrack->missedNotes(glfwGetTime(), 0.5)) score.stopStreak();
+    
+    // Render score and multiplier
+    standardFont->setScale(0.5f);
+    standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
+    standardFont->renderText("SCORE", 20, screenHeight - 50);
+    standardFont->renderText(std::to_string(score.getScore()), 20, screenHeight - 80);
+    standardFont->setColor(glm::vec3(0.6f, 0.4f, 0.8f));
+    standardFont->renderText("MULTIPLIER", 20, screenHeight - 120);
+    standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 150);
 }
 
 
@@ -107,6 +131,8 @@ void Game::renderSongMenu(){
         delete activeSong;
         activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, songs[activeElement].bpm);
         activeSong = new Song(*activeTrack, colorShader, textureShader);
+        // Reset score
+        score.reset();
         // Reset time
         glfwSetTime(0);
         

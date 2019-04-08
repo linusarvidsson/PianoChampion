@@ -142,8 +142,9 @@ void Song::renderNotes(){
 }
 
 
-void Song::updateNotes(){
-    // Update Note Color
+void Song::updateNotes(bool matchingKeys[]){
+    /*
+    // Automatic Note Color
     for (int n = 0; n < songTrack->size(); n++){
         // Update color data if note is played.
         if(songTrack->note(n)->start < glfwGetTime() - 2.5f){
@@ -152,6 +153,24 @@ void Song::updateNotes(){
             }
         }
     }
+    */
+    
+    // Update Note Color
+    for (int n = 0; n < songTrack->size(); n++){
+        // Get non-triggered notes that should be played.
+        if(songTrack->note(n)->triggered == false && songTrack->note(n)->start <= glfwGetTime() - 2.5f && songTrack->note(n)->end > glfwGetTime() - 2.5f){
+            
+            // If the note is pressed. Update color and set to triggered.
+            if( matchingKeys[songTrack->note(n)->keyNumber] ){
+                songTrack->note(n)->triggered = true;
+                for(int v = 0; v < 4; v++){
+                    noteColors[4*n + v] = glm::vec3(0.2f, 0.2f, 0.25f);
+                }
+            }
+            
+        }
+    }
+    
     // Bind the new data to the buffers
     glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
     glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);

@@ -31,7 +31,7 @@ public:
     ~Song();
     Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader);
     
-    void updateNotes();
+    void updateNotes(bool matchingKeys[]);
     void renderNotes();
     void renderBackground();
     void renderPiano();
