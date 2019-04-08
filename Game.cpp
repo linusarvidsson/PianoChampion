@@ -2,7 +2,7 @@
 
 // Constructor. Should be declared globally in main. Can not contain GL-related code before the window is initialized.
 Game::Game(){
-    State = SONG_SELECT;
+    State = MAIN_MENU;
 }
 
 // Destructor
@@ -34,7 +34,7 @@ void Game::init(int displayWidth, int displayHeight){
     songs.push_back( songItem{ "Crab Rave", "MusicLibrary/crab_rave.mid", 0, 125 } );
     songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100 } );
     songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 } );
-    songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 80 } );
+    songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 168 } );
     
     // Load shaders
     // Text shader is a shared shader used in the class Font.
@@ -64,6 +64,9 @@ void Game::render(){
         // Render the song menu
         renderSongMenu();
     }
+    if(State == SETTINGS){
+        renderSettings();
+    }
     
     
     // Draw Title
@@ -71,6 +74,8 @@ void Game::render(){
     standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
     standardFont->renderText("KEY SLAYER", screenWidth - 290, screenHeight - 60);
 }
+
+
 
 void Game::renderSong(){
     // Check player Input
@@ -85,7 +90,10 @@ void Game::renderSong(){
     activeSong->renderBackground();
     activeSong->renderNotes();
     activeSong->renderPiano();
+    activeSong->updatePiano(playerInput);
 }
+
+
 
 // Render function for the song menu
 void Game::renderSongMenu(){
@@ -117,11 +125,20 @@ void Game::renderSongMenu(){
         activeElement++;
         Keys[GLFW_KEY_DOWN] = GL_FALSE;
     }
+    else if(Keys[GLFW_KEY_RIGHT]) {
+        // Go to leaderboard
+        State = SETTINGS;
+        // Reset active element. Next menu should start at element 0.
+        activeElement = 0;
+        Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+    }
     
     // Draw list header
     standardFont->setScale(1.0f);
     standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
     standardFont->renderText("SONGS", 20, screenHeight - screenHeight/10);
+    standardFont->setColor(glm::vec3(0.3f, 0.3f, 0.3f));
+    standardFont->renderText("SETTINGS", 270, screenHeight - screenHeight/10);
     standardFont->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
     
     // Draw song list
@@ -137,7 +154,42 @@ void Game::renderSongMenu(){
     }
 }
 
-void Game::renderMainMenu(){
 
+
+void Game::renderMainMenu(){
+    // Check player Input
+    if(Keys[GLFW_KEY_ENTER]){
+        // Switch to song state
+        State = SONG_SELECT;
+        
+        // Reset active element. Next menu should start at element 0.
+        activeElement = 0;
+        
+        Keys[GLFW_KEY_ENTER] = GL_FALSE;
+    }
     
+    // Draw list header
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
+    standardFont->renderText("Press Enter", screenWidth/2 -180, screenHeight/2);
+    standardFont->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+}
+
+
+
+void Game::renderSettings(){
+    if(Keys[GLFW_KEY_LEFT]) {
+        // Go to leaderboard
+        State = SONG_SELECT;
+        // Reset active element. Next menu should start at element 0.
+        activeElement = 0;
+        Keys[GLFW_KEY_LEFT] = GL_FALSE;
+    }
+    
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.3f, 0.3f, 0.3f));
+    standardFont->renderText("SONGS", 20, screenHeight - screenHeight/10);
+    standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
+    standardFont->renderText("SETTINGS", 270, screenHeight - screenHeight/10);
+    standardFont->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
 }

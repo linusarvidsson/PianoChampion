@@ -214,8 +214,8 @@ void Song::renderBackground(){
 
 
 void Song::initPiano(){
-    int startKey = 24;
-    int endKey = 95;
+    int startKey = 0;
+    int endKey = 127;
     int numKeys = endKey - startKey +1;
     pianoKeyVertices.reserve(numKeys*4);
     pianoKeyColors.reserve(numKeys*4);
@@ -282,6 +282,7 @@ void Song::initPiano(){
 }
 
 void Song::renderPiano(){
+    
     glUseProgram(*noteShader);
     glBindVertexArray(pianoVAO);
     
@@ -296,3 +297,29 @@ void Song::renderPiano(){
     glBindVertexArray(0);
 }
 
+void Song::updatePiano(bool playerInput[]){
+    
+    // Update key colors
+    for (int key = 0; key < 128; key++){
+        if(playerInput[key]){
+            for(int v = 0; v < 4; v++){
+                if(black[key])
+                    pianoKeyColors[4*key + v] = glm::vec3(0.3f, 0.3f, 0.3f);
+                else
+                    pianoKeyColors[4*key + v] = glm::vec3(0.6f, 0.6f, 0.6f);
+            }
+        }
+        else{
+            for(int v = 0; v < 4; v++){
+                if(black[key])
+                    pianoKeyColors[4*key + v] = glm::vec3(0.0f, 0.0f, 0.0f);
+                else
+                    pianoKeyColors[4*key + v] = glm::vec3(1.0f, 1.0f, 1.0f);
+            }
+        }
+    }
+    
+    // Bind the new data to the buffers
+    glBindBuffer(GL_ARRAY_BUFFER, pianoColorBuffer);
+    glBufferData(GL_ARRAY_BUFFER, pianoKeyColors.size() * sizeof(glm::vec3), &pianoKeyColors.front(), GL_STATIC_DRAW);
+}
