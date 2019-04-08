@@ -35,6 +35,7 @@ void Game::init(int displayWidth, int displayHeight){
     songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100 } );
     songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 } );
     songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 80 } );
+
     
     // Load shaders
     // Text shader is a shared shader used in the class Font.
@@ -70,6 +71,7 @@ void Game::render(){
     standardFont->setScale(0.7f);
     standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
     standardFont->renderText("KEY SLAYER", screenWidth - 290, screenHeight - 60);
+
 }
 
 void Game::renderSong(){
@@ -85,6 +87,19 @@ void Game::renderSong(){
     activeSong->renderBackground();
     activeSong->renderNotes();
     activeSong->renderPiano();
+
+	int percent = 0;
+
+	if (glfwGetTime() > 2.5) {
+		double time = activeTrack->note(activeTrack->size()-1)->end;
+		double dummy = 100 * (glfwGetTime()-2.5) / time;
+		percent = (int)(dummy);
+	}
+	if (percent >= 100)
+		percent = 100;
+	standardFont->setScale(0.7f);
+	standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
+	standardFont->renderText(std::to_string(percent) + " %", screenWidth - 200, screenHeight - 140);
 }
 
 // Render function for the song menu
