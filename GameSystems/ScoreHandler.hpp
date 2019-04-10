@@ -26,6 +26,8 @@ public:
     int getScore();
     int getMultiplier();
     void stopStreak();
+	int getStreakScore();
+
 };
 
 #endif /* ScoreHandler_hpp */

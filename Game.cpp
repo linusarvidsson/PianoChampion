@@ -130,7 +130,12 @@ void Game::renderSong(){
     // Update score
     score.scoreNotes(activeTrack, currentNotes, playerInput, glfwGetTime(), 0.03f);
     // Stop streak if player missed note
-    if (activeTrack->missedNotes(glfwGetTime(), 0.5)) score.stopStreak();
+	if (activeTrack->missedNotes(glfwGetTime(), 0.5)) {
+		if (score.getStreakScore() > noteStreak) {
+			noteStreak = score.getStreakScore();
+		}
+		score.stopStreak();
+	}
     
     // Render score and multiplier
     standardFont->setScale(0.5f);
@@ -287,8 +292,10 @@ void Game::renderSongSettings() {
 
 void Game:: renderPostGame(){
     standardFont->setScale(2.0f);
-    standardFont->renderText("Post Game Screen", screenWidth/2-200, screenHeight - 100);
-    standardFont->renderText(std:: to_string(score.getScore()), screenWidth/2, screenHeight - 300);
+    standardFont->renderText("Post Game Screen", screenWidth/2-400, screenHeight - 100);
+    standardFont->renderText("Score: " + std:: to_string(score.getScore()), screenWidth/2-400, screenHeight - 300);
+	standardFont->renderText("Note Streak: " + std::to_string(noteStreak), screenWidth / 2-400, screenHeight - 400);
+	standardFont->renderText("Notes Hit: ", screenWidth / 2 - 400, screenHeight - 500);
 }
 
 
