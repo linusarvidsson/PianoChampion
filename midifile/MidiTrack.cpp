@@ -82,6 +82,13 @@ void MidiTrack::triggerNote(int n){
     trackNotes[n].triggered = true;
 }
 
+int MidiTrack::countTriggeredNotes(){
+    int result = 0;
+    for (int i = 0; i < numNotes; i++){
+        if (trackNotes[i].triggered) result++;
+    }
+    return result;
+}
 
 int MidiTrack::availableForBonus(double time, int key){
     MidiNote note;
