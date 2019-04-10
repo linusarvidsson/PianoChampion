@@ -109,7 +109,7 @@ int main(void) {
         
         // Render
         KeySlayer.render();
-        
+
         // Swap front and back buffers
         glfwSwapBuffers(window);
     }
