@@ -10,6 +10,7 @@
 #define ScoreHandler_hpp
 
 #include <stdio.h>
+#include "../midifile/MidiTrack.hpp"
 
 class ScoreHandler{
 private:
@@ -21,8 +22,7 @@ public:
         int score;
     ScoreHandler();
     void reset();
-    void scoreHeldNotes(bool midi[], bool player[], float dt);
-    void scoreBonusNotes();
+    void scoreNotes(MidiTrack* track, bool midi[], bool player[], float time, float dt);
     int getScore();
     int getMultiplier();
     void stopStreak();
