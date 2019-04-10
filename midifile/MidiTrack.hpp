@@ -33,6 +33,7 @@ public:
     int bpm();
     void bpm(int BPM);
     float tps();
+    double duration(); 
     
     MidiNote* note(int index);
     void updateCurrentNotes(bool currentNotes[], double time);
