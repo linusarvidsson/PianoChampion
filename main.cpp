@@ -97,9 +97,9 @@ int main(void) {
 
     do{
         for (int i = 0; i < 128; i++){
-            if (prevPlayerInput[i] && !KeySlayer.playerInput[i])
-                KeySlayer.playerToBeTurnedOn.push(i);
             if (!prevPlayerInput[i] && KeySlayer.playerInput[i])
+                KeySlayer.playerToBeTurnedOn.push(i);
+            if (prevPlayerInput[i] && !KeySlayer.playerInput[i])
                 KeySlayer.playerToBeTurnedOff.push(i);
             prevPlayerInput[i] = KeySlayer.playerInput[i];
         }
