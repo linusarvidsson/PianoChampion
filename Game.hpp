@@ -31,7 +31,8 @@ enum GameState{
     SONG_SELECT,
 	SONG_SETTINGS,
     SONG_ACTIVE,
-    SETTINGS
+	SONG_END,
+    SETTINGS,
 };
 
 class Game{
@@ -76,6 +77,7 @@ private:
     void renderMainMenu();
     void renderSettings();
 	void renderSongSettings();
+	void renderSongEnd();
 	void displaySongPercent();
     
 };
