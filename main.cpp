@@ -16,22 +16,28 @@
 
 // MidiPlayer libraries
 #include "MidiPlayer/minisdl_audio.h"
-#define TSF_IMPLEMENTATION
-#include "MidiPlayer/tsf.h"
-#define TML_IMPLEMENTATION
 #include "MidiPlayer/tml.h"
+#include "MidiPlayer/sfPlayer.hpp"
 
 // Other Libraries
 #include "Game.hpp"
 #include <vector>
-
+#include <queue>
 
 Game KeySlayer = Game();
+sfPlayer* soundfont;
+static void audioCallback(void* data, Uint8 *stream, int len);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+bool prevPlayerInput[128] = {false};
 
 
 int main(void) {
 
+    // --- Initialize soundfont --- //
+    soundfont = new sfPlayer(audioCallback, "MusicLibrary/kawai.sf2");
+    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 0, false);
+    tsf_channel_set_presetnumber(soundfont->soundfont, 2, 2, false);
+    
     //----- Window Initialization -----//
     
     // Initialize GLFW
@@ -90,6 +96,14 @@ int main(void) {
     
 
     do{
+        for (int i = 0; i < 128; i++){
+            if (prevPlayerInput[i] && !KeySlayer.playerInput[i])
+                KeySlayer.playerToBeTurnedOn.push(i);
+            if (!prevPlayerInput[i] && KeySlayer.playerInput[i])
+                KeySlayer.playerToBeTurnedOff.push(i);
+            prevPlayerInput[i] = KeySlayer.playerInput[i];
+        }
+        
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
@@ -233,4 +247,73 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         }
     }
     
+}
+
+static void audioCallback(void* data, Uint8 *stream, int len)
+{
+    //auto time = std::chrono::steady_clock::now();
+    //double current_time = (double)std::chrono::duration_cast<std::chrono::milliseconds>(time - start_time).count() / 1000;
+    //current_time -= 3.8;
+    
+    /*reader->getUserInput();
+    
+    // Turn on notes according to player input
+    for (int i = 0; i < reader->toBeTurnedOn.size(); i++) {
+        int key = reader->toBeTurnedOn[i];
+        if (midiFile[key]) {
+            tsf_channel_note_on(soundfont->soundfont, 0, key, 0.7);
+        } else {
+            tsf_channel_note_on(soundfont->soundfont, 0, key, 0.05);
+        }
+    } reader->toBeTurnedOn.clear();
+    
+    // Turn off notes according to player input
+    for (int i = 0; i < reader->toBeTurnedOff.size(); i++) {
+        int key = reader->toBeTurnedOff[i];
+        tsf_channel_note_off(soundfont->soundfont, 2, key);
+    } reader->toBeTurnedOff.clear();
+    
+    if (metronome_changed) {
+        if (metronome_midi[75]) {
+            tsf_channel_note_on(soundfont->soundfont, 2, 70, 0.4);
+        } else {
+            tsf_channel_note_off(soundfont->soundfont, 2, 70);
+        }
+    }
+    
+    // Turn on left hand notes
+    left_hand->updateQueues(last_time-0.05, current_time-0.05);
+    if (current_time < 70000) { //current_time is initialized to 729000 something on start which causes all notes to play and it's nasty
+        for (int i = 0; i < left_hand->toBeTurnedOn.size(); i++) {
+            int key = left_hand->toBeTurnedOn[i];
+            tsf_channel_note_on(soundfont->soundfont, 0, key, 0.4);
+        }
+        for (int i = 0; i < left_hand->toBeTurnedOff.size(); i++) {
+            int key = left_hand->toBeTurnedOff[i];
+            tsf_channel_note_off(soundfont->soundfont, 0, key);
+        }
+    }
+     */
+    //last_time = current_time;
+    
+    while (!KeySlayer.playerToBeTurnedOn.empty()){
+        tsf_channel_note_on(soundfont->soundfont, 0, KeySlayer.playerToBeTurnedOn.front(), 0.7);
+        //std::cout << KeySlayer.playerToBeTurnedOn.front() << " ";
+        KeySlayer.playerToBeTurnedOn.pop();
+    }
+    
+    while (!KeySlayer.playerToBeTurnedOff.empty()){
+        tsf_channel_note_off(soundfont->soundfont, 0, KeySlayer.playerToBeTurnedOff.front());
+        //std::cout << KeySlayer.playerToBeTurnedOff.front() << " ";
+        KeySlayer.playerToBeTurnedOff.pop();
+    }
+
+    //Number of samples to process
+    int SampleBlock, SampleCount = (len / (2 * sizeof(float))); //2 output channels
+    for (SampleBlock = TSF_RENDER_EFFECTSAMPLEBLOCK; SampleCount; SampleCount -= SampleBlock, stream += (SampleBlock * (2 * sizeof(float))))
+    {
+        if (SampleBlock > SampleCount) SampleBlock = SampleCount;
+        // Render the block of audio samples in float format
+        tsf_render_float(soundfont->soundfont, (float*)stream, SampleBlock, 0);
+    }
 }

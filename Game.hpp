@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <queue>
 #include <iomanip>
 
 #include <GL/glew.h>
@@ -46,6 +47,9 @@ public:
     bool playerInput[128];
     GLboolean Keys[1024];
     GameState State;
+    
+    std::queue<int> playerToBeTurnedOn;
+    std::queue<int> playerToBeTurnedOff;
     
 private:
     // Display data
