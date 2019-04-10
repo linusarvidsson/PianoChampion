@@ -73,6 +73,24 @@ void MidiTrack::triggerNotes(std::vector<int> &noteNumbers) {
     }
 }
 
+void MidiTrack::triggerNote(int n){
+    trackNotes[n].triggered = true;
+}
+
+
+int MidiTrack::availableForBonus(double time, int key){
+    MidiNote note;
+    for(int n = 0; n < numNotes; n++){
+        note = trackNotes[n];
+        if(note.start <= time && note.start + 0.3 >= time){
+            if (note.keyNumber == key && !note.triggered){
+                return n;
+            }
+        }
+    }
+    return 0;
+}
+
 bool MidiTrack::missedNotes(double time, double offset){
     for(int n = 0; n < numNotes; n++){
         if(trackNotes[n].end < time && trackNotes[n].end > time - offset){

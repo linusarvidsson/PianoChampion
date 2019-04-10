@@ -40,6 +40,8 @@ public:
     int searchNote(double time, int key);
     void searchNotes(double time, std::vector<int> &noteNumbers, bool playerInput[]);
     void triggerNotes(std::vector<int> &noteNumbers);
+    void triggerNote(int n);
+    int availableForBonus(double time, int key);
     bool missedNotes(double time, double offset);
     void transpose(int keyshift);
     

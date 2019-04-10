@@ -122,7 +122,7 @@ void Game::renderSong(){
     }
     
     // Update score
-    score.scoreHeldNotes(currentNotes, playerInput, 0.03f);
+    score.scoreNotes(activeTrack, currentNotes, playerInput, glfwGetTime(), 0.03f);
     // Stop streak if player missed note
     if (activeTrack->missedNotes(glfwGetTime(), 0.5)) score.stopStreak();
     
