@@ -48,6 +48,8 @@ public:
     GLboolean Keys[1024];
     GameState State;
     
+    ScoreHandler score;
+    
     std::queue<int> playerToBeTurnedOn;
     std::queue<int> playerToBeTurnedOff;
     
@@ -57,7 +59,6 @@ private:
     GLuint colorShader, textureShader;
     
     // Song data
-    ScoreHandler score;
     std::vector<songItem> songs;
     Song* activeSong;
     MidiTrack* activeTrack;
