@@ -34,9 +34,11 @@ double globalScore = 0;
 
 int main(void) {
     // --- Initialize soundfont --- //
-    soundfont = new sfPlayer(audioCallback, "MusicLibrary/fender.sf2");
-    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 0, false); //Piano
-    tsf_channel_set_presetnumber(soundfont->soundfont, 2, 2, false); //Claves
+    soundfont = new sfPlayer(audioCallback, "MusicLibrary/kawai.sf2");
+    tsf_channel_set_presetnumber(soundfont->soundfont, 0, 0, false); //Piano
+    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 1, false); //Super saw
+    tsf_channel_set_presetnumber(soundfont->soundfont, 2, 2, false); //Synth brass
+    tsf_channel_set_presetnumber(soundfont->soundfont, 3, 3, false); //Brighton synth
     
     //----- Window Initialization -----//
     

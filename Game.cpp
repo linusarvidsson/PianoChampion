@@ -239,27 +239,24 @@ void Game::renderSongSettings() {
 		Keys[GLFW_KEY_ENTER] = GL_FALSE;
 	}
     
-    if (Keys[GLFW_KEY_0]) {
-        soundfont = 0;
-        currentInstrument = "Piano";
+    if (Keys[GLFW_KEY_9]) {
+        soundfont++;
+        if(soundfont >3){
+            soundfont = 0;
+        }
+        Keys[GLFW_KEY_9] = GL_FALSE;
     }
-   else if (Keys[GLFW_KEY_1]) {
-        soundfont = 1;
-       currentInstrument = "banjoooo";
+   else if (Keys[GLFW_KEY_8]) {
+       soundfont--;
+       if(soundfont <0){
+           soundfont=3 ;
+       }
+       Keys[GLFW_KEY_8] = GL_FALSE;
 	}
-    else if (Keys[GLFW_KEY_2]) {
-        soundfont = 2;
-        currentInstrument = "maracaxxx";
-    }
-    else if (Keys[GLFW_KEY_5]) {
-        soundfont = 5;
-        currentInstrument = "maracaxxx";
-    }
 	else if (Keys[GLFW_KEY_UP]) {
 
 		activeBPM++;
 		Keys[GLFW_KEY_UP] = GL_FALSE;
-
 	}
 	else if (Keys[GLFW_KEY_DOWN] && activeBPM > 0) {
 
@@ -267,6 +264,16 @@ void Game::renderSongSettings() {
 		Keys[GLFW_KEY_DOWN] = GL_FALSE;
 
 	}
+    
+    if(soundfont==0){
+        currentInstrument = "Grand Piano";
+    }else if(soundfont ==1 ){
+        currentInstrument = "Supersaw Synthesizer";
+    }else if(soundfont == 2){
+        currentInstrument = "Brass Synthesizer";
+    }else if (soundfont == 3){
+        currentInstrument = "Brighton Synthesizer";
+    }
     // Create an output string stream
     std::ostringstream streamObj;
     //Add double to stream
@@ -275,11 +282,12 @@ void Game::renderSongSettings() {
     
     standardFont->setScale(1.7f);
 	standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-	standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/2, screenHeight-100);
+	standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
+    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
     standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/2, screenHeight-200);
-    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/2, screenHeight-300 );
-    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/2, screenHeight-400);
+    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-400);
+    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-500 );
+
 
 	// Draw list header
 	standardFont->setScale(2.0f);
