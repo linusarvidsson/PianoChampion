@@ -20,7 +20,7 @@
 class GraphicsTools{
 public:
     static GLuint loadShaders(const char * vertex_file_path,const char * fragment_file_path);
-    static GLuint loadTexture(const char* filepath);
+    static GLuint loadTexture(const char* filepath, bool alpha);
     static void getResolution(int* displayWidth, int* displayHeight);
 private:
     GraphicsTools() { }
