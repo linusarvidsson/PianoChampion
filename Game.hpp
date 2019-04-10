@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <queue>
 #include <iomanip>
 
 #include <GL/glew.h>
@@ -17,6 +18,7 @@
 #include "Graphics/GraphicsTools.hpp"
 
 #include "midifile/MidiTrack.hpp"
+#include "GameSystems/ScoreHandler.hpp"
 
 struct songItem{
     std::string name;
@@ -49,17 +51,24 @@ public:
     GLboolean Keys[1024];
     GameState State;
     
+    std::queue<int> playerToBeTurnedOn;
+    std::queue<int> playerToBeTurnedOff;
+    
 private:
     // Display data
     int screenWidth, screenHeight;
     GLuint colorShader, textureShader;
     
     // Song data
+    ScoreHandler score;
     std::vector<songItem> songs;
     Song* activeSong;
     MidiTrack* activeTrack;
 	int activeBPM;
     
+    // Logic arrays for the game mechanics
+    bool currentNotes[128];
+    bool matchingKeys[128];
     
     // Menu data
     int activeElement;
@@ -74,6 +83,7 @@ private:
     void renderSong();
     void renderMainMenu();
 	void renderSongSettings();
+	void renderSongEnd();
 	void displaySongPercent();
     void renderPostGame();
     

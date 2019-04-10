@@ -19,6 +19,7 @@ private:
     
 public:
     ScoreHandler();
+    void reset();
     void scoreHeldNotes(bool midi[], bool player[], float dt);
     void scoreBonusNotes();
     int getScore();

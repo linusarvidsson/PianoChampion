@@ -1,19 +1,19 @@
-//
-//  ScoreHandler.cpp
-//  PianoChamp
-//
-//  Created by Ludvig Kratzert on 2019-03-25.
-//  Copyright © 2019 Ludvig Kratzert. All rights reserved.
-//
-
 #include "ScoreHandler.hpp"
 #include <math.h>
+
+// Reset score.
+void ScoreHandler::reset(){
+    score = 0;
+    streakScore = 0;
+    multiplier = 1;
+}
 
 bool wrongNotes(bool midi[], bool player[], int size);
 int n_true(bool a[], int size);
 
 ScoreHandler::ScoreHandler(){
     score = 0;
+    streakScore = 0;
     multiplier = 1;
 }
 

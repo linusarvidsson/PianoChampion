@@ -98,16 +98,50 @@ void Game::renderSong(){
         State = POST_GAME;
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
+		score.reset();
     }
-    
-    activeSong->updateNotes();
+	if (Keys[GLFW_KEY_9]) {
+		// Switch to song state
+		State = SONG_END;
+
+		Keys[GLFW_KEY_9] = GL_FALSE;
+	}
+    activeSong->updateNotes(matchingKeys);
     activeSong->renderBackground();
     activeSong->renderNotes();
     activeSong->renderPiano();
     activeSong->updatePiano(playerInput);
 
 	displaySongPercent();
-	
+
+	if (activeTrack->note(activeTrack->size() - 1)->end < glfwGetTime() - 5)
+	{
+		State = SONG_END;
+	}
+    
+    // Update ther current notes array. The notes in the track that should currently be played.
+    activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f);
+    // Check if the player input matches with current notes. Update matchingKeys.
+    for(int i = 0; i < 128; i++){
+        if(playerInput[i] && currentNotes[i])
+            matchingKeys[i] = true;
+        else
+            matchingKeys[i] = false;
+    }
+    
+    // Update score
+    score.scoreHeldNotes(currentNotes, playerInput, 0.03f);
+    // Stop streak if player missed note
+    if (activeTrack->missedNotes(glfwGetTime(), 0.5)) score.stopStreak();
+    
+    // Render score and multiplier
+    standardFont->setScale(0.5f);
+    standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
+    standardFont->renderText("SCORE", 20, screenHeight - 80);
+    standardFont->renderText(std::to_string(score.getScore()), 20, screenHeight - 110);
+    standardFont->setColor(glm::vec3(0.6f, 0.4f, 0.8f));
+    standardFont->renderText("MULTIPLIER", 20, screenHeight - 150);
+    standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 180);
 }
 
 
@@ -262,6 +296,26 @@ void Game:: renderPostGame(){
      standardFont->renderText("gg", screenWidth/2, screenHeight - 100);
 }
 
+void Game::renderSongEnd()
+{
+	if (Keys[GLFW_KEY_ENTER]) {
+		// Switch to song state
+		State = SONG_SELECT;
+
+		// Reset active element. Next menu should start at element 0.
+		activeElement = 0;
+
+		Keys[GLFW_KEY_ENTER] = GL_FALSE;
+		score.reset();
+	}
+
+	standardFont->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+	standardFont->renderText("Score: " + std::to_string(score.getScore()), 20, screenHeight - (screenHeight / 10));
+	standardFont->renderText("Note streak: ", 20, screenHeight - (1+2)*(screenHeight / 10));
+		
+	
+}
+
 void Game::displaySongPercent() {
 
 	int percent = 0;
@@ -274,8 +328,8 @@ void Game::displaySongPercent() {
 	if (percent >= 100)
 		percent = 100;
 
-	standardFont->setScale(0.7f);
+	standardFont->setScale(0.4f);
 	standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
-	standardFont->renderText(std::to_string(percent), 20, screenHeight - 60);
-	standardFont->renderText(" % of song completed", 90, screenHeight - 60);
+	standardFont->renderText(std::to_string(percent), 20, screenHeight - 30);
+	standardFont->renderText(" % of song completed", 55, screenHeight - 30);
 }

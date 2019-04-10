@@ -89,7 +89,7 @@ bool MidiTrack::missedNotes(double time, double offset){
 
 void MidiTrack::updateCurrentNotes(bool currentNotes[], double time){
     
-    for(int i = 0; i < 127; i++){
+    for(int i = 0; i < 128; i++){
         currentNotes[i] = false;
     }
     
