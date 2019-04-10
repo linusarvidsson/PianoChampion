@@ -1,7 +1,8 @@
 #include "Font.hpp"
 
 Font::~Font() {
-    
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
 }
 
 

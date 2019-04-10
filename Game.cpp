@@ -12,7 +12,6 @@ Game::Game(){
 Game::~Game(){
     // Delete dynamically allocated objects
     delete standardFont;
-    delete songFont;
     delete activeSong;
     delete activeTrack;
     
@@ -60,9 +59,9 @@ void Game::init(int displayWidth, int displayHeight){
     textureShader = GraphicsTools::loadShaders( "Graphics/Shaders/TextureVertexShader.vertexshader", "Graphics/Shaders/TextureFragmentShader.fragmentshader" );
     
     // Initialize the standard font for the game
-    standardFont = new Font("Graphics/Fonts/neon.ttf", textShader, screenWidth, screenHeight);
-    songFont = new Font("Graphics/Fonts/neon.ttf", textShader, screenWidth, screenHeight);
-    
+    standardFont = new Font("Graphics/Fonts/Orbitron-Black.ttf", textShader, screenWidth, screenHeight);
+
+    logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 7.9f, 3.5f, glm::vec3(0.0f, 0.0f, 0.0f), textureShader, true);
 }
 
 
@@ -87,7 +86,8 @@ void Game::render(){
     if(State == POST_GAME){
         renderPostGame();
     }
-    globalScore = score.getScore();
+    // Draw Title
+    logo->render();
 
 }
 
@@ -177,27 +177,29 @@ void Game::renderSongMenu(){
 
     
     // Draw list header
-    standardFont->setScale(2.0f);
-    standardFont->setColor(glm::vec3(0.3f, 0.7f , 0.9f));
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
     standardFont->renderText("SONGS", 20, screenHeight - screenHeight/10);
     
+    float sin = glm::sin(0.3*glfwGetTime());
+    sin *= sin;
+    standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
+
     // Draw song list
     
     
     int addOn = 0;
-    if(activeElement >= 9){
-        addOn = -9;
+    if(activeElement >= 8){
+        addOn = -8;
     }
     for(int i = 0; i < songs.size(); i++){
         // Highlight active element in list
-        songFont->setScale(1.7f);
-        songFont->setColor(glm::vec3(0.45 ,0.04, 0.5664 *-sin(glfwGetTime()) ));
-        if(i==activeElement){
-            songFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
-            songFont->renderText(songs[i].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
-            songFont->setColor(glm::vec3(0.45 ,0.04, 0.5664 * -sin(glfwGetTime()) ));
+        if(i == activeElement){
+            standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+            standardFont->renderText(songs[i].name, 20, screenHeight - (i+2)*(screenHeight/10));
+            standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
         }
-        songFont->renderText(songs[i].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
+        standardFont->renderText(songs[i].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
     }
 }
 
@@ -209,17 +211,19 @@ void Game::renderMainMenu(){
         // Switch to song state
         State = SONG_SELECT;
         
+        logo->scale(0.3f);
+        logo->position( glm::vec3(3.5f, 3.0f, 0.0f) );
+        
         // Reset active element. Next menu should start at element 0.
         activeElement = 0;
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
-    
+
     // Draw list header
     standardFont->setScale(1.0f);
-    standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
-    standardFont->renderText("Press Enter", screenWidth/2 -180, screenHeight/2);
-    standardFont->setColor(glm::vec3(1.0f, 0.0f, 0.0f));
+    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
+    standardFont->renderText("Press Enter", screenWidth/2 -180, screenHeight/2 - 300);
 }
 
 void Game::renderSongSettings() {
@@ -280,7 +284,7 @@ void Game::renderSongSettings() {
     streamObj << std::fixed <<std::setprecision(2)<< songs[activeElement].duration;
     std::string activeElementDuration = streamObj.str();
     
-    standardFont->setScale(1.7f);
+    standardFont->setScale(1.0f);
 	standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
 	standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
     standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
@@ -290,7 +294,7 @@ void Game::renderSongSettings() {
 
 
 	// Draw list header
-	standardFont->setScale(2.0f);
+	standardFont->setScale(1.0f);
 	standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
 	standardFont->renderText("SONG OPTIONS", 20, screenHeight - screenHeight / 10);
     
@@ -301,16 +305,16 @@ void Game::renderSongSettings() {
     }
     for(int i = 0; i < songs.size(); i++){
         if(i==activeElement){
-            songFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
-            songFont->renderText(songs[activeElement].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
-            songFont->setColor(glm::vec3(0.3,0.3,0.3));
+            standardFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
+            standardFont->renderText(songs[activeElement].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
+            standardFont->setColor(glm::vec3(0.3,0.3,0.3));
         }
-        songFont->renderText(songs[i].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
+        standardFont->renderText(songs[i].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
     }
 }
 
 void Game:: renderPostGame(){
-    standardFont->setScale(2.0f);
+    standardFont->setScale(1.0f);
     standardFont->renderText("Post Game Screen", screenWidth/2-400, screenHeight - 100);
     standardFont->renderText("Score: " + std:: to_string(score.getScore()), screenWidth/2-400, screenHeight - 300);
 	standardFont->renderText("Note Streak: " + std::to_string(noteStreak), screenWidth / 2-400, screenHeight - 400);

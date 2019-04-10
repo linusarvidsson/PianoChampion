@@ -16,6 +16,7 @@
 #include "Graphics/Font.hpp"
 #include "Graphics/Song.hpp"
 #include "Graphics/GraphicsTools.hpp"
+#include "Graphics/TextureQuad.hpp"
 
 #include "midifile/MidiTrack.hpp"
 #include "GameSystems/ScoreHandler.hpp"
@@ -60,6 +61,8 @@ public:
     std::queue<int> playerToBeTurnedOff;
     
 private:
+    TextureQuad* logo;
+    
     // Display data
     int screenWidth, screenHeight;
     GLuint colorShader, textureShader;

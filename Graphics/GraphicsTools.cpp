@@ -105,7 +105,7 @@ void GraphicsTools::getResolution(int* displayWidth, int* displayHeight) {
 }
 
 
-GLuint GraphicsTools::loadTexture(const char* filepath){
+GLuint GraphicsTools::loadTexture(const char* filepath, bool alpha){
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
@@ -119,7 +119,12 @@ GLuint GraphicsTools::loadTexture(const char* filepath){
     int width, height, nrChannels;
     unsigned char *data = stbi_load(filepath, &width, &height, &nrChannels, 0);
     if (data){
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        if(alpha){
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+        }
+        else{
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
+        }
         glGenerateMipmap(GL_TEXTURE_2D);
     }
     else{

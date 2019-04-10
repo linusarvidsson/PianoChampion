@@ -179,7 +179,7 @@ void Song::updateNotes(bool matchingKeys[]){
 
 void Song::initBackground(){
     //----- BACKGROUND DATA -----//
-    backgroundTexture = GraphicsTools::loadTexture("Graphics/Images/pianoklaviatur.png");
+    backgroundTexture = GraphicsTools::loadTexture("Graphics/Images/pianoklaviatur.png", false);
     
     //----- BACKGROUND VAO -----//
     glGenVertexArrays(1, &backgroundVAO);
