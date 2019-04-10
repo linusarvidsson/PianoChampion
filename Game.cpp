@@ -184,18 +184,18 @@ void Game::renderSongMenu(){
     // Draw song list
     
     
-    int addOn = 0;
-    if(activeElement >= 8){
-        addOn = -8;
-    }
+    int listLocation = activeElement/9;
+    
     for(int i = 0; i < songs.size(); i++){
         // Highlight active element in list
-        if(i == activeElement){
-            standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-            standardFont->renderText(songs[i].name, 20, screenHeight - (i+2)*(screenHeight/10));
-            standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
+        if(i >= listLocation*9 && i  < (listLocation+1)*9){
+            if(i == activeElement){
+                standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
+                standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
+            }
+            standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
         }
-        standardFont->renderText(songs[i].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
     }
 }
 
@@ -278,31 +278,44 @@ void Game::renderSongSettings() {
 	standardFont->renderText("SONG OPTIONS", 20, screenHeight - screenHeight / 10);
     
     
-    int addOn = 0;
-    if(activeElement >= 9){
-        addOn = -9;
-    }
+    standardFont->setColor(glm::vec3(0.3,0.3,0.3));
+    int listLocation = activeElement/9;
+    
     for(int i = 0; i < songs.size(); i++){
-        if(i==activeElement){
-            standardFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
-            standardFont->renderText(songs[activeElement].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
-            standardFont->setColor(glm::vec3(0.3,0.3,0.3));
+        // Highlight active element in list
+        if(i >= listLocation*9 && i  < (listLocation+1)*9){
+            if(i==activeElement){
+                standardFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
+                standardFont->renderText(songs[activeElement].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
+                standardFont->setColor(glm::vec3(0.3,0.3,0.3));
+            }
+            standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
         }
-        standardFont->renderText(songs[i].name, 20, screenHeight - (i+2 + addOn)*(screenHeight/10));
     }
+    
 }
 
 void Game:: renderPostGame(){
+    if (Keys[GLFW_KEY_ENTER]){
+        State = SONG_SELECT;
+        
+        glfwSetTime(0);
+        activeElement = 0;
+        score.reset();
+        
+        Keys[GLFW_KEY_ENTER] = GL_FALSE;
+    }
+    
     standardFont->setScale(1.0f);
-    standardFont->renderText("Post Game Screen", screenWidth/2-400, screenHeight - 100);
-    standardFont->renderText("Score: " + std:: to_string(score.getScore()), screenWidth/2-400, screenHeight - 300);
-	standardFont->renderText("Note Streak: " + std::to_string(noteStreak), screenWidth / 2-400, screenHeight - 400);
-	standardFont->renderText("Notes Hit: ", screenWidth / 2 - 400, screenHeight - 500);
+    standardFont->renderText("Post Game Screen", 20, screenHeight - 100);
+    standardFont->renderText("Score: " + std:: to_string(score.getScore()), 20, screenHeight - 300);
+	standardFont->renderText("Note Streak: " + std::to_string(noteStreak), 20, screenHeight - 400);
+	standardFont->renderText("Notes Hit: ", 20, screenHeight - 500);
 }
 
 
 void Game::displaySongPercent() {
-
+    
 	int percent = 0;
 	if (glfwGetTime() > 2.5) {
 
