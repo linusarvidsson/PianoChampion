@@ -13,11 +13,12 @@
 
 class ScoreHandler{
 private:
-    int score;
+
     int streakScore;
     int multiplier;
     
 public:
+        int score;
     ScoreHandler();
     void reset();
     void scoreHeldNotes(bool midi[], bool player[], float dt);

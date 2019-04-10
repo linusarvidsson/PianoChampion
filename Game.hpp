@@ -83,7 +83,6 @@ private:
     void renderSong();
     void renderMainMenu();
 	void renderSongSettings();
-	void renderSongEnd();
 	void displaySongPercent();
     void renderPostGame();
     

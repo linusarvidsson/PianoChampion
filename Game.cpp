@@ -96,13 +96,11 @@ void Game::renderSong(){
     if(Keys[GLFW_KEY_ENTER]){
         // Switch to song state
         State = POST_GAME;
-        
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
-		score.reset();
     }
 	if (Keys[GLFW_KEY_9]) {
 		// Switch to song state
-		State = SONG_END;
+        State =POST_GAME;
 
 		Keys[GLFW_KEY_9] = GL_FALSE;
 	}
@@ -116,7 +114,7 @@ void Game::renderSong(){
 
 	if (activeTrack->note(activeTrack->size() - 1)->end < glfwGetTime() - 5)
 	{
-		State = SONG_END;
+		State = POST_GAME;
 	}
     
     // Update ther current notes array. The notes in the track that should currently be played.
@@ -273,8 +271,6 @@ void Game::renderSongSettings() {
 	standardFont->renderText("SONG OPTIONS", 20, screenHeight - screenHeight / 10);
     
     
-    //standardFont->setColor(glm::vec3(0.45 ,0.04, 0.5664 *-sin(glfwGetTime())));
-    //standardFont->renderText(songs[activeElement].name, 20,  screenHeight - screenHeight / 5);
     int addOn = 0;
     if(activeElement >= 9){
         addOn = -9;
@@ -289,32 +285,12 @@ void Game::renderSongSettings() {
     }
 }
 
-
 void Game:: renderPostGame(){
     standardFont->setScale(2.0f);
-    standardFont->renderText("Post Game Screen", screenWidth/2, screenHeight - 100);
-     standardFont->renderText("gg", screenWidth/2, screenHeight - 100);
+    standardFont->renderText("Post Game Screen", screenWidth/2-200, screenHeight - 100);
+    standardFont->renderText(std:: to_string(score.getScore()), screenWidth/2, screenHeight - 300);
 }
 
-void Game::renderSongEnd()
-{
-	if (Keys[GLFW_KEY_ENTER]) {
-		// Switch to song state
-		State = SONG_SELECT;
-
-		// Reset active element. Next menu should start at element 0.
-		activeElement = 0;
-
-		Keys[GLFW_KEY_ENTER] = GL_FALSE;
-		score.reset();
-	}
-
-	standardFont->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
-	standardFont->renderText("Score: " + std::to_string(score.getScore()), 20, screenHeight - (screenHeight / 10));
-	standardFont->renderText("Note streak: ", 20, screenHeight - (1+2)*(screenHeight / 10));
-		
-	
-}
 
 void Game::displaySongPercent() {
 
