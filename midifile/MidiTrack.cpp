@@ -43,6 +43,11 @@ MidiTrack::MidiTrack() {
     trackNotes.clear();
 }
 
+double MidiTrack:: duration(){ //returns song duration in seconds 
+
+    return trackNotes.back().end;
+}
+
 // Sök not. Returnerar notens index.
 int MidiTrack::searchNote(double time, int key){
     for(int n = 0; n < numNotes; n++){

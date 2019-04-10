@@ -25,6 +25,8 @@ struct songItem{
     std::string filepath;
     int track;
     int bpm;
+    double duration;
+    std::string difficulty;
 };
 
 enum GameState{
@@ -32,8 +34,8 @@ enum GameState{
     SONG_SELECT,
 	SONG_SETTINGS,
     SONG_ACTIVE,
-	SONG_END,
-    SETTINGS,
+    POST_GAME
+    
 };
 
 class Game{
@@ -75,15 +77,15 @@ private:
     // Font data
     GLuint textShader;
     Font* standardFont;
+    Font* songFont;
     
     // Render functions
     void renderSongMenu();
     void renderSong();
     void renderMainMenu();
-    void renderSettings();
 	void renderSongSettings();
-	void renderSongEnd();
 	void displaySongPercent();
+    void renderPostGame();
     
 };
 
