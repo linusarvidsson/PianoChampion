@@ -46,12 +46,15 @@ public:
     
     void init(int displayWidth, int displayHeight);
     void render();
+    int returnSoundfont();
     
     bool playerInput[128];
     GLboolean Keys[1024];
     GameState State;
+    double globalScore= 2;
     
     ScoreHandler score;
+    int soundfont = 2;
     
     std::queue<int> playerToBeTurnedOn;
     std::queue<int> playerToBeTurnedOff;
@@ -86,7 +89,6 @@ private:
 	void renderSongSettings();
 	void displaySongPercent();
     void renderPostGame();
-    
 };
 
 #endif

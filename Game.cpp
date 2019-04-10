@@ -1,8 +1,12 @@
 #include "Game.hpp"
+#include <iostream>
+#include <fstream>
 // Constructor. Should be declared globally in main. Can not contain GL-related code before the window is initialized.
 Game::Game(){
     State = MAIN_MENU;
 }
+
+
 
 // Destructor
 Game::~Game(){
@@ -27,7 +31,6 @@ void Game::init(int displayWidth, int displayHeight){
     // Default active element in menus
     activeElement = 0;
     
-    songs.reserve(6);
     // Add songs to the song list. Name, filepath, main track, BPM.
     songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 3.32, "HARD" } );
     songs.push_back( songItem{ "Piano Man", "MusicLibrary/pianoman.mid", 1, 100, 2.32, "Easy" } );
@@ -58,6 +61,7 @@ void Game::init(int displayWidth, int displayHeight){
     // Initialize the standard font for the game
     standardFont = new Font("Graphics/Fonts/neon.ttf", textShader, screenWidth, screenHeight);
     songFont = new Font("Graphics/Fonts/neon.ttf", textShader, screenWidth, screenHeight);
+    
 }
 
 
@@ -82,10 +86,7 @@ void Game::render(){
     if(State == POST_GAME){
         renderPostGame();
     }
-    // Draw Title
-    standardFont->setScale(0.7f);
-    standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
-    standardFont->renderText("KEY SLAYER", screenWidth - 290, screenHeight - 60);
+    globalScore = score.getScore();
 
 }
 
@@ -230,14 +231,17 @@ void Game::renderSongSettings() {
 
 		Keys[GLFW_KEY_ENTER] = GL_FALSE;
 	}
+    
+    
 
 	else if (Keys[GLFW_KEY_LEFT]) {
-		// Go to leaderboard
-		State = SONG_SELECT;
-		// Reset active element. Next menu should start at element 0.
-		
-		Keys[GLFW_KEY_LEFT] = GL_FALSE;
+        soundfont--;
+        Keys[GLFW_KEY_LEFT] = GL_FALSE;
 	}
+    else if (Keys[GLFW_KEY_RIGHT]) {
+        soundfont++;
+        Keys[GLFW_KEY_LEFT] = GL_FALSE;
+    }
 	else if (Keys[GLFW_KEY_UP]) {
 
 		activeBPM++;
@@ -308,4 +312,8 @@ void Game::displaySongPercent() {
 	standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
 	standardFont->renderText(std::to_string(percent), 20, screenHeight - 30);
 	standardFont->renderText(" % of song completed", 55, screenHeight - 30);
+}
+
+int Game:: returnSoundfont(){
+    return soundfont;
 }
