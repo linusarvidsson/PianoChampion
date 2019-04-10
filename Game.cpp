@@ -70,6 +70,10 @@ void Game::render(){
 	if (State == SONG_SETTINGS) {
 		renderSongSettings();
 	}
+	if (State == SONG_END)
+	{
+		renderSongEnd();
+	}
     // Draw Title
     standardFont->setScale(0.7f);
     standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
@@ -86,8 +90,14 @@ void Game::renderSong(){
         State = SONG_SELECT;
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
+		score.reset();
     }
-    
+	if (Keys[GLFW_KEY_9]) {
+		// Switch to song state
+		State = SONG_END;
+
+		Keys[GLFW_KEY_9] = GL_FALSE;
+	}
     activeSong->updateNotes(matchingKeys);
     activeSong->renderBackground();
     activeSong->renderNotes();
@@ -95,7 +105,11 @@ void Game::renderSong(){
     activeSong->updatePiano(playerInput);
 
 	displaySongPercent();
-	
+
+	if (activeTrack->note(activeTrack->size() - 1)->end < glfwGetTime() - 5)
+	{
+		State = SONG_END;
+	}
     
     // Update ther current notes array. The notes in the track that should currently be played.
     activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f);
@@ -275,6 +289,26 @@ void Game::renderSongSettings() {
 	}
 
 
+}
+
+void Game::renderSongEnd()
+{
+	if (Keys[GLFW_KEY_ENTER]) {
+		// Switch to song state
+		State = SONG_SELECT;
+
+		// Reset active element. Next menu should start at element 0.
+		activeElement = 0;
+
+		Keys[GLFW_KEY_ENTER] = GL_FALSE;
+		score.reset();
+	}
+
+	standardFont->setColor(glm::vec3(0.0f, 1.0f, 0.0f));
+	standardFont->renderText("Score: " + std::to_string(score.getScore()), 20, screenHeight - (screenHeight / 10));
+	standardFont->renderText("Note streak: ", 20, screenHeight - (1+2)*(screenHeight / 10));
+		
+	
 }
 
 void Game::displaySongPercent() {
