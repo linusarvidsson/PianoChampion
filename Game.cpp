@@ -28,6 +28,7 @@ void Game::init(int displayWidth, int displayHeight){
     screenWidth = displayWidth;
     screenHeight = displayHeight;
     
+    
     // Default active element in menus
     activeElement = 0;
     
@@ -222,6 +223,7 @@ void Game::renderMainMenu(){
 }
 
 void Game::renderSongSettings() {
+   
 	if (Keys[GLFW_KEY_ENTER])
 	{
 		State = SONG_ACTIVE;
@@ -237,15 +239,21 @@ void Game::renderSongSettings() {
 		Keys[GLFW_KEY_ENTER] = GL_FALSE;
 	}
     
-    
-
-	else if (Keys[GLFW_KEY_LEFT]) {
-        soundfont--;
-        Keys[GLFW_KEY_LEFT] = GL_FALSE;
+    if (Keys[GLFW_KEY_0]) {
+        soundfont = 0;
+        currentInstrument = "Piano";
+    }
+   else if (Keys[GLFW_KEY_1]) {
+        soundfont = 1;
+       currentInstrument = "banjoooo";
 	}
-    else if (Keys[GLFW_KEY_RIGHT]) {
-        soundfont++;
-        Keys[GLFW_KEY_LEFT] = GL_FALSE;
+    else if (Keys[GLFW_KEY_2]) {
+        soundfont = 2;
+        currentInstrument = "maracaxxx";
+    }
+    else if (Keys[GLFW_KEY_5]) {
+        soundfont = 5;
+        currentInstrument = "maracaxxx";
     }
 	else if (Keys[GLFW_KEY_UP]) {
 
@@ -259,7 +267,6 @@ void Game::renderSongSettings() {
 		Keys[GLFW_KEY_DOWN] = GL_FALSE;
 
 	}
-    
     // Create an output string stream
     std::ostringstream streamObj;
     //Add double to stream
@@ -272,7 +279,7 @@ void Game::renderSongSettings() {
     standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
     standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/2, screenHeight-200);
     standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/2, screenHeight-300 );
-    standardFont->renderText("Instrument: ", screenWidth/2, screenHeight-400);
+    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/2, screenHeight-400);
 
 	// Draw list header
 	standardFont->setScale(2.0f);

@@ -33,17 +33,8 @@ bool prevPlayerInput[128] = {false};
 double globalScore = 0; 
 
 int main(void) {
-    std::ofstream myfile;
-    myfile.open ("example.txt");
-    if(myfile.is_open()){
-        myfile << KeySlayer.globalScore;
-        myfile << "ghghgh";
-        myfile.close();
-    }
-    else std::cout << "Unable to open file";
-
     // --- Initialize soundfont --- //
-    soundfont = new sfPlayer(audioCallback, "MusicLibrary/kawai.sf2");
+    soundfont = new sfPlayer(audioCallback, "MusicLibrary/fender.sf2");
     tsf_channel_set_presetnumber(soundfont->soundfont, 1, 0, false); //Piano
     tsf_channel_set_presetnumber(soundfont->soundfont, 2, 2, false); //Claves
     

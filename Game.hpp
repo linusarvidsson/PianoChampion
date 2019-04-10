@@ -54,7 +54,7 @@ public:
     double globalScore= 2;
     
     ScoreHandler score;
-    int soundfont = 2;
+    int soundfont = 0;
     
     std::queue<int> playerToBeTurnedOn;
     std::queue<int> playerToBeTurnedOff;
@@ -63,6 +63,7 @@ private:
     // Display data
     int screenWidth, screenHeight;
     GLuint colorShader, textureShader;
+    std:: string currentInstrument = "Piano";
     
     // Song data
     std::vector<songItem> songs;
