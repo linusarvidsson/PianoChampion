@@ -65,11 +65,6 @@ void ScoreHandler::stopStreak(){
     multiplier = 1;
 }
 
-int ScoreHandler::getStreakScore()
-{
-	return streakScore;
-}
-
 bool wrongNotes(bool midi[], bool player[], int size){
     for (int i = 0; i < size; i++){
         if (player[i] && !midi[i]) return true;

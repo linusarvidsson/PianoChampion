@@ -26,7 +26,6 @@ public:
     int getScore();
     int getMultiplier();
     void stopStreak();
-	int getStreakScore();
 
 };
 

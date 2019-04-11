@@ -96,6 +96,7 @@ private:
 	void renderSongSettings();
 	void displaySongPercent();
     void renderPostGame();
+	int notesHit();
 };
 
 #endif

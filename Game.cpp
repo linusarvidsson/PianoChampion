@@ -131,13 +131,6 @@ void Game::renderSong(){
     
     // Update score
     score.scoreNotes(activeTrack, currentNotes, playerInput, glfwGetTime(), 0.03f);
-    // Stop streak if player missed note
-	if (activeTrack->missedNotes(glfwGetTime(), 0.5)) {
-		if (score.getStreakScore() > noteStreak) {
-			noteStreak = score.getStreakScore();
-		}
-		score.stopStreak();
-	}
     
     // Render score and multiplier
     standardFont->setScale(0.5f);
@@ -268,7 +261,12 @@ void Game::renderSongSettings() {
 		Keys[GLFW_KEY_DOWN] = GL_FALSE;
 
 	}
-    
+	else if (Keys[GLFW_KEY_BACKSPACE])
+	{
+		State = SONG_SELECT;
+		Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
+	}
+
     if(soundfont==0){
         currentInstrument = "Grand Piano";
     }else if(soundfont ==1 ){
@@ -330,8 +328,7 @@ void Game:: renderPostGame(){
     standardFont->setScale(1.0f);
     standardFont->renderText("Post Game Screen", 20, screenHeight - 100);
     standardFont->renderText("Score: " + std:: to_string(score.getScore()), 20, screenHeight - 300);
-	standardFont->renderText("Note Streak: " + std::to_string(noteStreak), 20, screenHeight - 400);
-	standardFont->renderText("Notes Hit: ", 20, screenHeight - 500);
+	standardFont->renderText("Notes Hit: " + std::to_string(notesHit()) +"%", 20, screenHeight - 500);
 }
 
 
@@ -355,4 +352,14 @@ void Game::displaySongPercent() {
 
 int Game:: returnSoundfont(){
     return soundfont;
+}
+
+int Game::notesHit()
+{
+	int total = activeTrack->size();
+	int hit = activeTrack->countTriggeredNotes();
+
+	double notesHitPercent = ((double)hit / (double)total)*100;
+
+	return notesHitPercent;
 }
