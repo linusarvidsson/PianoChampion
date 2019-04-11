@@ -19,9 +19,15 @@
 
 class GraphicsTools{
 public:
+    // Load shaders and create a shader program
     static GLuint loadShaders(const char * vertex_file_path,const char * fragment_file_path);
+    
+    // Load a texture. If the texture contains alpha, alpha = true.
     static GLuint loadTexture(const char* filepath, bool alpha);
+    
+    // Get the width and height of the primary display.
     static void getResolution(int* displayWidth, int* displayHeight);
+    
 private:
     GraphicsTools() { }
 };

@@ -12,12 +12,18 @@
 
 class TextureQuad{
 public:
+    // Class TextureQuad. Create a simple quadratic object with a texture.
     TextureQuad(const char* texturepath, GLfloat width, GLfloat height, glm::vec3 position, GLuint& shader, bool alphaTexture);
     ~TextureQuad();
     
+    // Render texture quad.
     void render();
+    
+    // Scale quad. Set new width and height.
     void scale(GLuint width, GLuint height);
+    // Scale quad. Set scale factor scale.
     void scale(GLfloat scale);
+    // Set the position of the quad.
     void position(glm::vec3 position);
     
 private:

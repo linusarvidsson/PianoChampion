@@ -9,6 +9,7 @@
 #include <glm/ext.hpp>
 
 #include "GraphicsTools.hpp"
+#include "TextureQuad.hpp"
 #include "../midifile/MidiTrack.hpp"
 #include "Note.hpp"
 
@@ -32,8 +33,7 @@ public:
     Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader);
     
     void updateNotes(bool matchingKeys[]);
-    void renderNotes();
-    void renderBackground();
+    void render();
     void renderPiano();
     void updatePiano(bool playerInput[]);
     
@@ -51,17 +51,8 @@ private:
     // Projection components
     glm::mat4 projection, view, model;
     
-    // Background data
-    GLuint* backgroundShader;
-    GLuint backgroundTexture;
-    GLuint backgroundVAO;
-    GLuint backgroundVertexBuffer, backgroundUVBuffer, backgroundElementBuffer;
-    void initBackground();
-    
-    static const GLfloat WIDTH, HEIGHT;
-    static const GLfloat backgroundVertices[];
-    static const GLuint backgroundIndices[];
-    static const GLfloat backgroundUV[];
+    // Background
+    TextureQuad* background;
     
     // Piano data
     GLuint pianoVAO;

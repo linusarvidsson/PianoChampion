@@ -107,10 +107,10 @@ void Game::renderSong(){
 		Keys[GLFW_KEY_9] = GL_FALSE;
 	}
     activeSong->updateNotes(matchingKeys);
-    activeSong->renderBackground();
-    activeSong->renderNotes();
-    activeSong->renderPiano();
+    activeSong->render();
     activeSong->updatePiano(playerInput);
+    activeSong->renderPiano();
+    
 
 	displaySongPercent();
 

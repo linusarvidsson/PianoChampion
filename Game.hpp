@@ -57,10 +57,12 @@ public:
     ScoreHandler score;
     int soundfont = 0;
     
+    // Queues for MidiPlayer
     std::queue<int> playerToBeTurnedOn;
     std::queue<int> playerToBeTurnedOff;
     
 private:
+    // Textures
     TextureQuad* logo;
     
     // Display data
@@ -74,6 +76,7 @@ private:
     MidiTrack* activeTrack;
 	int activeBPM;
 	int noteStreak = 0;
+    
     // Logic arrays for the game mechanics
     bool currentNotes[128];
     bool matchingKeys[128];
