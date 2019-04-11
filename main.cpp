@@ -141,7 +141,13 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
             KeySlayer.Keys[key] = GL_FALSE;
         
     }
-    
+	if (key == GLFW_KEY_6)
+	{
+		if (action == GLFW_PRESS) {
+			if (KeySlayer.debugMode) KeySlayer.debugMode = false;
+			else KeySlayer.debugMode = true;
+		}
+	}
     if(key == GLFW_KEY_2 && octave < 8){
         if (action == GLFW_PRESS)
             octave++;

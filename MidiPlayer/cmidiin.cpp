@@ -2,16 +2,19 @@
 #include <cstdlib>
 #include "cmidiin.h"
 
-MidiInputReader:: MidiInputReader(){
-    // Check available ports.
-    midiin = new RtMidiIn();
-    nPorts = midiin->getPortCount();
-    if ( nPorts == 0 ) {
-        cleanup();
-    }
-    midiin->openPort( 0 );
-    // Don't ignore sysex, timing, or active sensing messages.
-    midiin->ignoreTypes( false, false, false );
+MidiInputReader::MidiInputReader() {
+	// Check available ports.
+	midiin = new RtMidiIn();
+	nPorts = midiin->getPortCount();
+	if (nPorts == 0) {
+		//cleanup();
+	}
+	else {
+		midiin->openPort(0);
+	}
+
+	// Don't ignore sysex, timing, or active sensing messages.
+	midiin->ignoreTypes(false, false, false);
 }
 
 void MidiInputReader:: getUserInput(){

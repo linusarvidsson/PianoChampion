@@ -20,7 +20,7 @@
 
 #include "midifile/MidiTrack.hpp"
 #include "GameSystems/ScoreHandler.hpp"
-#include "cmidiin.h"
+#include "Midiplayer/cmidiin.h"
 
 struct songItem{
     std::string name;
@@ -63,6 +63,8 @@ public:
     std::queue<int> playerToBeTurnedOn;
     std::queue<int> playerToBeTurnedOff;
     
+	bool debugMode;
+
 private:
     // Textures
     TextureQuad* logo;
@@ -84,6 +86,7 @@ private:
     
     //Midi in
     MidiInputReader *midiin;
+	
     
     // Menu data
     int activeElement;

@@ -96,8 +96,10 @@ void Game::render(){
 
 void Game::renderSong(){
     //Update user input
-    midiin->getUserInput();
-    for (int i = 0; i < 127; i++) playerInput[i] = midiin->playerInput[i];
+	if (!debugMode) {
+		midiin->getUserInput();
+		for (int i = 0; i < 127; i++) playerInput[i] = midiin->playerInput[i];
+	}
     
     // Check player Input
     if(Keys[GLFW_KEY_ENTER]){
@@ -107,7 +109,7 @@ void Game::renderSong(){
     }
 	if (Keys[GLFW_KEY_9]) {
 		// Switch to song state
-        State =POST_GAME;
+        State = POST_GAME;
 
 		Keys[GLFW_KEY_9] = GL_FALSE;
 	}
@@ -145,7 +147,28 @@ void Game::renderSong(){
     standardFont->renderText(std::to_string(score.getScore()), 20, screenHeight - 110);
     standardFont->setColor(glm::vec3(0.6f, 0.4f, 0.8f));
     standardFont->renderText("MULTIPLIER", 20, screenHeight - 150);
-    standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 180);
+
+	//Change color of multiplier depending on multiplier
+	glm::vec3 multiColor;
+	switch (score.getMultiplier())
+	{
+	case 1:
+		multiColor = glm::vec3(1.0f, 1.0f, 1.0f);
+		break;
+	case 2:
+		multiColor = glm::vec3(1.0f, 1.0f, 0.0f);
+		break;
+	case 3:
+		multiColor = glm::vec3(0.0f, 0.5f, 0.0f);
+		break;
+	case 4:
+		multiColor = glm::vec3(0.5f, 0.0f, 0.5f);
+		break;
+	default:
+		break;
+	}
+	standardFont->setColor(multiColor);
+	standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 180);
 }
 
 
@@ -331,6 +354,7 @@ void Game:: renderPostGame(){
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
     
+	standardFont->setColor(glm::vec3(0.6f, 0.4f, 0.8f));
     standardFont->setScale(1.0f);
     standardFont->renderText("Post Game Screen", 20, screenHeight - 100);
     standardFont->renderText("Score: " + std:: to_string(score.getScore()), 20, screenHeight - 300);
