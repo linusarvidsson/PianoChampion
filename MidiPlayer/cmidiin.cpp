@@ -2,16 +2,19 @@
 #include <cstdlib>
 #include "cmidiin.h"
 
-MidiInputReader:: MidiInputReader(){
-    // Check available ports.
-    midiin = new RtMidiIn();
-    nPorts = midiin->getPortCount();
-    if ( nPorts == 0 ) {
-        cleanup();
-    }
-    midiin->openPort( 0 );
-    // Don't ignore sysex, timing, or active sensing messages.
-    midiin->ignoreTypes( false, false, false );
+MidiInputReader::MidiInputReader() {
+	// Check available ports.
+	midiin = new RtMidiIn();
+	nPorts = midiin->getPortCount();
+	if (nPorts == 0) {
+		//cleanup();
+	}
+	else {
+		midiin->openPort(0);
+	}
+
+	// Don't ignore sysex, timing, or active sensing messages.
+	midiin->ignoreTypes(false, false, false);
 }
 
 void MidiInputReader:: getUserInput(){
@@ -27,9 +30,9 @@ void MidiInputReader:: getUserInput(){
             // Tangentbordet är korkat och togglar så vi får göra så här
             if (instruction == 144) {
                 if (playerInput[key]){
-                    playerInput[key] = false; toBeTurnedOff.push_back(key);
+                    playerInput[key] = false; toBeTurnedOff.push(key);
                 } else {
-                    playerInput[key] = true; toBeTurnedOn.push_back(key);
+                    playerInput[key] = true; toBeTurnedOn.push(key);
                 }
             }
             

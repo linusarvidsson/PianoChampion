@@ -47,7 +47,6 @@ void ScoreHandler::scoreNotes(MidiTrack* track, bool midi[], bool player[], floa
         if (player[i]){
             bonusNote = track->availableForBonus(time, i);
             if (bonusNote != 0) score += 300;
-            track->triggerNote(bonusNote);
         }
     }
 }

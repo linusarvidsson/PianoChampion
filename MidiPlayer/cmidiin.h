@@ -10,6 +10,7 @@
 #define cmidiin_h
 #include <iostream>
 #include <cstdlib>
+#include <queue>
 #include "RtMidi.h"
 
 class MidiInputReader{
@@ -18,8 +19,8 @@ public:
     void getUserInput();
     RtMidiIn *midiin;
     bool playerInput[127] = {false};
-    std::vector<int> toBeTurnedOn;
-    std::vector<int> toBeTurnedOff;
+    std::queue<int> toBeTurnedOn;
+    std::queue<int> toBeTurnedOff;
 private:
     std::vector<unsigned char> inputQueue;
     unsigned int nPorts ;
