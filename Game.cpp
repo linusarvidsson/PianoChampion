@@ -288,57 +288,11 @@ void Game::renderSong(){
         midiin->getUserInput();
         for (int i = 0; i < 127; i++) playerInput[i] = midiin->playerInput[i];
     }
-    /*
-    // Check player Input
+
     if(Keys[GLFW_KEY_ENTER]){
         // Switch to song state
         State = POST_GAME;
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
-    }
-	if (Keys[GLFW_KEY_9]) {
-		// Switch to song state
-        State =POST_GAME;
-
-		Keys[GLFW_KEY_9] = GL_FALSE;
-	}
-    activeSong->updateNotes(matchingKeys);
-    activeSong->updatePiano(playerInput);
-    activeSong->render();
-    
-	displaySongPercent();
-
-	if (activeTrack->note(activeTrack->size() - 1)->end < glfwGetTime() - 5)
-	{
-		State = POST_GAME;
-	}
-    
-    // Update ther current notes array. The notes in the track that should currently be played.
-    activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f);
-    // Check if the player input matches with current notes. Update matchingKeys.
-    for(int i = 0; i < 128; i++){
-        if(playerInput[i] && currentNotes[i])
-            matchingKeys[i] = true;
-        else
-            matchingKeys[i] = false;
-    }
-    
-    // Update score
-    score.scoreNotes(activeTrack, currentNotes, playerInput, glfwGetTime(), 0.03f);
-    
-    // Render score and multiplier
-    standardFont->setScale(0.5f);
-    standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
-    standardFont->renderText("SCORE", 20, screenHeight - 80);
-    standardFont->renderText(std::to_string(score.getScore()), 20, screenHeight - 110);
-    standardFont->setColor(glm::vec3(0.6f, 0.4f, 0.8f));
-    standardFont->renderText("MULTIPLIER", 20, screenHeight - 150);
-    standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 180);
-    */
-    if (Keys[GLFW_KEY_9]) {
-        // Switch to song state
-        State = POST_GAME;
-        
-        Keys[GLFW_KEY_9] = GL_FALSE;
     }
     activeSong->updateNotes(matchingKeys);
     activeSong->updatePiano(playerInput);
