@@ -24,6 +24,7 @@
 #include <vector>
 #include <queue>
 #include <fstream>
+#include "RtMidi/qmidiin.h"
 
 Game KeySlayer = Game();
 sfPlayer* soundfont;
@@ -33,6 +34,8 @@ bool prevPlayerInput[128] = {false};
 double globalScore = 0; 
 
 int main(void) {
+    
+    initRtMidi();
     // --- Initialize soundfont --- //
     soundfont = new sfPlayer(audioCallback, "MusicLibrary/kawai.sf2");
     tsf_channel_set_presetnumber(soundfont->soundfont, 0, 0, false); //Piano
