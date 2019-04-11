@@ -268,7 +268,7 @@ void Game::renderSongSettings() {
 	standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
 	standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/2, screenHeight-100);
     standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/2, screenHeight-200);
+    standardFont->renderText("Song Duration:" + activeElementDuration + "min", screenWidth/2, screenHeight-200);
     standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/2, screenHeight-300 );
     standardFont->renderText("Instrument: ", screenWidth/2, screenHeight-400);
 
