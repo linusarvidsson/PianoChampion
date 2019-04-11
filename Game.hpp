@@ -108,8 +108,6 @@ private:
 	void displaySongPercent();
     void renderPostGame();
 	int notesHit();
-    
-    //
     void leaderboardHandler();
 
 };
