@@ -3,6 +3,7 @@
 #include "qmidiin.h"
 bool done;
 static void finish(int ignore){ done = true; }
+
 void initRtMidi()
 {
     RtMidiIn *midiin = new RtMidiIn();

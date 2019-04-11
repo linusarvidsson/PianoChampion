@@ -21,6 +21,10 @@
 #include "midifile/MidiTrack.hpp"
 #include "GameSystems/ScoreHandler.hpp"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 struct songItem{
     std::string name;
     std::string filepath;
@@ -59,7 +63,6 @@ public:
     
     std::queue<int> playerToBeTurnedOn;
     std::queue<int> playerToBeTurnedOff;
-    
 private:
     TextureQuad* logo;
     
@@ -80,7 +83,7 @@ private:
     
     // Menu data
     int activeElement;
-    
+
     // Font data
     GLuint textShader;
     Font* standardFont;
@@ -93,6 +96,10 @@ private:
 	void renderSongSettings();
 	void displaySongPercent();
     void renderPostGame();
+    
+    //
+    void leaderboardHandler();
+
 };
 
 #endif

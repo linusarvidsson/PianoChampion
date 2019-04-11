@@ -91,8 +91,6 @@ void Game::render(){
 
 }
 
-
-
 void Game::renderSong(){
     // Check player Input
     if(Keys[GLFW_KEY_ENTER]){
@@ -316,8 +314,18 @@ void Game::renderSongSettings() {
     
 }
 
+
+void Game:: leaderboardHandler(){
+    std::fstream file;
+    std:: string line;
+    file.open("Leaderboards/"+ songs[activeElement].name + ".txt",std::ios_base::app);
+    file << std::endl <<score.getScore() ;
+
+}
+
 void Game:: renderPostGame(){
     if (Keys[GLFW_KEY_ENTER]){
+        leaderboardHandler();
         State = SONG_SELECT;
         
         glfwSetTime(0);
@@ -326,7 +334,7 @@ void Game:: renderPostGame(){
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
-    
+
     standardFont->setScale(1.0f);
     standardFont->renderText("Post Game Screen", 20, screenHeight - 100);
     standardFont->renderText("Score: " + std:: to_string(score.getScore()), 20, screenHeight - 300);
