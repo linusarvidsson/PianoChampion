@@ -12,6 +12,7 @@ Song::~Song(){
 
 Song::Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader){
     background = new TextureQuad("Graphics/Images/pianoklaviatur.png", 10.9f, 10.0f, glm::vec3(0.0f, 0.0f, -0.01f), textureShader, false);
+    strikeBar = new TextureQuad("Graphics/Images/strike_bar.png", 10.0f, 1.0f, glm::vec3(0.0f, -2.5f, 0.1f), textureShader, true);
     noteShader = &colorShader;
     songTrack = &track;
     
@@ -99,7 +100,7 @@ void Song::initNotes(){
 }
 
 void Song::render(){
-    //----- Render Background -----//
+    //----- Render Background-----//
     
     background->render();
     
@@ -117,6 +118,11 @@ void Song::render(){
     glDrawElements(GL_TRIANGLES, (GLsizei)noteIndices.size(), GL_UNSIGNED_INT, NULL);
     
     glBindVertexArray(0);
+    
+    //----- Render Strike Bar & Piano -----//
+    renderPiano();
+    strikeBar->render();
+    
 }
 
 

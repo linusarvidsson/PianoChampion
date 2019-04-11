@@ -5,9 +5,6 @@
 Game::Game(){
     State = MAIN_MENU;
 }
-
-
-
 // Destructor
 Game::~Game(){
     // Delete dynamically allocated objects
@@ -65,7 +62,9 @@ void Game::init(int displayWidth, int displayHeight){
 }
 
 
-//----- RENDER FUNCTIONS -----//
+//-------------------------------------------//
+//----------------- RENDER ------------------//
+//-------------------------------------------//
 
 // The main rendering function. Calls other rendering functions depending on what game state is active.
 void Game::render(){
@@ -93,6 +92,191 @@ void Game::render(){
 
 
 
+//-------------------------------------------//
+//--------------- MAIN MENU -----------------//
+//-------------------------------------------//
+
+void Game::renderMainMenu(){
+    // Check player Input
+    if(Keys[GLFW_KEY_ENTER]){
+        // Switch to song state
+        State = SONG_SELECT;
+        
+        logo->scale(0.3f);
+        logo->position( glm::vec3(3.5f, 3.0f, 0.0f) );
+        
+        // Reset active element. Next menu should start at element 0.
+        activeElement = 0;
+        
+        Keys[GLFW_KEY_ENTER] = GL_FALSE;
+    }
+    
+    // Draw list header
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
+    standardFont->renderText("Press Enter", screenWidth/2 -180, screenHeight/2 - 300);
+}
+
+
+
+//-------------------------------------------//
+//--------------- SONG MENU -----------------//
+//-------------------------------------------//
+
+// Render function for the song menu
+void Game::renderSongMenu(){
+    // Check player Input
+    if(Keys[GLFW_KEY_ENTER]){
+        // Switch to song state
+        State = SONG_SETTINGS;
+        activeBPM = songs[activeElement].bpm;
+        
+        // Reset active element. Next menu should start at element 0.
+        //activeElement = 0;
+        
+        Keys[GLFW_KEY_ENTER] = GL_FALSE;
+    }
+    else if(activeElement > 0 && Keys[GLFW_KEY_UP]) {
+        // Go up the list
+        activeElement--;
+        Keys[GLFW_KEY_UP] = GL_FALSE;
+    }
+    else if(activeElement < songs.size()-1 && Keys[GLFW_KEY_DOWN]) {
+        // Go down the list
+        activeElement++;
+        Keys[GLFW_KEY_DOWN] = GL_FALSE;
+    }
+    
+    
+    // Draw list header
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
+    standardFont->renderText("SONGS", 20, screenHeight - screenHeight/10);
+    
+    // Draw song list
+    float sin = glm::sin(0.3*glfwGetTime());
+    sin *= sin;
+    standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
+    
+    int listLocation = activeElement/9;
+    for(int i = 0; i < songs.size(); i++){
+        // Highlight active element in list
+        if(i >= listLocation*9 && i  < (listLocation+1)*9){
+            if(i == activeElement){
+                standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
+                standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
+            }
+            standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
+        }
+    }
+}
+
+
+
+//-------------------------------------------//
+//------------- SONG SETTINGS ---------------//
+//-------------------------------------------//
+
+void Game::renderSongSettings() {
+    
+    if (Keys[GLFW_KEY_ENTER])
+    {
+        State = SONG_ACTIVE;
+        
+        // Load new selected song
+        delete activeTrack;
+        delete activeSong;
+        activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
+        activeSong = new Song(*activeTrack, colorShader, textureShader);
+        // Reset time
+        glfwSetTime(0);
+        
+        Keys[GLFW_KEY_ENTER] = GL_FALSE;
+    }
+    
+    if (Keys[GLFW_KEY_9]) {
+        soundfont++;
+        if(soundfont >3){
+            soundfont = 0;
+        }
+        Keys[GLFW_KEY_9] = GL_FALSE;
+    }
+    else if (Keys[GLFW_KEY_8]) {
+        soundfont--;
+        if(soundfont <0){
+            soundfont=3 ;
+        }
+        Keys[GLFW_KEY_8] = GL_FALSE;
+    }
+    else if (Keys[GLFW_KEY_UP]) {
+        
+        activeBPM++;
+        Keys[GLFW_KEY_UP] = GL_FALSE;
+    }
+    else if (Keys[GLFW_KEY_DOWN] && activeBPM > 0) {
+        
+        activeBPM--;
+        Keys[GLFW_KEY_DOWN] = GL_FALSE;
+        
+    }
+    else if (Keys[GLFW_KEY_BACKSPACE])
+    {
+        State = SONG_SELECT;
+        Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
+    }
+    
+    if(soundfont==0){
+        currentInstrument = "Grand Piano";
+    }else if(soundfont ==1 ){
+        currentInstrument = "Supersaw Synthesizer";
+    }else if(soundfont == 2){
+        currentInstrument = "Brass Synthesizer";
+    }else if (soundfont == 3){
+        currentInstrument = "Brighton Synthesizer";
+    }
+    // Create an output string stream
+    std::ostringstream streamObj;
+    //Add double to stream
+    streamObj << std::fixed <<std::setprecision(2)<< songs[activeElement].duration;
+    std::string activeElementDuration = streamObj.str();
+    
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
+    standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
+    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
+    standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
+    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-500 );
+    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-400);
+    
+    // Draw list header
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
+    standardFont->renderText("SONG OPTIONS", 20, screenHeight - screenHeight / 10);
+    
+    // Draw song list
+    standardFont->setColor(glm::vec3(0.3,0.3,0.3));
+    int listLocation = activeElement/9;
+    for(int i = 0; i < songs.size(); i++){
+        // Highlight active element in list
+        if(i >= listLocation*9 && i  < (listLocation+1)*9){
+            if(i==activeElement){
+                standardFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
+                standardFont->renderText(songs[activeElement].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
+                standardFont->setColor(glm::vec3(0.3,0.3,0.3));
+            }
+            standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
+        }
+    }
+    
+}
+
+
+
+//-------------------------------------------//
+//-----------------  SONG -------------------//
+//-------------------------------------------//
+
 void Game::renderSong(){
     // Check player Input
     if(Keys[GLFW_KEY_ENTER]){
@@ -107,11 +291,9 @@ void Game::renderSong(){
 		Keys[GLFW_KEY_9] = GL_FALSE;
 	}
     activeSong->updateNotes(matchingKeys);
-    activeSong->render();
     activeSong->updatePiano(playerInput);
-    activeSong->renderPiano();
+    activeSong->render();
     
-
 	displaySongPercent();
 
 	if (activeTrack->note(activeTrack->size() - 1)->end < glfwGetTime() - 5)
@@ -144,175 +326,9 @@ void Game::renderSong(){
 
 
 
-// Render function for the song menu
-void Game::renderSongMenu(){
-    // Check player Input
-    if(Keys[GLFW_KEY_ENTER]){
-        // Switch to song state
-        State = SONG_SETTINGS;
-		activeBPM = songs[activeElement].bpm;
-        
-        // Reset active element. Next menu should start at element 0.
-        //activeElement = 0;
-        
-        Keys[GLFW_KEY_ENTER] = GL_FALSE;
-    }
-    else if(activeElement > 0 && Keys[GLFW_KEY_UP]) {
-        // Go up the list
-        activeElement--;
-        Keys[GLFW_KEY_UP] = GL_FALSE;
-    }
-    else if(activeElement < songs.size()-1 && Keys[GLFW_KEY_DOWN]) {
-        // Go down the list
-        activeElement++;
-        Keys[GLFW_KEY_DOWN] = GL_FALSE;
-    }
-
-    
-    // Draw list header
-    standardFont->setScale(1.0f);
-    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
-    standardFont->renderText("SONGS", 20, screenHeight - screenHeight/10);
-    
-    float sin = glm::sin(0.3*glfwGetTime());
-    sin *= sin;
-    standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
-
-    // Draw song list
-    
-    
-    int listLocation = activeElement/9;
-    
-    for(int i = 0; i < songs.size(); i++){
-        // Highlight active element in list
-        if(i >= listLocation*9 && i  < (listLocation+1)*9){
-            if(i == activeElement){
-                standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-                standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
-                standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
-            }
-            standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
-        }
-    }
-}
-
-
-
-void Game::renderMainMenu(){
-    // Check player Input
-    if(Keys[GLFW_KEY_ENTER]){
-        // Switch to song state
-        State = SONG_SELECT;
-        
-        logo->scale(0.3f);
-        logo->position( glm::vec3(3.5f, 3.0f, 0.0f) );
-        
-        // Reset active element. Next menu should start at element 0.
-        activeElement = 0;
-        
-        Keys[GLFW_KEY_ENTER] = GL_FALSE;
-    }
-
-    // Draw list header
-    standardFont->setScale(1.0f);
-    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
-    standardFont->renderText("Press Enter", screenWidth/2 -180, screenHeight/2 - 300);
-}
-
-void Game::renderSongSettings() {
-   
-	if (Keys[GLFW_KEY_ENTER])
-	{
-		State = SONG_ACTIVE;
-
-		// Load new selected song
-		delete activeTrack;
-		delete activeSong;
-		activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
-		activeSong = new Song(*activeTrack, colorShader, textureShader);
-		// Reset time
-		glfwSetTime(0);
-
-		Keys[GLFW_KEY_ENTER] = GL_FALSE;
-	}
-    
-    if (Keys[GLFW_KEY_9]) {
-        soundfont++;
-        if(soundfont >3){
-            soundfont = 0;
-        }
-        Keys[GLFW_KEY_9] = GL_FALSE;
-    }
-   else if (Keys[GLFW_KEY_8]) {
-       soundfont--;
-       if(soundfont <0){
-           soundfont=3 ;
-       }
-       Keys[GLFW_KEY_8] = GL_FALSE;
-	}
-	else if (Keys[GLFW_KEY_UP]) {
-
-		activeBPM++;
-		Keys[GLFW_KEY_UP] = GL_FALSE;
-	}
-	else if (Keys[GLFW_KEY_DOWN] && activeBPM > 0) {
-
-		activeBPM--;
-		Keys[GLFW_KEY_DOWN] = GL_FALSE;
-
-	}
-	else if (Keys[GLFW_KEY_BACKSPACE])
-	{
-		State = SONG_SELECT;
-		Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
-	}
-
-    if(soundfont==0){
-        currentInstrument = "Grand Piano";
-    }else if(soundfont ==1 ){
-        currentInstrument = "Supersaw Synthesizer";
-    }else if(soundfont == 2){
-        currentInstrument = "Brass Synthesizer";
-    }else if (soundfont == 3){
-        currentInstrument = "Brighton Synthesizer";
-    }
-    // Create an output string stream
-    std::ostringstream streamObj;
-    //Add double to stream
-    streamObj << std::fixed <<std::setprecision(2)<< songs[activeElement].duration;
-    std::string activeElementDuration = streamObj.str();
-    
-    standardFont->setScale(1.0f);
-	standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-	standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
-    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
-    standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-500 );
-    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-400);
-
-
-	// Draw list header
-	standardFont->setScale(1.0f);
-	standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
-	standardFont->renderText("SONG OPTIONS", 20, screenHeight - screenHeight / 10);
-    
-    
-    standardFont->setColor(glm::vec3(0.3,0.3,0.3));
-    int listLocation = activeElement/9;
-    
-    for(int i = 0; i < songs.size(); i++){
-        // Highlight active element in list
-        if(i >= listLocation*9 && i  < (listLocation+1)*9){
-            if(i==activeElement){
-                standardFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
-                standardFont->renderText(songs[activeElement].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
-                standardFont->setColor(glm::vec3(0.3,0.3,0.3));
-            }
-            standardFont->renderText(songs[i].name, 20, screenHeight - (i%9+2)*(screenHeight/10));
-        }
-    }
-    
-}
+//-------------------------------------------//
+//--------------- POST GAME -----------------//
+//-------------------------------------------//
 
 void Game:: renderPostGame(){
     if (Keys[GLFW_KEY_ENTER]){
@@ -331,6 +347,11 @@ void Game:: renderPostGame(){
 	standardFont->renderText("Notes Hit: " + std::to_string(notesHit()) +"%", 20, screenHeight - 500);
 }
 
+
+
+//-------------------------------------------//
+//------------- OTHER FUNCTIONS -------------//
+//-------------------------------------------//
 
 void Game::displaySongPercent() {
     

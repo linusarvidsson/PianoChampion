@@ -33,9 +33,9 @@ public:
     Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader);
     
     void updateNotes(bool matchingKeys[]);
-    void render();
-    void renderPiano();
     void updatePiano(bool playerInput[]);
+    void render();
+
     
 private:
     // Note data
@@ -51,8 +51,9 @@ private:
     // Projection components
     glm::mat4 projection, view, model;
     
-    // Background
+    // Background & Strike Bar
     TextureQuad* background;
+    TextureQuad* strikeBar;
     
     // Piano data
     GLuint pianoVAO;
@@ -61,6 +62,7 @@ private:
     std::vector<glm::vec3> pianoKeyColors;
     std::vector<GLuint> pianoKeyIndices;
     void initPiano();
+    void renderPiano();
 
 };
 
