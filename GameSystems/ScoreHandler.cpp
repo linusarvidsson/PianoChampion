@@ -47,7 +47,6 @@ void ScoreHandler::scoreNotes(MidiTrack* track, bool midi[], bool player[], floa
         if (player[i]){
             bonusNote = track->availableForBonus(time, i);
             if (bonusNote != 0) score += 300;
-            track->triggerNote(bonusNote);
         }
     }
 }
@@ -63,11 +62,6 @@ int ScoreHandler::getMultiplier(){
 void ScoreHandler::stopStreak(){
     streakScore = 0;
     multiplier = 1;
-}
-
-int ScoreHandler::getStreakScore()
-{
-	return streakScore;
 }
 
 bool wrongNotes(bool midi[], bool player[], int size){

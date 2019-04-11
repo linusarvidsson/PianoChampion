@@ -1,44 +1,18 @@
 #include "Song.hpp"
 
-// Static constant background data
-const GLfloat Song::WIDTH = 5.45f;
-const GLfloat Song::HEIGHT = 5.0f;
-
-const GLfloat Song::backgroundVertices[] = {
-    -WIDTH, -HEIGHT, -0.01f,
-    WIDTH, -HEIGHT, -0.01f,
-    -WIDTH, HEIGHT, -0.01f,
-    WIDTH, HEIGHT, -0.01f
-};
-
-const GLuint Song::backgroundIndices[] = {
-    0,1,2,2,1,3
-};
-
-const GLfloat Song::backgroundUV[] = {
-    0.0f, 1.0f,   // top-left corner
-    1.0f, 1.0f,  // top-right corner
-    0.0f, 0.0f,  // lower-left corner
-    1.0f, 0.0f,  // lower-right corner
-    
-};
-
 // Destructor. Delete VAOs and VBOs
 Song::~Song(){
     glDeleteBuffers(1, &noteVertexBuffer);
     glDeleteBuffers(1, &noteColorBuffer);
     glDeleteBuffers(1, &noteElementBuffer);
-    glDeleteBuffers(1, &backgroundVertexBuffer);
-    glDeleteBuffers(1, &backgroundUVBuffer);
-    glDeleteBuffers(1, &backgroundElementBuffer);
     
     glDeleteVertexArrays(1, &noteVAO);
-    glDeleteVertexArrays(1, &backgroundVAO);
 }
 
 
 Song::Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader){
-    backgroundShader = &textureShader;
+    background = new TextureQuad("Graphics/Images/pianoklaviatur.png", 10.9f, 10.0f, glm::vec3(0.0f, 0.0f, -0.01f), textureShader, false);
+    strikeBar = new TextureQuad("Graphics/Images/strike_bar.png", 10.0f, 1.0f, glm::vec3(0.0f, -2.5f, 0.1f), textureShader, true);
     noteShader = &colorShader;
     songTrack = &track;
     
@@ -66,7 +40,6 @@ Song::Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader){
     */
      
     initNotes();
-    initBackground();
     initPiano();
 }
 
@@ -126,12 +99,18 @@ void Song::initNotes(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, noteIndices.size() * sizeof(GLuint), &noteIndices.front(), GL_STATIC_DRAW);
 }
 
-void Song::renderNotes(){
+void Song::render(){
+    //----- Render Background-----//
+    
+    background->render();
+    
+    //----- Render Notes -----/
+    
     glUseProgram(*noteShader);
     glBindVertexArray(noteVAO);
     
     // MVP for notes. Translates notes with time.
-    glm::mat4 noteTranslation = projection * view * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime(), 0.0f)) * model;
+    glm::mat4 noteTranslation = projection * view * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime() -0.1f, 0.0f)) * model;
     
     // Send the transformation to the currently bound shader,
     glUniformMatrix4fv(glGetUniformLocation(*noteShader, "MVP"), 1, GL_FALSE, &noteTranslation[0][0]);
@@ -139,6 +118,11 @@ void Song::renderNotes(){
     glDrawElements(GL_TRIANGLES, (GLsizei)noteIndices.size(), GL_UNSIGNED_INT, NULL);
     
     glBindVertexArray(0);
+    
+    //----- Render Strike Bar & Piano -----//
+    renderPiano();
+    strikeBar->render();
+    
 }
 
 
@@ -156,9 +140,10 @@ void Song::updateNotes(bool matchingKeys[]){
     */
     
     // Update Note Color
+    double updateTime = glfwGetTime();
     for (int n = 0; n < songTrack->size(); n++){
         // Get non-triggered notes that should be played.
-        if(songTrack->note(n)->triggered == false && songTrack->note(n)->start <= glfwGetTime() - 2.5f && songTrack->note(n)->end > glfwGetTime() - 2.5f){
+        if(songTrack->note(n)->triggered == false && songTrack->note(n)->start <= updateTime - 2.5f && songTrack->note(n)->end > updateTime - 2.5f){
             
             // If the note is pressed. Update color and set to triggered.
             if( matchingKeys[songTrack->note(n)->keyNumber] ){
@@ -174,60 +159,6 @@ void Song::updateNotes(bool matchingKeys[]){
     // Bind the new data to the buffers
     glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
     glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
-}
-
-
-void Song::initBackground(){
-    //----- BACKGROUND DATA -----//
-    backgroundTexture = GraphicsTools::loadTexture("Graphics/Images/pianoklaviatur.png", false);
-    
-    //----- BACKGROUND VAO -----//
-    glGenVertexArrays(1, &backgroundVAO);
-    glBindVertexArray(backgroundVAO);
-    
-    //----- BACKGROUND VBOs -----//
-    glGenBuffers(1, &backgroundVertexBuffer);
-    glEnableVertexAttribArray(0);
-    glBindBuffer(GL_ARRAY_BUFFER, backgroundVertexBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundVertices), backgroundVertices, GL_STATIC_DRAW);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
-    // Create UV buffer
-    glGenBuffers(1, &backgroundUVBuffer);
-    glEnableVertexAttribArray(1);
-    glBindBuffer(GL_ARRAY_BUFFER, backgroundUVBuffer);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(backgroundUV), backgroundUV, GL_STATIC_DRAW);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 0, NULL);
-    // Create index buffer
-    glGenBuffers(1, &backgroundElementBuffer);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundElementBuffer);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(backgroundIndices), backgroundIndices, GL_STATIC_DRAW);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, backgroundElementBuffer);
-    
-    
-    // Send MVP transformation to backgroundShader
-    glm::mat4 MVP = projection * view * model;
-    glUseProgram(*backgroundShader);
-    glUniformMatrix4fv(glGetUniformLocation(*backgroundShader, "MVP"), 1, GL_FALSE, &MVP[0][0]);
-    
-    // Set "myTextureSampler" sampler to use Texture Unit 0
-    glUniform1i(glGetUniformLocation(*backgroundShader, "myTextureSampler"), 0);
-    
-    glBindVertexArray(0);
-}
-
-void Song::renderBackground(){
-    glUseProgram(*backgroundShader);
-    glBindVertexArray(backgroundVAO);
-    
-    // Bind texture in Texture Unit 0
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-    
-    // Draw the textured elements
-    glDrawElements(GL_TRIANGLES, sizeof(backgroundIndices), GL_UNSIGNED_INT, NULL);
-    
-    glBindVertexArray(0);
-    glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 

@@ -20,6 +20,7 @@
 
 #include "midifile/MidiTrack.hpp"
 #include "GameSystems/ScoreHandler.hpp"
+#include "MidiPlayer/cmidiin.h"
 
 #include <iostream>
 #include <fstream>
@@ -54,6 +55,7 @@ public:
     int returnSoundfont();
     
     bool playerInput[128];
+    bool matchingKeys[128];
     GLboolean Keys[1024];
     GameState State;
     double globalScore= 2;
@@ -61,9 +63,14 @@ public:
     ScoreHandler score;
     int soundfont = 0;
     
+    // Queues for MidiPlayer
     std::queue<int> playerToBeTurnedOn;
     std::queue<int> playerToBeTurnedOff;
+    
+	bool debugMode;
+
 private:
+    // Textures
     TextureQuad* logo;
     
     // Display data
@@ -77,9 +84,13 @@ private:
     MidiTrack* activeTrack;
 	int activeBPM;
 	int noteStreak = 0;
+    
     // Logic arrays for the game mechanics
     bool currentNotes[128];
-    bool matchingKeys[128];
+    
+    //Midi in
+    MidiInputReader *midiin;
+	
     
     // Menu data
     int activeElement;
@@ -96,6 +107,7 @@ private:
 	void renderSongSettings();
 	void displaySongPercent();
     void renderPostGame();
+	int notesHit();
     
     //
     void leaderboardHandler();

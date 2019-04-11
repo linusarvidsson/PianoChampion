@@ -98,7 +98,7 @@ GLuint GraphicsTools::loadShaders(const char * vertex_file_path,const char * fra
 
 
 void GraphicsTools::getResolution(int* displayWidth, int* displayHeight) {
-    const GLFWvidmode * mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
+    const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     
     *displayWidth = mode->width;
     *displayHeight = mode->height;
