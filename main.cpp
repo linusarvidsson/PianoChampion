@@ -23,20 +23,22 @@
 #include "Game.hpp"
 #include <vector>
 #include <queue>
+#include <fstream>
 
 Game KeySlayer = Game();
 sfPlayer* soundfont;
 static void audioCallback(void* data, Uint8 *stream, int len);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 bool prevPlayerInput[128] = {false};
-
+double globalScore = 0; 
 
 int main(void) {
-
     // --- Initialize soundfont --- //
     soundfont = new sfPlayer(audioCallback, "MusicLibrary/kawai.sf2");
-    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 0, false);
-    tsf_channel_set_presetnumber(soundfont->soundfont, 2, 2, false);
+    tsf_channel_set_presetnumber(soundfont->soundfont, 0, 0, false); //Piano
+    tsf_channel_set_presetnumber(soundfont->soundfont, 1, 1, false); //Super saw
+    tsf_channel_set_presetnumber(soundfont->soundfont, 2, 2, false); //Synth brass
+    tsf_channel_set_presetnumber(soundfont->soundfont, 3, 3, false); //Brighton synth
     
     //----- Window Initialization -----//
     
@@ -297,13 +299,13 @@ static void audioCallback(void* data, Uint8 *stream, int len)
     //last_time = current_time;
     
     while (!KeySlayer.playerToBeTurnedOn.empty()){
-        tsf_channel_note_on(soundfont->soundfont, 0, KeySlayer.playerToBeTurnedOn.front(), 0.7);
+        tsf_channel_note_on(soundfont->soundfont, KeySlayer.returnSoundfont(), KeySlayer.playerToBeTurnedOn.front(), 0.7);
         //std::cout << KeySlayer.playerToBeTurnedOn.front() << " ";
         KeySlayer.playerToBeTurnedOn.pop();
     }
     
     while (!KeySlayer.playerToBeTurnedOff.empty()){
-        tsf_channel_note_off(soundfont->soundfont, 0, KeySlayer.playerToBeTurnedOff.front());
+        tsf_channel_note_off(soundfont->soundfont, KeySlayer.returnSoundfont(), KeySlayer.playerToBeTurnedOff.front());
         //std::cout << KeySlayer.playerToBeTurnedOff.front() << " ";
         KeySlayer.playerToBeTurnedOff.pop();
     }

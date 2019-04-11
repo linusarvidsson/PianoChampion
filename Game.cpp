@@ -1,8 +1,12 @@
 #include "Game.hpp"
+#include <iostream>
+#include <fstream>
 // Constructor. Should be declared globally in main. Can not contain GL-related code before the window is initialized.
 Game::Game(){
     State = MAIN_MENU;
 }
+
+
 
 // Destructor
 Game::~Game(){
@@ -23,10 +27,10 @@ void Game::init(int displayWidth, int displayHeight){
     screenWidth = displayWidth;
     screenHeight = displayHeight;
     
+    
     // Default active element in menus
     activeElement = 0;
     
-    songs.reserve(6);
     // Add songs to the song list. Name, filepath, main track, BPM.
     songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 3.32, "HARD" } );
     songs.push_back( songItem{ "Piano Man", "MusicLibrary/pianoman.mid", 1, 100, 2.32, "Easy" } );
@@ -223,6 +227,7 @@ void Game::renderMainMenu(){
 }
 
 void Game::renderSongSettings() {
+   
 	if (Keys[GLFW_KEY_ENTER])
 	{
 		State = SONG_ACTIVE;
@@ -237,19 +242,25 @@ void Game::renderSongSettings() {
 
 		Keys[GLFW_KEY_ENTER] = GL_FALSE;
 	}
-
-	else if (Keys[GLFW_KEY_LEFT]) {
-		// Go to leaderboard
-		State = SONG_SELECT;
-		// Reset active element. Next menu should start at element 0.
-		
-		Keys[GLFW_KEY_LEFT] = GL_FALSE;
+    
+    if (Keys[GLFW_KEY_9]) {
+        soundfont++;
+        if(soundfont >3){
+            soundfont = 0;
+        }
+        Keys[GLFW_KEY_9] = GL_FALSE;
+    }
+   else if (Keys[GLFW_KEY_8]) {
+       soundfont--;
+       if(soundfont <0){
+           soundfont=3 ;
+       }
+       Keys[GLFW_KEY_8] = GL_FALSE;
 	}
 	else if (Keys[GLFW_KEY_UP]) {
 
 		activeBPM++;
 		Keys[GLFW_KEY_UP] = GL_FALSE;
-
 	}
 	else if (Keys[GLFW_KEY_DOWN] && activeBPM > 0) {
 
@@ -258,6 +269,15 @@ void Game::renderSongSettings() {
 
 	}
     
+    if(soundfont==0){
+        currentInstrument = "Grand Piano";
+    }else if(soundfont ==1 ){
+        currentInstrument = "Supersaw Synthesizer";
+    }else if(soundfont == 2){
+        currentInstrument = "Brass Synthesizer";
+    }else if (soundfont == 3){
+        currentInstrument = "Brighton Synthesizer";
+    }
     // Create an output string stream
     std::ostringstream streamObj;
     //Add double to stream
@@ -266,11 +286,12 @@ void Game::renderSongSettings() {
     
     standardFont->setScale(1.0f);
 	standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-	standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/2, screenHeight-100);
+	standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
+    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
     standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-    standardFont->renderText("Song Duration:" + activeElementDuration + "min", screenWidth/2, screenHeight-200);
-    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/2, screenHeight-300 );
-    standardFont->renderText("Instrument: ", screenWidth/2, screenHeight-400);
+    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-500 );
+    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-400);
+
 
 	// Draw list header
 	standardFont->setScale(1.0f);
@@ -330,4 +351,8 @@ void Game::displaySongPercent() {
 	standardFont->setColor(glm::vec3(0.6f, 0.0f, 0.0f));
 	standardFont->renderText(std::to_string(percent), 20, screenHeight - 30);
 	standardFont->renderText(" % of song completed", 55, screenHeight - 30);
+}
+
+int Game:: returnSoundfont(){
+    return soundfont;
 }
