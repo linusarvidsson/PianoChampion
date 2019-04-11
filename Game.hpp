@@ -73,7 +73,7 @@ private:
     Song* activeSong;
     MidiTrack* activeTrack;
 	int activeBPM;
-	int noteStreak = 0;
+
     // Logic arrays for the game mechanics
     bool currentNotes[128];
     bool matchingKeys[128];
@@ -93,6 +93,7 @@ private:
 	void renderSongSettings();
 	void displaySongPercent();
     void renderPostGame();
+	int notesHit();
 };
 
 #endif
