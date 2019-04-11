@@ -109,7 +109,7 @@ void Song::render(){
     glBindVertexArray(noteVAO);
     
     // MVP for notes. Translates notes with time.
-    glm::mat4 noteTranslation = projection * view * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime(), 0.0f)) * model;
+    glm::mat4 noteTranslation = projection * view * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime() -0.1f, 0.0f)) * model;
     
     // Send the transformation to the currently bound shader,
     glUniformMatrix4fv(glGetUniformLocation(*noteShader, "MVP"), 1, GL_FALSE, &noteTranslation[0][0]);
@@ -134,9 +134,10 @@ void Song::updateNotes(bool matchingKeys[]){
     */
     
     // Update Note Color
+    double updateTime = glfwGetTime();
     for (int n = 0; n < songTrack->size(); n++){
         // Get non-triggered notes that should be played.
-        if(songTrack->note(n)->triggered == false && songTrack->note(n)->start <= glfwGetTime() - 2.5f && songTrack->note(n)->end > glfwGetTime() - 2.5f){
+        if(songTrack->note(n)->triggered == false && songTrack->note(n)->start <= updateTime - 2.5f && songTrack->note(n)->end > updateTime - 2.5f){
             
             // If the note is pressed. Update color and set to triggered.
             if( matchingKeys[songTrack->note(n)->keyNumber] ){

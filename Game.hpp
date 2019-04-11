@@ -20,6 +20,7 @@
 
 #include "midifile/MidiTrack.hpp"
 #include "GameSystems/ScoreHandler.hpp"
+#include "cmidiin.h"
 
 struct songItem{
     std::string name;
@@ -50,6 +51,7 @@ public:
     int returnSoundfont();
     
     bool playerInput[128];
+    bool matchingKeys[128];
     GLboolean Keys[1024];
     GameState State;
     double globalScore= 2;
@@ -79,7 +81,9 @@ private:
     
     // Logic arrays for the game mechanics
     bool currentNotes[128];
-    bool matchingKeys[128];
+    
+    //Midi in
+    MidiInputReader *midiin;
     
     // Menu data
     int activeElement;

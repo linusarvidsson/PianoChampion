@@ -13,8 +13,20 @@
 #include <iostream>
 #include <cstdlib>
 #include <signal.h>
+#include <queue>
 #include "RtMidi.h"
 
-void initRtMidi();
+class MidiInputReader{
+private:
+public:
+    MidiInputReader();
+    ~MidiInputReader();
+    RtMidiIn* midiin;
+    std::queue<int> toBeTurnedOn;
+    std::queue<int> toBeTurnedOff;
+    bool keys[128] = {false};
+    void update();
+};
+
 #endif /* qmidiin_h */
 

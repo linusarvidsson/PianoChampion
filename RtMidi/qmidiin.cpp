@@ -1,11 +1,35 @@
 // qmidiin.cpp
 
 #include "qmidiin.h"
-bool done;
-static void finish(int ignore){ done = true; }
-void initRtMidi()
+
+MidiInputReader::MidiInputReader(){
+    midiin = new RtMidiIn();
+    midiin->openPort( 0 );
+}
+
+void MidiInputReader::update(){
+    int nBytes;
+    double stamp;
+    std::vector<unsigned char> message;
+    
+    do {
+        stamp = midiin->getMessage(&message);
+        nBytes = message.size();
+        for (int i=0; i < nBytes; i++)
+            std::cout << "Byte " << i << " = " << (int)message[i] << ", ";
+        if ( nBytes > 0 )
+            std::cout << "stamp = " << stamp << std::endl;
+    } while(stamp != 0);
+}
+
+MidiInputReader::~MidiInputReader(){
+    delete midiin;
+}
+
+/*
+void initRtMidi(RtMidiIn *midiin)
 {
-    RtMidiIn *midiin = new RtMidiIn();
+    midiin = new RtMidiIn();
     std::vector<unsigned char> message;
     int nBytes, i;
     double stamp;
@@ -35,4 +59,4 @@ void initRtMidi()
     // Clean up
 cleanup:
     delete midiin;
-}
+} */

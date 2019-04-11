@@ -27,9 +27,9 @@ void MidiInputReader:: getUserInput(){
             // Tangentbordet är korkat och togglar så vi får göra så här
             if (instruction == 144) {
                 if (playerInput[key]){
-                    playerInput[key] = false; toBeTurnedOff.push_back(key);
+                    playerInput[key] = false; toBeTurnedOff.push(key);
                 } else {
-                    playerInput[key] = true; toBeTurnedOn.push_back(key);
+                    playerInput[key] = true; toBeTurnedOn.push(key);
                 }
             }
             

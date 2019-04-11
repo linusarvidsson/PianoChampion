@@ -4,6 +4,7 @@
 // Constructor. Should be declared globally in main. Can not contain GL-related code before the window is initialized.
 Game::Game(){
     State = MAIN_MENU;
+    midiin = new MidiInputReader();
 }
 
 
@@ -94,6 +95,10 @@ void Game::render(){
 
 
 void Game::renderSong(){
+    //Update user input
+    midiin->getUserInput();
+    for (int i = 0; i < 127; i++) playerInput[i] = midiin->playerInput[i];
+    
     // Check player Input
     if(Keys[GLFW_KEY_ENTER]){
         // Switch to song state
@@ -119,7 +124,7 @@ void Game::renderSong(){
 		State = POST_GAME;
 	}
     
-    // Update ther current notes array. The notes in the track that should currently be played.
+    // Update the current notes array. The notes in the track that should currently be played.
     activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f);
     // Check if the player input matches with current notes. Update matchingKeys.
     for(int i = 0; i < 128; i++){
@@ -128,6 +133,7 @@ void Game::renderSong(){
         else
             matchingKeys[i] = false;
     }
+    
     
     // Update score
     score.scoreNotes(activeTrack, currentNotes, playerInput, glfwGetTime(), 0.03f);
