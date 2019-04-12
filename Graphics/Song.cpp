@@ -21,7 +21,7 @@ Song::Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader){
     projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
     // Camera matrix
     view = glm::lookAt(
-                       glm::vec3(0,0,9), // Camera position
+                       glm::vec3(0,0,8.5), // Camera position
                        glm::vec3(0,0,0),  // The point the camera looks at
                        glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                        );
