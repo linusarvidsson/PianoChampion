@@ -30,14 +30,15 @@ void Game::init(int displayWidth, int displayHeight){
     activeElement = 0;
     
     // Add songs to the song list. Name, filepath, main track, BPM.
-    songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 3.32, "HARD" } );
+    songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 3.32, "Easy" } );
+    songs.push_back( songItem{ "Brother Jacob", "MusicLibrary/jakob.mid", 0, 100, 3.32, "Easy" } );
     songs.push_back( songItem{ "Piano Man", "MusicLibrary/pianoman.mid", 1, 100, 2.32, "Easy" } );
     songs.push_back( songItem{ "Crab Rave", "MusicLibrary/crab_rave.mid", 0, 125 , 1.32, "Easy"} );
     songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100, 10.32, "Easy" } );
     songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 , 5.22, "Easy"} );
     songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 168, 5.12, "Easy" } );
-    songs.push_back( songItem{ "sex", "MusicLibrary/levels.mid", 0, 128, 7.32, "Easy" } );
-    songs.push_back( songItem{ "sju", "MusicLibrary/levels.mid", 0, 128, 1.11 , "Easy"} );
+    songs.push_back( songItem{ "Abril 14th", "MusicLibrary/avril.mid", 1, 17, 7.32, "Easy" } );
+    songs.push_back( songItem{ "Take On Me", "MusicLibrary/Aha_-_Take_On_Me.mid", 3, 170, 1.11 , "Easy"} );
     songs.push_back( songItem{ "atta", "MusicLibrary/levels.mid", 0, 128 , 1.52, "Easy"} );
     songs.push_back( songItem{ "nio", "MusicLibrary/levels.mid", 0, 128 , 10.32, "Easy"} );
     songs.push_back( songItem{ "tio", "MusicLibrary/levels.mid", 0, 128 , 10.32, "Easy"} );
@@ -86,8 +87,11 @@ void Game::render(){
     if(State == POST_GAME){
         renderPostGame();
     }
+    if(State == LEADERBOARD){
+        renderLeaderboard();
+    }
     // Draw Title
-    logo->render();
+   logo->render();
     
 }
 
@@ -114,15 +118,12 @@ void Game::renderMainMenu(){
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
     
-    
     // Draw list header
     standardFont->setScale(1.0f);
     standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
     standardFont->renderText("Press Enter", screenWidth/2 -180, screenHeight/2 - 300);
     
 }
-
-
 
 //-------------------------------------------//
 //--------------- SONG MENU -----------------//
@@ -183,6 +184,9 @@ void Game::renderSongMenu(){
 //------------- SONG SETTINGS ---------------//
 //-------------------------------------------//
 
+
+
+
 void Game::renderSongSettings() {
     
     if (Keys[GLFW_KEY_ENTER])
@@ -200,32 +204,7 @@ void Game::renderSongSettings() {
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
     
-    if (Keys[GLFW_KEY_9]) {
-        soundfont++;
-        if(soundfont >3){
-            soundfont = 0;
-        }
-        Keys[GLFW_KEY_9] = GL_FALSE;
-    }
-    else if (Keys[GLFW_KEY_8]) {
-        soundfont--;
-        if(soundfont <0){
-            soundfont=3 ;
-        }
-        Keys[GLFW_KEY_8] = GL_FALSE;
-    }
-    else if (Keys[GLFW_KEY_UP]) {
-        
-        activeBPM++;
-        Keys[GLFW_KEY_UP] = GL_FALSE;
-    }
-    else if (Keys[GLFW_KEY_DOWN] && activeBPM > 0) {
-        
-        activeBPM--;
-        Keys[GLFW_KEY_DOWN] = GL_FALSE;
-        
-    }
-    else if (Keys[GLFW_KEY_BACKSPACE])
+    if (Keys[GLFW_KEY_BACKSPACE])
     {
         State = SONG_SELECT;
         Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
@@ -247,17 +226,94 @@ void Game::renderSongSettings() {
     std::string activeElementDuration = streamObj.str();
     
     standardFont->setScale(1.0f);
-    standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
+
+    /////////////////////////////////
+    
+        if(Keys[GLFW_KEY_DOWN]){
+            i++;
+            if(i >2){
+                i = 0;
+            }
+            Keys[GLFW_KEY_DOWN] = GL_FALSE;
+        }
+        if(Keys[GLFW_KEY_UP]){
+            i--;
+            if(i <0){
+                i = 2;
+            }
+            Keys[GLFW_KEY_UP] = GL_FALSE;
+        }
+        if(i == 0){
+        standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
+        standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
+        standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
+            
+            if (Keys[GLFW_KEY_RIGHT]) {
+                
+                activeBPM++;
+                Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+            }
+            else if (Keys[GLFW_KEY_LEFT] && activeBPM > 0) {
+                
+                activeBPM--;
+                Keys[GLFW_KEY_LEFT] = GL_FALSE;
+                
+            }
+        }
+    
+        if(i == 1){
+            standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
+            standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
+            standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
+        
+            if (Keys[GLFW_KEY_RIGHT]){
+                soundfont++;
+                if(soundfont >3){
+                    soundfont = 0;
+                }
+                Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+            }
+            else if (Keys[GLFW_KEY_LEFT]) {
+                soundfont--;
+                if(soundfont <0){
+                    soundfont=3 ;
+                }
+                Keys[GLFW_KEY_LEFT] = GL_FALSE;
+            }
+                                    
+        }
+    
+            if(i == 2){
+            standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
+            standardFont->renderText("leaderboards ", screenWidth/3, screenHeight-400);
+            standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
+                if (Keys[GLFW_KEY_RIGHT]){
+                    State = LEADERBOARD;
+                    
+                    Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+                }
+        }
+    if(Keys[GLFW_KEY_ENTER]){
+        i = 4;
+        Keys[GLFW_KEY_ENTER] = false;
+    }
+    
+
+    standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
     standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
     standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
-    standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-500 );
-    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-400);
+    standardFont->renderText("leaderboards ", screenWidth/3, screenHeight-400);
+    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-600 );
+    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-500);
+    standardFont->setColor(glm::vec3(0.00 ,0.2 * sin(glfwGetTime()), 0.2 ));
+
     
     // Draw list header
     standardFont->setScale(1.0f);
     standardFont->setColor(glm::vec3(0.3f, 0.7f, 0.9f));
     standardFont->renderText("SONG OPTIONS", 20, screenHeight - screenHeight / 10);
+    
+    /////////////////////////////////////////
     
     // Draw song list
     standardFont->setColor(glm::vec3(0.3,0.3,0.3));
@@ -276,6 +332,22 @@ void Game::renderSongSettings() {
     
 }
 
+//-------------------------------------------//
+//--------------- LEADERBOARD -----------------//
+//-------------------------------------------//
+void Game:: renderLeaderboard(){
+    standardFont->setScale(1.0f);
+    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
+    standardFont->renderText(songs[activeElement].name +" Leaderboard", screenWidth/2 -180, screenHeight/2 + 400);
+    std::fstream readerFile;
+    readerFile.open("Leaderboards/" + songs[activeElement].name +".txt", std::ios::in);
+    std:: string line;
+    int i = 0;
+    while(std::getline(readerFile, line)){
+        standardFont->renderText(line, screenWidth/2 -180, screenHeight/2 +350- i);
+        i= i + 50;
+    }
+}
 
 
 //-------------------------------------------//
@@ -306,7 +378,7 @@ void Game::renderSong(){
     }
     
     // Update the current notes array. The notes in the track that should currently be played.
-    activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f);
+    activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f); 
     // Check if the player input matches with current notes. Update matchingKeys.
     for(int i = 0; i < 128; i++){
         if(playerInput[i] && currentNotes[i])
@@ -350,13 +422,11 @@ void Game::renderSong(){
     standardFont->renderText(std::to_string(score.getMultiplier()), 20, screenHeight - 180);
 }
 
-
-
 //-------------------------------------------//
 //--------------- POST GAME -----------------//
 //-------------------------------------------//
-
 void Game:: renderPostGame(){
+    
     if (Keys[GLFW_KEY_ENTER]){
         leaderboardHandler();
         State = SONG_SELECT;
@@ -366,6 +436,15 @@ void Game:: renderPostGame(){
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
+    if (Keys[GLFW_KEY_X]){
+        leaderboardHandler();
+        State = LEADERBOARD;
+        glfwSetTime(0);
+        activeElement = 0;
+        score.reset();
+        
+        Keys[GLFW_KEY_X] = GL_FALSE;
+    }
     
     standardFont->setColor(glm::vec3(0.6f, 0.4f, 0.8f));
     standardFont->setScale(1.0f);
@@ -374,6 +453,12 @@ void Game:: renderPostGame(){
     standardFont->renderText("Notes Hit: " + std::to_string(notesHit()) +"%", 20, screenHeight - 500);
 }
 
+
+
+//-------------------------------------------//
+//------------- OTHER FUNCTIONS -------------//
+//-------------------------------------------//
+
 void Game:: leaderboardHandler(){
     std::fstream file;
     std:: string line;
@@ -381,10 +466,6 @@ void Game:: leaderboardHandler(){
     file << std::endl <<score.getScore() ;
     
 }
-
-//-------------------------------------------//
-//------------- OTHER FUNCTIONS -------------//
-//-------------------------------------------//
 
 void Game::displaySongPercent() {
     

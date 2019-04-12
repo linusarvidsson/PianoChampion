@@ -40,7 +40,8 @@ enum GameState{
     SONG_SELECT,
 	SONG_SETTINGS,
     SONG_ACTIVE,
-    POST_GAME
+    POST_GAME,
+    LEADERBOARD
     
 };
 
@@ -90,7 +91,7 @@ private:
     
     //Midi in
     MidiInputReader *midiin;
-	
+	    int i = 0;
     
     // Menu data
     int activeElement;
@@ -107,6 +108,8 @@ private:
 	void renderSongSettings();
 	void displaySongPercent();
     void renderPostGame();
+    void renderLeaderboard();
+    
 	int notesHit();
     void leaderboardHandler();
 
