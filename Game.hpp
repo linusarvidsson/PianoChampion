@@ -16,6 +16,7 @@
 #include "Graphics/Font.hpp"
 #include "Graphics/Song.hpp"
 #include "Graphics/GraphicsTools.hpp"
+#include "Graphics/Particle_Generator.h"
 
 #include "midifile/MidiTrack.hpp"
 #include "GameSystems/ScoreHandler.hpp"
@@ -45,11 +46,13 @@ public:
     ~Game();
     
     void init(int displayWidth, int displayHeight);
-    void render();
+    void render(GLfloat dt);
     
     bool playerInput[128];
     GLboolean Keys[1024];
     GameState State;
+
+	GLboolean ParticlesActive;
     
     ScoreHandler score;
     
@@ -59,7 +62,10 @@ public:
 private:
     // Display data
     int screenWidth, screenHeight;
-    GLuint colorShader, textureShader;
+    GLuint colorShader, textureShader, particleTexture, particleShader;
+
+	//Particles
+	ParticleGenerator *Particles;
     
     // Song data
     std::vector<songItem> songs;
@@ -81,7 +87,7 @@ private:
     
     // Render functions
     void renderSongMenu();
-    void renderSong();
+    void renderSong(GLfloat dt);
     void renderMainMenu();
 	void renderSongSettings();
 	void displaySongPercent();

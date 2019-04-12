@@ -11,6 +11,7 @@ Game::~Game(){
     delete songFont;
     delete activeSong;
     delete activeTrack;
+	delete Particles;
     
     // Delete shader programs
     glDeleteProgram(colorShader);
@@ -53,24 +54,35 @@ void Game::init(int displayWidth, int displayHeight){
     // Color shader is mainly used in the class Song for rendering the notes.
     colorShader = GraphicsTools::loadShaders( "Graphics/Shaders/ColorVertexShader.vertexshader", "Graphics/Shaders/ColorFragmentShader.fragmentshader" );
     // Texture shader is used for all textured objects. The background is rendered with this shader.
-    textureShader = GraphicsTools::loadShaders( "Graphics/Shaders/TextureVertexShader.vertexshader", "Graphics/Shaders/TextureFragmentShader.fragmentshader" );
     
+	//GraphicsTools::LoadShaderBreakout("Graphics/Shaders/particle.vx", "Graphics/Shaders/particle.frag", nullptr, "particle");
+	//GraphicsTools::GetShader("particle").Use().SetInteger("sprite", 0);
+	//glm::mat4 projection = glm::ortho(0.0f, static_cast<GLfloat>(screenWidth), static_cast<GLfloat>(screenHeight), 0.0f, -1.0f, 1.0f);
+	//GraphicsTools::GetShader("particle").SetMatrix4("projection", projection);
+	particleTexture = GraphicsTools::loadTexture("Graphics/Images/syntesia_bakgrund-01.png");
+
+	particleShader = GraphicsTools::loadShaders("Graphics/Shaders/particle.vx", "Graphics/Shaders/particle.frag");
+
+	Particles = new ParticleGenerator(&particleShader, &particleTexture, 500, 1);
+
     // Initialize the standard font for the game
     standardFont = new Font("Graphics/Fonts/neon.ttf", textShader, screenWidth, screenHeight);
     songFont = new Font("Graphics/Fonts/neon.ttf", textShader, screenWidth, screenHeight);
+
+	ParticlesActive = true;
 }
 
 
 //----- RENDER FUNCTIONS -----//
 
 // The main rendering function. Calls other rendering functions depending on what game state is active.
-void Game::render(){
+void Game::render(GLfloat dt){
     if(State == MAIN_MENU){
         renderMainMenu();
     }
     if(State == SONG_ACTIVE){
         // Render the song
-        renderSong();
+        renderSong(dt);
     }
     if(State == SONG_SELECT){
         // Render the song menu
@@ -91,7 +103,7 @@ void Game::render(){
 
 
 
-void Game::renderSong(){
+void Game::renderSong(GLfloat dt){
     // Check player Input
     if(Keys[GLFW_KEY_ENTER]){
         // Switch to song state
@@ -105,10 +117,16 @@ void Game::renderSong(){
 		Keys[GLFW_KEY_9] = GL_FALSE;
 	}
     activeSong->updateNotes(matchingKeys);
-    activeSong->renderBackground();
+    //activeSong->renderBackground();
     activeSong->renderNotes();
     activeSong->renderPiano();
     activeSong->updatePiano(playerInput);
+
+	// Update particles
+	glm::vec2 particlePos = glm::vec2(0.0f, 0.0f);
+	Particles->Update(dt, particlePos, 5, ParticlesActive);
+	// Draw particles	
+	Particles->Draw();
 
 	displaySongPercent();
 

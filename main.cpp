@@ -12,6 +12,7 @@
 #include "Graphics/GraphicsTools.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
+
 #include "Graphics/stb_image.h"
 
 // MidiPlayer libraries
@@ -93,6 +94,10 @@ int main(void) {
 
     //----- SETUP -----//
     KeySlayer.init(screenWidth, screenHeight);
+
+	// DeltaTime variables
+	GLfloat deltaTime = 0.0f;
+	GLfloat lastFrame = 0.0f;
     
 
     do{
@@ -103,12 +108,16 @@ int main(void) {
                 KeySlayer.playerToBeTurnedOff.push(i);
             prevPlayerInput[i] = KeySlayer.playerInput[i];
         }
+
+		GLfloat currentFrame = glfwGetTime();
+		deltaTime = currentFrame - lastFrame;
+		lastFrame = currentFrame;
         
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         
         // Render
-        KeySlayer.render();
+        KeySlayer.render(deltaTime);
         
         // Swap front and back buffers
         glfwSwapBuffers(window);
