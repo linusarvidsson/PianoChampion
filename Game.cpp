@@ -504,7 +504,7 @@ void Game:: leaderboardHandler(){
     std::fstream file;
     std:: string line;
     file.open("Leaderboards/"+ songs[activeElement].name + ".txt",std::ios_base::app);
-    file << std::endl <<score.getScore() ;
+    file << std::endl << playerName << ": " <<score.getScore() ;
     
 }
 
