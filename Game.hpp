@@ -76,13 +76,14 @@ private:
     
     // Display data
     int screenWidth, screenHeight;
+    glm::mat4 projection, view;
     GLuint colorShader, textureShader;
-    std:: string currentInstrument = "Piano";
     
     // Song data
     std::vector<songItem> songs;
     Song* activeSong;
     MidiTrack* activeTrack;
+    std:: string currentInstrument = "Piano";
 	int activeBPM;
 	int noteStreak = 0;
     
@@ -96,6 +97,10 @@ private:
     // Menu data
     int activeElement;
 
+	//Stats data
+	char alfaBet = 'A';
+	std::string playerName;
+    
     // Font data
     GLuint textShader;
     Font* standardFont;

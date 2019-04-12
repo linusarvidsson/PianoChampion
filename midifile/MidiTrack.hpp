@@ -14,16 +14,7 @@ struct MidiNote {
 };
 
 class MidiTrack{
-private:
-    //std::string trackPath;
-    int trackNumber;
-    int numNotes;
-    int trackTPQ;
-    int trackBPM;
-    float trackTPS;
-
-    std::vector<MidiNote> trackNotes;
-
+    
 public:
     MidiTrack(const std::string& filename, int track, int BPM);
     MidiTrack();
@@ -33,9 +24,10 @@ public:
     int bpm();
     void bpm(int BPM);
     float tps();
-    double duration(); 
+    double duration();
     
     MidiNote* note(int index);
+    void setStartOffset(double offset);
     void updateCurrentNotes(bool currentNotes[], double time);
     void updateQueues(double last_time, double current_time);
     int searchNote(double time, int key);
@@ -49,6 +41,18 @@ public:
     
     std::vector<int> toBeTurnedOn;
     std::vector<int> toBeTurnedOff;
+    
+private:
+    //std::string trackPath;
+    int trackNumber;
+    int numNotes;
+    int trackTPQ;
+    int trackBPM;
+    float trackTPS;
+
+    std::vector<MidiNote> trackNotes;
+
+
 };
 
 #endif
