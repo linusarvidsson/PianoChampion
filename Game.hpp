@@ -91,6 +91,10 @@ private:
     
     // Menu data
     int activeElement;
+
+	//Stats data
+	char alfaBet = 'A';
+	std::string playerName;
     
     // Font data
     GLuint textShader;

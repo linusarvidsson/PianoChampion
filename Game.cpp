@@ -374,6 +374,7 @@ void Game:: renderPostGame(){
         glfwSetTime(0);
         activeElement = 0;
         score.reset();
+		playerName = "";
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
@@ -383,6 +384,35 @@ void Game:: renderPostGame(){
     standardFont->renderText("Post Game Screen", 20, screenHeight - 100);
     standardFont->renderText("Score: " + std:: to_string(score.getScore()), 20, screenHeight - 300);
 	standardFont->renderText("Notes Hit: " + std::to_string(notesHit()) +"%", 20, screenHeight - 500);
+
+	
+	if (Keys[GLFW_KEY_UP]) {
+		if (alfaBet > 'A')
+		{
+			alfaBet--;
+		}
+		Keys[GLFW_KEY_UP] = GL_FALSE;
+	}
+	else if (Keys[GLFW_KEY_DOWN]) {
+		if (alfaBet < 'Z' )
+		{
+			alfaBet++;
+		}
+		Keys[GLFW_KEY_DOWN] = GL_FALSE;
+	}
+	std::cout << alfaBet;
+	std::string s(1, alfaBet);
+	if (playerName.size() < 11)
+	{
+		if (Keys[GLFW_KEY_RIGHT])
+		{
+			playerName += s;
+			Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+			alfaBet = 'A';
+		}
+	}
+	standardFont->renderText("Name: " + playerName + s, 20, screenHeight - 700);
+	
 }
 
 
