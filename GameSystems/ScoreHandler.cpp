@@ -28,7 +28,6 @@ void ScoreHandler::scoreNotes(MidiTrack* track, bool midi[], bool player[], floa
     } else {
         streakScore = 0;
     }
-    
     score += multiplier*points;
     
     //Update multiplier
@@ -37,16 +36,17 @@ void ScoreHandler::scoreNotes(MidiTrack* track, bool midi[], bool player[], floa
     } else {
         streakScore = 0;
     }
-    
     multiplier = 1 + round((float)streakScore / (float)500);
     if (multiplier > 4) multiplier = 4;
     
     //Add bonus notes
-    int bonusNote;
-    for (int i = 0; i < 127; i++){
-        if (player[i]){
-            bonusNote = track->availableForBonus(time, i);
-            if (bonusNote != 0) score += 300;
+    if (!wrongNotes(midi, player, 127)){
+        int bonusNote;
+        for (int i = 0; i < 127; i++){
+            if (player[i]){
+                bonusNote = track->availableForBonus(time, i);
+                if (bonusNote != 0) score += 300;
+            }
         }
     }
 }

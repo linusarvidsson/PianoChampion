@@ -46,8 +46,11 @@ void Game::init(int displayWidth, int displayHeight){
     songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100, 10.32, "Easy" } );
     songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 , 5.22, "Easy"} );
     songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 168, 5.12, "Easy" } );
-    songs.push_back( songItem{ "Abril 14th", "MusicLibrary/avril.mid", 1, 17, 7.32, "Easy" } );
-    songs.push_back( songItem{ "Take On Me", "MusicLibrary/Aha_-_Take_On_Me.mid", 3, 170, 1.11 , "Easy"} );
+    songs.push_back( songItem{ "Megalovania", "MusicLibrary/megalovania.mid", 0, 120 , 10.32, "Easy"} );
+    songs.push_back( songItem{ "Pirates of the Caribbean", "MusicLibrary/pirates.mid", 0, 120 , 10.32, "Easy"} );
+    songs.push_back( songItem{ "Can't Help Falling in Love", "MusicLibrary/cant_help_falling_in_love.mid", 0, 120 , 10.32, "Easy"} );
+    songs.push_back( songItem{ "sex", "MusicLibrary/levels.mid", 0, 128, 7.32, "Easy" } );
+    songs.push_back( songItem{ "sju", "MusicLibrary/levels.mid", 0, 128, 1.11 , "Easy"} );
     songs.push_back( songItem{ "atta", "MusicLibrary/levels.mid", 0, 128 , 1.52, "Easy"} );
     songs.push_back( songItem{ "nio", "MusicLibrary/levels.mid", 0, 128 , 10.32, "Easy"} );
     songs.push_back( songItem{ "tio", "MusicLibrary/levels.mid", 0, 128 , 10.32, "Easy"} );

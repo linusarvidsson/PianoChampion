@@ -194,7 +194,7 @@ void Song::initPiano(){
         }
         else{
             for (int vertex = 0; vertex < 4; vertex++){
-                pianoKeyColors.push_back( glm::vec3(1.0f, 1.0f, 1.0f) );
+                pianoKeyColors.push_back( glm::vec3(0.2f, 0.2f, 0.2f) ); //Was white
             }
         }
         
@@ -254,9 +254,9 @@ void Song::updatePiano(bool playerInput[]){
         if(playerInput[key]){
             for(int v = 0; v < 4; v++){
                 if(black[key])
-                    pianoKeyColors[4*key + v] = glm::vec3(0.3f, 0.3f, 0.3f);
+                    pianoKeyColors[4*key + v] = glm::vec3(0.2f, 0.2f, 0.2f); //Was 0.1
                 else
-                    pianoKeyColors[4*key + v] = glm::vec3(0.6f, 0.6f, 0.6f);
+                    pianoKeyColors[4*key + v] = glm::vec3(0.3f, 0.3f, 0.3f); //Was 0.6
             }
         }
         else{
@@ -264,7 +264,7 @@ void Song::updatePiano(bool playerInput[]){
                 if(black[key])
                     pianoKeyColors[4*key + v] = glm::vec3(0.0f, 0.0f, 0.0f);
                 else
-                    pianoKeyColors[4*key + v] = glm::vec3(1.0f, 1.0f, 1.0f);
+                    pianoKeyColors[4*key + v] = glm::vec3(0.1f, 0.1f, 0.1f); //Was white
             }
         }
     }
