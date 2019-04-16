@@ -145,7 +145,7 @@ void Game::renderSongMenu(){
         // Switch to song state
         State = SONG_SETTINGS;
         activeBPM = songs[activeElement].bpm;
-        
+		defaultBPM = songs[activeElement].bpm;
         // Reset active element. Next menu should start at element 0.
         //activeElement = 0;
         
@@ -256,17 +256,51 @@ void Game::renderSongSettings() {
         }
         if(i == 0){
         standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-        standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
+        standardFont->renderText("Speed: " + difficulty, screenWidth/3, screenHeight-200);
         standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-            
+        
+		
             if (Keys[GLFW_KEY_RIGHT]) {
-                
-                activeBPM++;
+
+				j++;
+
+				if (j == 1)
+				{
+					activeBPM = defaultBPM*0.75;
+					difficulty = "SLOWER";
+				}
+				else if (j == 2)
+				{
+					activeBPM = defaultBPM*0.5;
+					difficulty = "SLOWEST";
+				}
+				else if (j > 2) {
+					activeBPM = defaultBPM*0.5;
+					j = 2;
+				}
+				
                 Keys[GLFW_KEY_RIGHT] = GL_FALSE;
             }
             else if (Keys[GLFW_KEY_LEFT] && activeBPM > 0) {
+
+				j--;
                 
-                activeBPM--;
+				if (j <= 0) {
+					activeBPM = defaultBPM;
+					difficulty = "NORMAL";
+					j = 0;
+				}
+				else if (j == 1)
+				{
+					activeBPM = defaultBPM*0.75;
+					difficulty = "SLOWER";
+				}
+				else if (j == 2)
+				{
+					activeBPM = defaultBPM*0.5;
+					difficulty = "SLOWEST";
+				}
+				
                 Keys[GLFW_KEY_LEFT] = GL_FALSE;
                 
             }
@@ -311,7 +345,7 @@ void Game::renderSongSettings() {
     
 
     standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-    standardFont->renderText("BPM:" + std::to_string(activeBPM), screenWidth/3, screenHeight-200);
+    standardFont->renderText("Speed: " + difficulty, screenWidth/3, screenHeight-200);
     standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
     standardFont->renderText("leaderboards ", screenWidth/3, screenHeight-400);
     standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-600 );
@@ -479,7 +513,7 @@ void Game:: renderPostGame(){
 		}
 		Keys[GLFW_KEY_DOWN] = GL_FALSE;
 	}
-	std::cout << alfaBet;
+	
 	std::string s(1, alfaBet);
 	if (playerName.size() < 11)
 	{

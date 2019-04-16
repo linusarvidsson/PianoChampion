@@ -85,17 +85,20 @@ private:
     MidiTrack* activeTrack;
     std:: string currentInstrument = "Piano";
 	int activeBPM;
-	int noteStreak = 0;
+	int defaultBPM;
     
     // Logic arrays for the game mechanics
     bool currentNotes[128];
     
     //Midi in
     MidiInputReader *midiin;
-	    int i = 0;
-    
+
+	int i = 0;
+	
     // Menu data
     int activeElement;
+	int j = 0;
+	std::string difficulty = "NORMAL";
 
 	//Stats data
 	char alfaBet = 'A';
