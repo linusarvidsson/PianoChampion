@@ -22,6 +22,10 @@
 #include "GameSystems/ScoreHandler.hpp"
 #include "MidiPlayer/cmidiin.h"
 
+#include <iostream>
+#include <fstream>
+#include <sstream>
+
 struct songItem{
     std::string name;
     std::string filepath;
@@ -36,7 +40,8 @@ enum GameState{
     SONG_SELECT,
 	SONG_SETTINGS,
     SONG_ACTIVE,
-    POST_GAME
+    POST_GAME,
+    LEADERBOARD
     
 };
 
@@ -80,17 +85,20 @@ private:
     MidiTrack* activeTrack;
     std:: string currentInstrument = "Piano";
 	int activeBPM;
-	int noteStreak = 0;
+	int defaultBPM;
     
     // Logic arrays for the game mechanics
     bool currentNotes[128];
     
     //Midi in
     MidiInputReader *midiin;
+
+	int i = 0;
 	
-    
     // Menu data
     int activeElement;
+	int j = 0;
+	std::string difficulty = "NORMAL";
 
 	//Stats data
 	char alfaBet = 'A';
@@ -108,7 +116,11 @@ private:
 	void renderSongSettings();
 	void displaySongPercent();
     void renderPostGame();
+    void renderLeaderboard();
+    
 	int notesHit();
+    void leaderboardHandler();
+
 };
 
 #endif
