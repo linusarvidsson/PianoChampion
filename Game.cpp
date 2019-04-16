@@ -144,7 +144,7 @@ void Game::renderMainMenu(){
 // Render function for the song menu
 void Game::renderSongMenu(){
     // Check player Input
-    if(Keys[GLFW_KEY_ENTER]){
+    if(Keys[GLFW_KEY_RIGHT]){
         // Switch to song state
         State = SONG_SETTINGS;
         activeBPM = songs[activeElement].bpm;
@@ -152,7 +152,7 @@ void Game::renderSongMenu(){
         // Reset active element. Next menu should start at element 0.
         //activeElement = 0;
         
-        Keys[GLFW_KEY_ENTER] = GL_FALSE;
+        Keys[GLFW_KEY_RIGHT] = GL_FALSE;
     }
     else if(activeElement > 0 && Keys[GLFW_KEY_UP]) {
         // Go up the list
@@ -188,6 +188,30 @@ void Game::renderSongMenu(){
             standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
         }
     }
+
+	// Create an output string stream
+	std::ostringstream streamObj;
+	//Add double to stream
+	streamObj << std::fixed << std::setprecision(2) << songs[activeElement].duration;
+	std::string activeElementDuration = streamObj.str();
+
+	standardFont->setColor(glm::vec3(sin*0.827f + (1 - sin)*0.015f, sin*0.023f + (1 - sin)*0.517f, 1.0f));
+	standardFont->renderText(songs[activeElement].name, screenWidth / 3+200, screenHeight - 216);
+	standardFont->renderText(songs[activeElement].difficulty, screenWidth / 3 + 400, screenHeight - 316);
+	standardFont->renderText(activeElementDuration + "M", screenWidth / 3+200, screenHeight - 316);
+
+	//DRAW leaderboard
+	standardFont->setScale(1.0f);
+	standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
+	standardFont->renderText("Leaderboard", screenWidth / 3 + 200, screenHeight - 416);
+	std::fstream readerFile;
+	readerFile.open("Leaderboards/" + songs[activeElement].name + ".txt", std::ios::in);
+	std::string line;
+	int i = 0;
+	while (std::getline(readerFile, line)) {
+		standardFont->renderText(line, screenWidth / 3 + 200, screenHeight - 416 - i);
+		i = i + 50;
+	}
 }
 
 
@@ -201,7 +225,7 @@ void Game::renderSongMenu(){
 
 void Game::renderSongSettings() {
     
-    if (Keys[GLFW_KEY_ENTER])
+    /*if (Keys[GLFW_KEY_ENTER])
     {
         State = SONG_ACTIVE;
         
@@ -216,12 +240,12 @@ void Game::renderSongSettings() {
         glfwSetTime(0);
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
-    }
+    }*/
     
-    if (Keys[GLFW_KEY_BACKSPACE])
+    if (Keys[GLFW_KEY_LEFT])
     {
         State = SONG_SELECT;
-        Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
+        Keys[GLFW_KEY_LEFT] = GL_FALSE;
     }
     
     if(soundfont==0){
@@ -242,6 +266,8 @@ void Game::renderSongSettings() {
     standardFont->setScale(1.0f);
 
     /////////////////////////////////
+	float sin = glm::sin(0.3*glfwGetTime());
+	sin *= sin;
     
         if(Keys[GLFW_KEY_DOWN]){
             i++;
@@ -258,9 +284,10 @@ void Game::renderSongSettings() {
             Keys[GLFW_KEY_UP] = GL_FALSE;
         }
         if(i == 0){
-        standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-        standardFont->renderText("Speed: " + difficulty, screenWidth/3, screenHeight-200);
-        standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
+			
+		standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+		standardFont->renderText("Speed: " + difficulty, screenWidth / 3, screenHeight - 350);
+        standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
         
 		
             if (Keys[GLFW_KEY_RIGHT]) {
@@ -278,40 +305,19 @@ void Game::renderSongSettings() {
 					difficulty = "SLOWEST";
 				}
 				else if (j > 2) {
-					activeBPM = defaultBPM*0.5;
-					j = 2;
-				}
-				
-                Keys[GLFW_KEY_RIGHT] = GL_FALSE;
-            }
-            else if (Keys[GLFW_KEY_LEFT] && activeBPM > 0) {
-
-				j--;
-                
-				if (j <= 0) {
 					activeBPM = defaultBPM;
 					difficulty = "NORMAL";
 					j = 0;
 				}
-				else if (j == 1)
-				{
-					activeBPM = defaultBPM*0.75;
-					difficulty = "SLOWER";
-				}
-				else if (j == 2)
-				{
-					activeBPM = defaultBPM*0.5;
-					difficulty = "SLOWEST";
-				}
 				
-                Keys[GLFW_KEY_LEFT] = GL_FALSE;
-                
+                Keys[GLFW_KEY_RIGHT] = GL_FALSE;
             }
+        
         }
     
         if(i == 1){
-            standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-            standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
+			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+			standardFont->renderText("Instrument: " + currentInstrument, screenWidth / 3, screenHeight - 450);
             standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
         
             if (Keys[GLFW_KEY_RIGHT]){
@@ -321,39 +327,41 @@ void Game::renderSongSettings() {
                 }
                 Keys[GLFW_KEY_RIGHT] = GL_FALSE;
             }
-            else if (Keys[GLFW_KEY_LEFT]) {
-                soundfont--;
-                if(soundfont <0){
-                    soundfont=3 ;
-                }
-                Keys[GLFW_KEY_LEFT] = GL_FALSE;
-            }
                                     
         }
+		if (i == 2) {
+			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+			standardFont->renderText("PLAY", screenWidth / 3, screenHeight - 550);
+			if (Keys[GLFW_KEY_RIGHT])
+			{
+				State = SONG_ACTIVE;
+
+				// Load new selected song
+				delete activeTrack;
+				delete activeSong;
+				activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
+				activeSong = new Song(*activeTrack, colorShader, textureShader);
+				// Lengthens the start of track notes. Has to be done after creation of Song.
+				activeTrack->setStartOffset(0.1);
+				// Reset time
+				glfwSetTime(0);
+
+				Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+			}
+		}
     
-            if(i == 2){
-            standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-            standardFont->renderText("Leaderboard", screenWidth/3, screenHeight-400);
-            standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-                if (Keys[GLFW_KEY_RIGHT]){
-                    State = LEADERBOARD;
-                    
-                    Keys[GLFW_KEY_RIGHT] = GL_FALSE;
-                }
-        }
-    if(Keys[GLFW_KEY_ENTER]){
+    /*if(Keys[GLFW_KEY_ENTER]){
         i = 4;
         Keys[GLFW_KEY_ENTER] = false;
-    }
-    
-
-    standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
-    standardFont->renderText("Speed: " + difficulty, screenWidth/3, screenHeight-200);
-    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
-    standardFont->renderText("Leaderboard", screenWidth/3, screenHeight-400);
-    standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-600 );
-    standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-500);
-    standardFont->setColor(glm::vec3(0.00 ,0.2 * sin(glfwGetTime()), 0.2 ));
+    }*/
+	
+	standardFont->setColor(glm::vec3(sin*0.827f + (1 - sin)*0.015f, sin*0.023f + (1 - sin)*0.517f, 1.0f));
+	standardFont->renderText(songs[activeElement].name, screenWidth / 3, screenHeight - 100);
+    standardFont->renderText("Speed: " + difficulty, screenWidth/3, screenHeight-350);
+    standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-450);
+	standardFont->renderText("PLAY", screenWidth / 3, screenHeight - 550);
+    standardFont->renderText(songs[activeElement].difficulty, screenWidth/3+200, screenHeight-200 );
+    standardFont->renderText(activeElementDuration + "M", screenWidth/3, screenHeight-200);
 
     
     // Draw list header
@@ -370,7 +378,7 @@ void Game::renderSongSettings() {
         // Highlight active element in list
         if(i >= listLocation*8 && i  < (listLocation+1)*8){
             if(i==activeElement){
-                standardFont->setColor(glm::vec3(0.85 + sin(glfwGetTime())/4 ,0.00, 0.2 ));
+				standardFont->setColor(glm::vec3(sin*0.827f + (1 - sin)*0.015f, sin*0.023f + (1 - sin)*0.517f, 1.0f));
                 standardFont->renderText(songs[activeElement].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
                 standardFont->setColor(glm::vec3(0.3,0.3,0.3));
             }
