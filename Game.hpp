@@ -99,6 +99,7 @@ private:
     int activeElement;
 	int j = 0;
 	std::string difficulty = "NORMAL";
+	std::string hands = "BOTH";
 
 	//Stats data
 	char alfaBet = 'A';

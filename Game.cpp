@@ -149,6 +149,7 @@ void Game::renderSongMenu(){
         State = SONG_SETTINGS;
         activeBPM = songs[activeElement].bpm;
 		defaultBPM = songs[activeElement].bpm;
+		i = 0;
         // Reset active element. Next menu should start at element 0.
         //activeElement = 0;
         
@@ -247,6 +248,8 @@ void Game::renderSongSettings() {
     if (Keys[GLFW_KEY_LEFT])
     {
         State = SONG_SELECT;
+		difficulty = "NORMAL";
+		hands = "BOTH";
         Keys[GLFW_KEY_LEFT] = GL_FALSE;
     }
     
@@ -273,15 +276,17 @@ void Game::renderSongSettings() {
     
         if(Keys[GLFW_KEY_DOWN]){
             i++;
-            if(i >2){
+            if(i >3){
                 i = 0;
+				j = 0;
             }
             Keys[GLFW_KEY_DOWN] = GL_FALSE;
         }
         if(Keys[GLFW_KEY_UP]){
             i--;
             if(i <0){
-                i = 2;
+                i = 3;
+				j = 0;
             }
             Keys[GLFW_KEY_UP] = GL_FALSE;
         }
@@ -331,9 +336,38 @@ void Game::renderSongSettings() {
             }
                                     
         }
-		if (i == 2) {
+		if (i == 2)
+		{
 			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-			standardFont->renderText("PLAY", screenWidth / 3, screenHeight - 550);
+			standardFont->renderText("Hands: " + hands, screenWidth / 3, screenHeight - 550);
+			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+
+
+			if (Keys[GLFW_KEY_RIGHT]) {
+
+				j++;
+
+				if (j == 1){
+
+					hands = "LEFT";
+				}
+				else if (j == 2)
+				{
+					
+					hands = "RIGHT";
+				}
+				else if (j > 2) {
+					
+					hands = "BOTH";
+					j = 0;
+				}
+
+				Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+			}
+		}
+		if (i == 3) {
+			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+			standardFont->renderText("PLAY", screenWidth / 3, screenHeight - 650);
 			if (Keys[GLFW_KEY_RIGHT])
 			{
 				State = SONG_ACTIVE;
@@ -361,7 +395,8 @@ void Game::renderSongSettings() {
 	standardFont->renderText(songs[activeElement].name, screenWidth / 3, screenHeight - 100);
     standardFont->renderText("Speed: " + difficulty, screenWidth/3, screenHeight-350);
     standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-450);
-	standardFont->renderText("PLAY", screenWidth / 3, screenHeight - 550);
+	standardFont->renderText("Hands: " + hands, screenWidth / 3, screenHeight - 550);
+	standardFont->renderText("PLAY", screenWidth / 3, screenHeight - 650);
     standardFont->renderText(songs[activeElement].difficulty, screenWidth/3+200, screenHeight-200 );
     standardFont->renderText(activeElementDuration + "M", screenWidth/3, screenHeight-200);
 
