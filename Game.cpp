@@ -183,9 +183,11 @@ void Game::renderSongMenu(){
             if(i == activeElement){
                 standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
                 standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
+				standardFont->renderText(">" , screenWidth/3, screenHeight - (i % 8 + 2)*(screenHeight / 10));
                 standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
             }
             standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
+			standardFont->renderText(">", screenWidth/3 , screenHeight - (i % 8 + 2)*(screenHeight / 10));
         }
     }
 
