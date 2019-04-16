@@ -330,7 +330,7 @@ void Game::renderSongSettings() {
     
             if(i == 2){
             standardFont->setColor(glm::vec3(0.00 ,0.85 + sin(glfwGetTime())/4, 0.2 ));
-            standardFont->renderText("leaderboards ", screenWidth/3, screenHeight-400);
+            standardFont->renderText("Leaderboard", screenWidth/3, screenHeight-400);
             standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
                 if (Keys[GLFW_KEY_RIGHT]){
                     State = LEADERBOARD;
@@ -347,7 +347,7 @@ void Game::renderSongSettings() {
     standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
     standardFont->renderText("Speed: " + difficulty, screenWidth/3, screenHeight-200);
     standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3, screenHeight-300);
-    standardFont->renderText("leaderboards ", screenWidth/3, screenHeight-400);
+    standardFont->renderText("Leaderboard", screenWidth/3, screenHeight-400);
     standardFont->renderText("Song Difficulty:" + songs[activeElement].difficulty, screenWidth/3, screenHeight-600 );
     standardFont->renderText("Song Duration:" + activeElementDuration + "M", screenWidth/3, screenHeight-500);
     standardFont->setColor(glm::vec3(0.00 ,0.2 * sin(glfwGetTime()), 0.2 ));
@@ -381,6 +381,11 @@ void Game::renderSongSettings() {
 //--------------- LEADERBOARD -----------------//
 //-------------------------------------------//
 void Game:: renderLeaderboard(){
+	if (Keys[GLFW_KEY_BACKSPACE]) {
+		// Switch to song state
+		State = SONG_SETTINGS;
+		Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
+	}
     standardFont->setScale(1.0f);
     standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
     standardFont->renderText(songs[activeElement].name +" Leaderboard", screenWidth/2 -180, screenHeight/2 + 400);
@@ -392,6 +397,7 @@ void Game:: renderLeaderboard(){
         standardFont->renderText(line, screenWidth/2 -180, screenHeight/2 +350- i);
         i= i + 50;
     }
+
 }
 
 
