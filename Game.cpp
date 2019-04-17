@@ -39,16 +39,16 @@ void Game::init(int displayWidth, int displayHeight){
     activeElement = 0;
     
     // Add songs to the song list. Name, filepath, main track, BPM.
-    songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 3.32, "Easy" } );
-    songs.push_back( songItem{ "Brother Jacob", "MusicLibrary/jakob.mid", 0, 100, 3.32, "Easy" } );
-    songs.push_back( songItem{ "Piano Man", "MusicLibrary/pianoman.mid", 1, 100, 2.32, "Easy" } );
-    songs.push_back( songItem{ "Crab Rave", "MusicLibrary/crab_rave.mid", 0, 125 , 1.32, "Easy"} );
-    songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100, 10.32, "Easy" } );
-    songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 , 5.22, "Easy"} );
-    songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 168, 5.12, "Easy" } );
-    songs.push_back( songItem{ "Megalovania", "MusicLibrary/megalovania.mid", 0, 120 , 10.32, "Easy"} );
-    songs.push_back( songItem{ "Pirates of the Caribbean", "MusicLibrary/pirates.mid", 0, 120 , 10.32, "Easy"} );
-    songs.push_back( songItem{ "Can't Help Falling in Love", "MusicLibrary/cant_help_falling_in_love.mid", 0, 120 , 10.32, "Easy"} );
+    songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 0.29, "Easy" } );
+    songs.push_back( songItem{ "Brother Jacob", "MusicLibrary/jakob.mid", 0, 100, 0.19, "Easy" } );
+    songs.push_back( songItem{ "Piano Man", "MusicLibrary/pianoman.mid", 1, 100, 2.50, "Easy" } );
+    songs.push_back( songItem{ "Crab Rave", "MusicLibrary/crab_rave.mid", 0, 125 , 0.46, "Easy"} );
+    songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100, 1.23, "Easy" } );
+    songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 , 0.14, "Easy"} );
+    songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 168, 0.57, "Easy" } );
+    songs.push_back( songItem{ "Megalovania", "MusicLibrary/megalovania.mid", 0, 120 , 1.50, "Easy"} );
+    songs.push_back( songItem{ "Pirates of the Caribbean", "MusicLibrary/pirates.mid", 0, 120 , 0.57, "Easy"} );
+    songs.push_back( songItem{ "Can't Help Falling in Love", "MusicLibrary/cant_help_falling_in_love.mid", 0, 120 , 1.27, "Easy"} );
     songs.push_back( songItem{ "sex", "MusicLibrary/levels.mid", 0, 128, 7.32, "Easy" } );
     songs.push_back( songItem{ "sju", "MusicLibrary/levels.mid", 0, 128, 1.11 , "Easy"} );
     songs.push_back( songItem{ "atta", "MusicLibrary/levels.mid", 0, 128 , 1.52, "Easy"} );
@@ -248,6 +248,7 @@ void Game::renderSongSettings() {
         State = SONG_SELECT;
 		difficulty = "NORMAL";
 		hands = "BOTH";
+		durationMulti = 1;
         Keys[GLFW_KEY_LEFT] = GL_FALSE;
     }
     
@@ -260,12 +261,7 @@ void Game::renderSongSettings() {
     }else if (soundfont == 3){
         currentInstrument = "Brighton Synthesizer";
     }
-    // Create an output string stream
-    std::ostringstream streamObj;
-    //Add double to stream
-    streamObj << std::fixed <<std::setprecision(2)<< songs[activeElement].duration;
-    std::string activeElementDuration = streamObj.str();
-    
+ 
     standardFont->setScale(1.0f);
 
     /////////////////////////////////
@@ -303,15 +299,18 @@ void Game::renderSongSettings() {
 				{
 					activeBPM = defaultBPM*0.75;
 					difficulty = "SLOWER";
+					durationMulti = (1.0/0.75);
 				}
 				else if (j == 2)
 				{
 					activeBPM = defaultBPM*0.5;
 					difficulty = "SLOWEST";
+					durationMulti = 2;
 				}
 				else if (j > 2) {
 					activeBPM = defaultBPM;
 					difficulty = "NORMAL";
+					durationMulti = 1;
 					j = 0;
 				}
 				
@@ -376,6 +375,7 @@ void Game::renderSongSettings() {
 				activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
 				activeSong = new Song(*activeTrack, colorShader, textureShader);
 				// Lengthens the start of track notes. Has to be done after creation of Song.
+				std::cout << activeTrack->note(activeTrack->size() - 1)->end;
 				activeTrack->setStartOffset(0.1);
 				// Reset time
 				glfwSetTime(0);
@@ -388,6 +388,13 @@ void Game::renderSongSettings() {
         i = 4;
         Keys[GLFW_KEY_ENTER] = false;
     }*/
+
+	// Create an output string stream
+	std::ostringstream streamObj;
+	//Add double to stream
+	streamObj << std::fixed << std::setprecision(2) << songs[activeElement].duration*durationMulti;
+	std::string activeElementDuration = streamObj.str();
+
 	
 	standardFont->setColor(glm::vec3(sin*0.827f + (1 - sin)*0.015f, sin*0.023f + (1 - sin)*0.517f, 1.0f));
 	standardFont->renderText(songs[activeElement].name, screenWidth / 3 + 200, screenHeight - 216);

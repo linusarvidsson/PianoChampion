@@ -100,6 +100,7 @@ private:
 	int j = 0;
 	std::string difficulty = "NORMAL";
 	std::string hands = "BOTH";
+	double durationMulti = 1;
 
 	//Stats data
 	char alfaBet = 'A';
