@@ -376,7 +376,7 @@ void Game::renderSongSettings() {
 				delete activeTrack;
 				delete activeSong;
 				activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
-				activeSong = new Song(*activeTrack, colorShader, textureShader);
+				activeSong = new Song(*activeTrack, colorShader, textureShader, viewProjection);
 				// Lengthens the start of track notes. Has to be done after creation of Song.
 				std::cout << activeTrack->note(activeTrack->size() - 1)->end;
 				activeTrack->setStartOffset(0.1);
