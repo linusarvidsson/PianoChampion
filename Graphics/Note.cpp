@@ -34,8 +34,8 @@ bool Note::isBlack() { return black; }
 
 // Bestämmer notens färg
 void Note::setNoteColor(){
-    if(black) noteColor = glm::vec3(0.0f, 0.7f, 0.8f);
-    else noteColor = glm::vec3(0.0f, 1.0f, 0.0f);
+    if(black) noteColor = glm::vec3(0.0f, 0.2f, 0.4f);
+    else noteColor = glm::vec3(0.015f, 0.517f, 1.0f);
 }
 
 // Bestämmer notens position i x-planet
@@ -101,12 +101,12 @@ void Note::setBlackOffset(){
 void Note::pianoSettings(){
     if(black){
         startPoint = -3.4f;
-        endPoint = -2.5f;
+        endPoint = 5.0f; //Was -2.5
         noteHeight = -0.001f;
     }
     else{
         startPoint = -3.8f;
-        endPoint = -2.5f;
+        endPoint = 5.0f;
         noteHeight = -0.002f;
     }
 }
