@@ -347,12 +347,12 @@ void Game::renderSongSettings() {
 
 				if (j == 1){
 
-					hands = "LEFT";
+					hands = "RIGHT";
 				}
 				else if (j == 2)
 				{
 					
-					hands = "RIGHT";
+					hands = "LEFT";
 				}
 				else if (j > 2) {
 					
