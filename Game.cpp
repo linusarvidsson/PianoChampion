@@ -235,9 +235,14 @@ void Game::renderSongSettings() {
         
         // Load new selected song
         delete activeTrack;
+        delete backingTrack;
         delete activeSong;
-        activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
-        activeSong = new Song(*activeTrack, colorShader, textureShader, viewProjection);
+        /*activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
+        backingTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);*/
+        //if (hands = BOTH)
+        activeTrack = new MidiTrack("MusicLibrary/crab_rave_r.mid", songs[activeElement].track, activeBPM);
+        backingTrack = new MidiTrack("MusicLibrary/crab_rave_l.mid", songs[activeElement].track, activeBPM);
+        activeSong = new Song(*activeTrack, colorShader, textureShader);
         // Lengthens the start of track notes. Has to be done after creation of Song.
         activeTrack->setStartOffset(0.1);
         // Reset time
@@ -484,6 +489,15 @@ void Game::renderSong(){
     {
         State = POST_GAME;
     }
+    
+    // Update the backing track
+    bool backingNotes[128];
+    backingTrack->updateCurrentNotes(backingNotes, glfwGetTime() - 2.5f);
+    for (int i = 0; i < 128; i++){
+        if (!prevBackingNotes[i] && backingNotes[i]) notesToBeTurnedOn.push(i);
+        if (prevBackingNotes[i] && !backingNotes[i]) notesToBeTurnedOff.push(i);
+    }
+    backingTrack->updateCurrentNotes(prevBackingNotes, glfwGetTime() - 2.5f);
     
     // Update the current notes array. The notes in the track that should currently be played.
     activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f); 

@@ -31,7 +31,9 @@ void ScoreHandler::scoreNotes(MidiTrack* track, bool midi[], bool player[], floa
     score += multiplier*points;
     
     //Update multiplier
-    if (identical(midi, player, 127)){
+    
+    bool missedNotes(double time, double offset);
+    if (!track->missedNotes(time, 0.5)){
         streakScore += points;
     } else {
         streakScore = 0;

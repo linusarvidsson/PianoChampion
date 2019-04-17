@@ -101,9 +101,9 @@ int main(void) {
     do{
         for (int i = 0; i < 128; i++){
             if (!prevPlayerInput[i] && KeySlayer.playerInput[i])
-                KeySlayer.playerToBeTurnedOn.push(i);
+                KeySlayer.notesToBeTurnedOn.push(i);
             if (prevPlayerInput[i] && !KeySlayer.playerInput[i])
-                KeySlayer.playerToBeTurnedOff.push(i);
+                KeySlayer.notesToBeTurnedOff.push(i);
             prevPlayerInput[i] = KeySlayer.playerInput[i];
         }
         
@@ -305,19 +305,19 @@ static void audioCallback(void* data, Uint8 *stream, int len)
      */
     //last_time = current_time;
     
-    while (!KeySlayer.playerToBeTurnedOn.empty()){
-        int key = KeySlayer.playerToBeTurnedOn.front();
-        float velocity = 0.1;
-        if (KeySlayer.matchingKeys[key]) velocity = 0.7;
-        tsf_channel_note_on(soundfont->soundfont, KeySlayer.returnSoundfont(), key, velocity);
+    while (!KeySlayer.notesToBeTurnedOn.empty()){
+        int key = KeySlayer.notesToBeTurnedOn.front();
+        /*float velocity = 0.1;
+        if (KeySlayer.matchingKeys[key]) velocity = 0.7; */
+        tsf_channel_note_on(soundfont->soundfont, KeySlayer.returnSoundfont(), key, 0.7);
         //std::cout << KeySlayer.playerToBeTurnedOn.front() << " ";
-        KeySlayer.playerToBeTurnedOn.pop();
+        KeySlayer.notesToBeTurnedOn.pop();
     }
     
-    while (!KeySlayer.playerToBeTurnedOff.empty()){
-        tsf_channel_note_off(soundfont->soundfont, KeySlayer.returnSoundfont(), KeySlayer.playerToBeTurnedOff.front());
+    while (!KeySlayer.notesToBeTurnedOff.empty()){
+        tsf_channel_note_off(soundfont->soundfont, KeySlayer.returnSoundfont(), KeySlayer.notesToBeTurnedOff.front());
         //std::cout << KeySlayer.playerToBeTurnedOff.front() << " ";
-        KeySlayer.playerToBeTurnedOff.pop();
+        KeySlayer.notesToBeTurnedOff.pop();
     }
 
     //Number of samples to process
