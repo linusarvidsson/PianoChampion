@@ -71,7 +71,7 @@ private:
     
     // Display data
     int screenWidth, screenHeight;
-    glm::mat4 projection, view;
+    glm::mat4 viewProjection, ortho;
     GLuint colorShader, textureShader;
     
     // Song data

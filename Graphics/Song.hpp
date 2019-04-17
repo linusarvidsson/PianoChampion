@@ -30,7 +30,7 @@ static bool black[128] = {
 class Song{
 public:
     ~Song();
-    Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader);
+    Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader, glm::mat4 viewProjection_);
     
     void updateNotes(bool matchingKeys[]);
     void updatePiano(bool playerInput[]);
@@ -49,7 +49,7 @@ private:
     void initNotes();
     
     // Projection components
-    glm::mat4 projection, view, model;
+    glm::mat4 model, viewProjection;
     
     // Background & Strike Bar
     TextureQuad* background;

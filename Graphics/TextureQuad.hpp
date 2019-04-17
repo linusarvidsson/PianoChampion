@@ -13,7 +13,7 @@
 class TextureQuad{
 public:
     // Class TextureQuad. Create a simple quadratic object with a texture.
-    TextureQuad(const char* texturepath, GLfloat width, GLfloat height, glm::vec3 position, GLuint& shader, bool alphaTexture);
+    TextureQuad(const char* texturepath, GLfloat width, GLfloat height, glm::vec3 position, GLuint& shader, bool alphaTexture, glm::mat4 viewProjection);
     ~TextureQuad();
     
     // Render texture quad.
@@ -42,7 +42,7 @@ private:
     // GL data
     GLuint VAO;
     GLuint vertexBuffer, uvBuffer, elementBuffer;
-    glm::mat4 projection, view, model;
+    glm::mat4 MVP;
     
     void updateVertices();
 };

@@ -17,7 +17,7 @@ Game::~Game(){
     glDeleteProgram(colorShader);
     glDeleteProgram(textureShader);
     glDeleteProgram(textShader);
-}
+}   
 
 // Initialize the game. Must be done after window is created.
 void Game::init(int displayWidth, int displayHeight){
@@ -26,14 +26,18 @@ void Game::init(int displayWidth, int displayHeight){
     screenHeight = displayHeight;
     
     // Projection matrix: FoV, Aspect Ratio, Display range (0.1 unit <-> 100 units)
-    projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)displayWidth / (float)displayHeight, 0.1f, 100.0f);
     // Camera matrix
-    view = glm::lookAt(
-                       glm::vec3(0,0,8.5), // Camera position
-                       glm::vec3(0,0,0),  // The point the camera looks at
+    glm::mat4 view = glm::lookAt(
+                       glm::vec3(0,-0.8,7), // Camera position
+                       glm::vec3(0,-0.8,0),  // The point the camera looks at
                        glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                        );
+    viewProjection = projection * view;
     
+    // Orthograpic camera:
+    ortho = projection = glm::ortho(0.0f, static_cast<GLfloat>(displayWidth), 0.0f, static_cast<GLfloat>(displayHeight));
+
     
     // Default active element in menus
     activeElement = 0;
@@ -68,7 +72,7 @@ void Game::init(int displayWidth, int displayHeight){
     // Initialize the standard font for the game
     standardFont = new Font("Graphics/Fonts/Orbitron-Black.ttf", textShader, screenWidth, screenHeight);
 
-    logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 7.9f, 3.5f, glm::vec3(0.0f, 0.0f, 0.0f), textureShader, true);
+    logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 1789 * 0.5, 786 * 0.5, glm::vec3(screenWidth/2, screenHeight/2, 0.0f), textureShader, true, ortho);
 }
 
 
@@ -97,7 +101,6 @@ void Game::render(){
     }
     // Draw Title
     logo->render();
-
 }
 
 
@@ -115,7 +118,7 @@ void Game::renderMainMenu(){
         State = SONG_SELECT;
         
         logo->scale(0.3f);
-        logo->position( glm::vec3(3.5f, 3.0f, 0.0f) );
+        logo->position( glm::vec3(screenWidth-200, screenHeight-100, 1.0f) );
         
         // Reset active element. Next menu should start at element 0.
         activeElement = 0;
@@ -202,7 +205,7 @@ void Game::renderSongSettings() {
         delete activeTrack;
         delete activeSong;
         activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
-        activeSong = new Song(*activeTrack, colorShader, textureShader);
+        activeSong = new Song(*activeTrack, colorShader, textureShader, viewProjection);
         // Lengthens the start of track notes. Has to be done after creation of Song.
         activeTrack->setStartOffset(0.1);
         // Reset time
@@ -400,7 +403,6 @@ void Game:: renderPostGame(){
 		}
 		Keys[GLFW_KEY_DOWN] = GL_FALSE;
 	}
-	std::cout << alfaBet;
 	std::string s(1, alfaBet);
 	if (playerName.size() < 11)
 	{

@@ -10,34 +10,15 @@ Song::~Song(){
 }
 
 
-Song::Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader){
-    background = new TextureQuad("Graphics/Images/pianoklaviatur.png", 10.9f, 10.0f, glm::vec3(0.0f, 0.0f, -0.01f), textureShader, false);
-    strikeBar = new TextureQuad("Graphics/Images/strike_bar.png", 10.0f, 1.0f, glm::vec3(0.0f, -2.5f, 0.1f), textureShader, true);
+Song::Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader, glm::mat4 viewProjection_){
+    viewProjection = viewProjection_;
+    background = new TextureQuad("Graphics/Images/pianoklaviatur.png", 10.9f, 10.0f, glm::vec3(0.0f, 0.0f, -0.01f), textureShader, false, viewProjection);
+    strikeBar = new TextureQuad("Graphics/Images/strike_bar.png", 10.0f, 1.0f, glm::vec3(0.0f, -2.5f, 0.1f), textureShader, true, viewProjection);
     noteShader = &colorShader;
     songTrack = &track;
-    
-    // Perspective camera:
-    // Projection matrix: 45∞ Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-    // Camera matrix
-    view = glm::lookAt(
-                       glm::vec3(0,0,8.5), // Camera position
-                       glm::vec3(0,0,0),  // The point the camera looks at
-                       glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-                       );
+
     // Model matrix : an identity matrix (model will be at the origin)
     model = glm::mat4(1.0f);
-    /*
-    // Orthograpic camera:
-    
-    projection = glm::ortho(-8.0f,8.0f,-8.0f,8.0f, 0.0f, 100.0f); // In world coordinates
-    view = glm::lookAt(
-                       glm::vec3(0,0,10), // Camera position
-                       glm::vec3(0,0,0),  // The point the camera looks at
-                       glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-                       );
-    model = glm::mat4(1.0f);
-    */
      
     initNotes();
     initPiano();
@@ -110,7 +91,7 @@ void Song::render(){
     glBindVertexArray(noteVAO);
     
     // MVP for notes. Translates notes with time.
-    glm::mat4 noteTranslation = projection * view * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime() -0.1f, 0.0f)) * model;
+    glm::mat4 noteTranslation = viewProjection * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime() -0.1f, 0.0f)) * model;
     
     // Send the transformation to the currently bound shader,
     glUniformMatrix4fv(glGetUniformLocation(*noteShader, "MVP"), 1, GL_FALSE, &noteTranslation[0][0]);
@@ -237,7 +218,7 @@ void Song::renderPiano(){
     glBindVertexArray(pianoVAO);
     
     // MVP for notes. Translates notes with time.
-    glm::mat4 MVP = projection * view * model;
+    glm::mat4 MVP = viewProjection * model;
     
     // Send the transformation to the currently bound shader,
     glUniformMatrix4fv(glGetUniformLocation(*noteShader, "MVP"), 1, GL_FALSE, &MVP[0][0]);

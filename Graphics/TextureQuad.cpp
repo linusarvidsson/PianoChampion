@@ -13,7 +13,7 @@ const GLfloat TextureQuad::uv[] = {
 };
 
 
-TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height, glm::vec3 position, GLuint& textureShader, bool alphaTexture)
+TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height, glm::vec3 position, GLuint& textureShader, bool alphaTexture, glm::mat4 viewProjection)
     :quadWidth(width), quadHeight(height), alpha(alphaTexture), quadPosition(position)
 {
     texture = GraphicsTools::loadTexture(texturepath, alpha);
@@ -24,18 +24,9 @@ TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height,
     vertices.push_back(glm::vec3( position.x + width/2.0f, position.y - height/2.0f, position.z ));
     vertices.push_back(glm::vec3( position.x - width/2.0f, position.y + height/2.0f, position.z ));
     vertices.push_back(glm::vec3( position.x + width/2.0f, position.y + height/2.0f, position.z ));
-    
-    // Perspective camera:
-    // Projection matrix: 45∞ Field of View, 4:3 ratio, display range : 0.1 unit <-> 100 units
-    projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-    // Camera matrix
-    view = glm::lookAt(
-                       glm::vec3(0,0,8.5), // Camera position
-                       glm::vec3(0,0,0),  // The point the camera looks at
-                       glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-                       );
-    // Model matrix : an identity matrix (model will be at the origin)
-    model = glm::mat4(1.0f);
+
+    // Model view projection
+    MVP = viewProjection * glm::mat4(1.0f);
     
     // VAO
     glGenVertexArrays(1, &VAO);
@@ -58,15 +49,9 @@ TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height,
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBuffer);
     
-    // Send MVP transformation to backgroundShader
-    glm::mat4 MVP = projection * view * model;
-    glUseProgram(*shader);
-    glUniformMatrix4fv(glGetUniformLocation(*shader, "MVP"), 1, GL_FALSE, &MVP[0][0]);
-    
     // Set "myTextureSampler" sampler to use Texture Unit 0
     glUniform1i(glGetUniformLocation(*shader, "myTextureSampler"), 0);
     
-    glBindVertexArray(0);
 }
 
 TextureQuad::~TextureQuad(){
@@ -80,6 +65,8 @@ void TextureQuad::render(){
     if(alpha) glEnable(GL_BLEND);
     
     glUseProgram(*shader);
+    glUniformMatrix4fv(glGetUniformLocation(*shader, "MVP"), 1, GL_FALSE, &MVP[0][0]);
+    
     glBindVertexArray(VAO);
     
     // Bind texture in Texture Unit 0
