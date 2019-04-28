@@ -17,7 +17,7 @@ Game::~Game(){
     glDeleteProgram(colorShader);
     glDeleteProgram(textureShader);
     glDeleteProgram(textShader);
-}
+}   
 
 // Initialize the game. Must be done after window is created.
 void Game::init(int displayWidth, int displayHeight){
@@ -26,29 +26,33 @@ void Game::init(int displayWidth, int displayHeight){
     screenHeight = displayHeight;
     
     // Projection matrix: FoV, Aspect Ratio, Display range (0.1 unit <-> 100 units)
-    projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), (float)displayWidth / (float)displayHeight, 0.1f, 100.0f);
     // Camera matrix
-    view = glm::lookAt(
-                       glm::vec3(0,0,8.5), // Camera position
-                       glm::vec3(0,0,0),  // The point the camera looks at
+    glm::mat4 view = glm::lookAt(
+                       glm::vec3(0,-0.8,7), // Camera position
+                       glm::vec3(0,-0.8,0),  // The point the camera looks at
                        glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
                        );
+    viewProjection = projection * view;
     
+    // Orthograpic camera:
+    ortho = projection = glm::ortho(0.0f, static_cast<GLfloat>(displayWidth), 0.0f, static_cast<GLfloat>(displayHeight));
+
     
     // Default active element in menus
     activeElement = 0;
     
     // Add songs to the song list. Name, filepath, main track, BPM.
-    songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 3.32, "Easy" } );
-    songs.push_back( songItem{ "Brother Jacob", "MusicLibrary/jakob.mid", 0, 100, 3.32, "Easy" } );
-    songs.push_back( songItem{ "Piano Man", "MusicLibrary/pianoman.mid", 1, 100, 2.32, "Easy" } );
-    songs.push_back( songItem{ "Crab Rave", "MusicLibrary/crab_rave.mid", 0, 125 , 1.32, "Easy"} );
-    songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100, 10.32, "Easy" } );
-    songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 , 5.22, "Easy"} );
-    songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 168, 5.12, "Easy" } );
-    songs.push_back( songItem{ "Megalovania", "MusicLibrary/megalovania.mid", 0, 120 , 10.32, "Easy"} );
-    songs.push_back( songItem{ "Pirates of the Caribbean", "MusicLibrary/pirates.mid", 0, 120 , 10.32, "Easy"} );
-    songs.push_back( songItem{ "Can't Help Falling in Love", "MusicLibrary/cant_help_falling_in_love.mid", 0, 120 , 10.32, "Easy"} );
+    songs.push_back( songItem{ "Twinkle", "MusicLibrary/twinkle.mid", 1, 100, 0.29, "Easy" } );
+    songs.push_back( songItem{ "Brother Jacob", "MusicLibrary/jakob.mid", 0, 100, 0.19, "Easy" } );
+    songs.push_back( songItem{ "Piano Man", "MusicLibrary/pianoman.mid", 1, 100, 2.50, "Easy" } );
+    songs.push_back( songItem{ "Crab Rave", "MusicLibrary/crab_rave.mid", 0, 125 , 0.46, "Easy"} );
+    songs.push_back( songItem{ "Mountain King", "MusicLibrary/mountainking.mid", 1, 100, 1.23, "Easy" } );
+    songs.push_back( songItem{ "Levels", "MusicLibrary/levels.mid", 0, 128 , 0.14, "Easy"} );
+    songs.push_back( songItem{ "Impromptu", "MusicLibrary/impromptu.mid", 0, 168, 0.57, "Easy" } );
+    songs.push_back( songItem{ "Megalovania", "MusicLibrary/megalovania.mid", 0, 120 , 1.50, "Easy"} );
+    songs.push_back( songItem{ "Pirates of the Caribbean", "MusicLibrary/pirates.mid", 0, 120 , 0.57, "Easy"} );
+    songs.push_back( songItem{ "Can't Help Falling in Love", "MusicLibrary/cant_help_falling_in_love.mid", 0, 120 , 1.27, "Easy"} );
     songs.push_back( songItem{ "sex", "MusicLibrary/levels.mid", 0, 128, 7.32, "Easy" } );
     songs.push_back( songItem{ "sju", "MusicLibrary/levels.mid", 0, 128, 1.11 , "Easy"} );
     songs.push_back( songItem{ "atta", "MusicLibrary/levels.mid", 0, 128 , 1.52, "Easy"} );
@@ -71,10 +75,8 @@ void Game::init(int displayWidth, int displayHeight){
     
     // Initialize the standard font for the game
     standardFont = new Font("Graphics/Fonts/Orbitron-Black.ttf", textShader, screenWidth, screenHeight);
-    
-    logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 7.9f, 3.5f, glm::vec3(0.0f, 0.0f, 0.0f), textureShader, true);
 
-	playerName = "           ";
+    logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 1789 * 0.5, 786 * 0.5, glm::vec3(screenWidth/2, screenHeight/2, 0.0f), textureShader, true, ortho);
 }
 
 
@@ -105,8 +107,7 @@ void Game::render(){
         renderLeaderboard();
     }
     // Draw Title
-   logo->render();
-    
+    logo->render();
 }
 
 
@@ -124,7 +125,7 @@ void Game::renderMainMenu(){
         State = SONG_SELECT;
         
         logo->scale(0.3f);
-        logo->position( glm::vec3(3.5f, 3.0f, 0.0f) );
+        logo->position( glm::vec3(screenWidth-200, screenHeight-100, 1.0f) );
         
         // Reset active element. Next menu should start at element 0.
         activeElement = 0;
@@ -236,8 +237,13 @@ void Game::renderSongSettings() {
         
         // Load new selected song
         delete activeTrack;
+        delete backingTrack;
         delete activeSong;
-        activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
+        /*activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
+        backingTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);*/
+        //if (hands = BOTH)
+        activeTrack = new MidiTrack("MusicLibrary/crab_rave_r.mid", songs[activeElement].track, activeBPM);
+        backingTrack = new MidiTrack("MusicLibrary/crab_rave_l.mid", songs[activeElement].track, activeBPM);
         activeSong = new Song(*activeTrack, colorShader, textureShader);
         // Lengthens the start of track notes. Has to be done after creation of Song.
         activeTrack->setStartOffset(0.1);
@@ -252,6 +258,7 @@ void Game::renderSongSettings() {
         State = SONG_SELECT;
 		difficulty = "NORMAL";
 		hands = "BOTH";
+		durationMulti = 1;
         Keys[GLFW_KEY_LEFT] = GL_FALSE;
     }
     
@@ -264,12 +271,7 @@ void Game::renderSongSettings() {
     }else if (soundfont == 3){
         currentInstrument = "Brighton Synthesizer";
     }
-    // Create an output string stream
-    std::ostringstream streamObj;
-    //Add double to stream
-    streamObj << std::fixed <<std::setprecision(2)<< songs[activeElement].duration;
-    std::string activeElementDuration = streamObj.str();
-    
+ 
     standardFont->setScale(1.0f);
 
     /////////////////////////////////
@@ -307,15 +309,18 @@ void Game::renderSongSettings() {
 				{
 					activeBPM = defaultBPM*0.75;
 					difficulty = "SLOWER";
+					durationMulti = (1.0/0.75);
 				}
 				else if (j == 2)
 				{
 					activeBPM = defaultBPM*0.5;
 					difficulty = "SLOWEST";
+					durationMulti = 2;
 				}
 				else if (j > 2) {
 					activeBPM = defaultBPM;
 					difficulty = "NORMAL";
+					durationMulti = 1;
 					j = 0;
 				}
 				
@@ -378,8 +383,9 @@ void Game::renderSongSettings() {
 				delete activeTrack;
 				delete activeSong;
 				activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
-				activeSong = new Song(*activeTrack, colorShader, textureShader);
+				activeSong = new Song(*activeTrack, colorShader, textureShader, viewProjection);
 				// Lengthens the start of track notes. Has to be done after creation of Song.
+				std::cout << activeTrack->note(activeTrack->size() - 1)->end;
 				activeTrack->setStartOffset(0.1);
 				// Reset time
 				glfwSetTime(0);
@@ -392,6 +398,13 @@ void Game::renderSongSettings() {
         i = 4;
         Keys[GLFW_KEY_ENTER] = false;
     }*/
+
+	// Create an output string stream
+	std::ostringstream streamObj;
+	//Add double to stream
+	streamObj << std::fixed << std::setprecision(2) << songs[activeElement].duration*durationMulti;
+	std::string activeElementDuration = streamObj.str();
+
 	
 	standardFont->setColor(glm::vec3(sin*0.827f + (1 - sin)*0.015f, sin*0.023f + (1 - sin)*0.517f, 1.0f));
 	standardFont->renderText(songs[activeElement].name, screenWidth / 3 + 200, screenHeight - 216);
@@ -479,6 +492,15 @@ void Game::renderSong(){
     {
         State = POST_GAME;
     }
+    
+    // Update the backing track
+    bool backingNotes[128];
+    backingTrack->updateCurrentNotes(backingNotes, glfwGetTime() - 2.5f);
+    for (int i = 0; i < 128; i++){
+        if (!prevBackingNotes[i] && backingNotes[i]) notesToBeTurnedOn.push(i);
+        if (prevBackingNotes[i] && !backingNotes[i]) notesToBeTurnedOff.push(i);
+    }
+    backingTrack->updateCurrentNotes(prevBackingNotes, glfwGetTime() - 2.5f);
     
     // Update the current notes array. The notes in the track that should currently be played.
     activeTrack->updateCurrentNotes(currentNotes, glfwGetTime() - 2.5f); 

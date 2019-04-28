@@ -45,6 +45,12 @@ enum GameState{
     
 };
 
+enum HandStates{
+    LEFT,
+    RIGHT,
+    BOTH
+};
+
 class Game{
     
 public:
@@ -65,8 +71,8 @@ public:
     int soundfont = 0;
     
     // Queues for MidiPlayer
-    std::queue<int> playerToBeTurnedOn;
-    std::queue<int> playerToBeTurnedOff;
+    std::queue<int> notesToBeTurnedOn;
+    std::queue<int> notesToBeTurnedOff;
     
 	bool debugMode;
 
@@ -76,16 +82,21 @@ private:
     
     // Display data
     int screenWidth, screenHeight;
-    glm::mat4 projection, view;
+    glm::mat4 viewProjection, ortho;
     GLuint colorShader, textureShader;
     
     // Song data
     std::vector<songItem> songs;
     Song* activeSong;
     MidiTrack* activeTrack;
+    HandState Hands = BOTH;
     std:: string currentInstrument = "Piano";
 	int activeBPM;
 	int defaultBPM;
+    
+    //The backing track
+    MidiTrack* backingTrack;
+    bool prevBackingNotes[128] = {false};
     
     // Logic arrays for the game mechanics
     bool currentNotes[128];
@@ -100,6 +111,7 @@ private:
 	int j = 0;
 	std::string difficulty = "NORMAL";
 	std::string hands = "BOTH";
+	double durationMulti = 1;
 
 	//Stats data
 	char alfaBet = ' ';
