@@ -102,7 +102,8 @@ private:
 	std::string hands = "BOTH";
 
 	//Stats data
-	char alfaBet = 'A';
+	char alfaBet = ' ';
+	int letterInPlayerName = 0;
 	std::string playerName;
     
     // Font data

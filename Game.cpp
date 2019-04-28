@@ -73,6 +73,8 @@ void Game::init(int displayWidth, int displayHeight){
     standardFont = new Font("Graphics/Fonts/Orbitron-Black.ttf", textShader, screenWidth, screenHeight);
     
     logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 7.9f, 3.5f, glm::vec3(0.0f, 0.0f, 0.0f), textureShader, true);
+
+	playerName = "           ";
 }
 
 
@@ -184,11 +186,11 @@ void Game::renderSongMenu(){
             if(i == activeElement){
                 standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
                 standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
-				standardFont->renderText(">" , screenWidth/3, screenHeight - (i % 8 + 2)*(screenHeight / 10));
+				standardFont->renderText(">" , screenWidth/2 - screenWidth/9, screenHeight - (i % 8 + 2)*(screenHeight / 10));
                 standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
             }
             standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
-			standardFont->renderText(">", screenWidth/3 , screenHeight - (i % 8 + 2)*(screenHeight / 10));
+			//standardFont->renderText(">", screenWidth/3 , screenHeight - (i % 8 + 2)*(screenHeight / 10));
         }
     }
 
@@ -293,7 +295,7 @@ void Game::renderSongSettings() {
         if(i == 0){
 			
 		standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-		standardFont->renderText("Speed: " + difficulty, screenWidth / 3+200, screenHeight - 450);
+		standardFont->renderText("Speed: " + difficulty + " >", screenWidth / 3+200, screenHeight - 450);
         standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
         
 		
@@ -324,7 +326,7 @@ void Game::renderSongSettings() {
     
         if(i == 1){
 			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-			standardFont->renderText("Instrument: " + currentInstrument, screenWidth / 3+200, screenHeight - 550);
+			standardFont->renderText("Instrument: " + currentInstrument + " >", screenWidth / 3+200, screenHeight - 550);
             standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
         
             if (Keys[GLFW_KEY_RIGHT]){
@@ -339,7 +341,7 @@ void Game::renderSongSettings() {
 		if (i == 2)
 		{
 			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-			standardFont->renderText("Hands: " + hands, screenWidth / 3+200, screenHeight - 650);
+			standardFont->renderText("Hands: " + hands + " >", screenWidth / 3+200, screenHeight - 650);
 			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
 
 
@@ -349,16 +351,16 @@ void Game::renderSongSettings() {
 
 				if (j == 1){
 
-					hands = "RIGHT";
+					hands = "RIGHT >";
 				}
 				else if (j == 2)
 				{
 					
-					hands = "LEFT";
+					hands = "LEFT >";
 				}
 				else if (j > 2) {
 					
-					hands = "BOTH";
+					hands = "BOTH >";
 					j = 0;
 				}
 
@@ -367,7 +369,7 @@ void Game::renderSongSettings() {
 		}
 		if (i == 3) {
 			standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-			standardFont->renderText("PLAY", screenWidth / 3 + 200, screenHeight - 750);
+			standardFont->renderText("PLAY >", screenWidth / 3 + 200, screenHeight - 750);
 			if (Keys[GLFW_KEY_RIGHT])
 			{
 				State = SONG_ACTIVE;
@@ -418,6 +420,7 @@ void Game::renderSongSettings() {
             if(i==activeElement){
 				standardFont->setColor(glm::vec3(sin*0.827f + (1 - sin)*0.015f, sin*0.023f + (1 - sin)*0.517f, 1.0f));
                 standardFont->renderText(songs[activeElement].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
+				standardFont->renderText("<", screenWidth / 2 - screenWidth / 9, screenHeight - (i % 8 + 2)*(screenHeight / 10));
                 standardFont->setColor(glm::vec3(0.3,0.3,0.3));
             }
             standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
@@ -533,7 +536,10 @@ void Game:: renderPostGame(){
         glfwSetTime(0);
         activeElement = 0;
         score.reset();
-		playerName = "";
+		playerName.clear();
+		playerName = "           ";
+		letterInPlayerName = 0;
+		alfaBet = ' ';
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
@@ -555,31 +561,80 @@ void Game:: renderPostGame(){
 
 	
 	if (Keys[GLFW_KEY_UP]) {
-		if (alfaBet > 'A')
+		if (alfaBet == ' ')
+		{
+			alfaBet = 'Z';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet == 'A')
+		{
+			alfaBet = ' ';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet > 'A')
 		{
 			alfaBet--;
+			playerName[letterInPlayerName] = alfaBet;
 		}
 		Keys[GLFW_KEY_UP] = GL_FALSE;
 	}
 	else if (Keys[GLFW_KEY_DOWN]) {
-		if (alfaBet < 'Z' )
+		if (alfaBet == ' ')
+		{
+			alfaBet = 'A';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet == 'Z')
+		{
+			alfaBet = ' ';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet < 'Z')
 		{
 			alfaBet++;
+			playerName[letterInPlayerName] = alfaBet;
 		}
 		Keys[GLFW_KEY_DOWN] = GL_FALSE;
 	}
-	
-	std::string s(1, alfaBet);
-	if (playerName.size() < 11)
+
+	if (Keys[GLFW_KEY_RIGHT])
 	{
-		if (Keys[GLFW_KEY_RIGHT])
+
+		if (letterInPlayerName < 10)
 		{
-			playerName += s;
-			Keys[GLFW_KEY_RIGHT] = GL_FALSE;
-			alfaBet = 'A';
+			playerName[letterInPlayerName] = alfaBet;
+			letterInPlayerName++;
+			alfaBet = playerName[letterInPlayerName];
+		}
+		Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+	}
+
+
+	if (Keys[GLFW_KEY_LEFT])
+	{
+		if (letterInPlayerName > 0)
+		{
+			playerName[letterInPlayerName] = alfaBet;
+			letterInPlayerName--;
+			alfaBet = playerName[letterInPlayerName];
+		}
+		Keys[GLFW_KEY_LEFT] = GL_FALSE;
+	}
+		
+	
+	standardFont->renderText("Name: ", 20, screenHeight - 700);
+
+	std::string temp;
+	for (int i = 0; i < 11; i++)
+	{
+		temp.append(1, playerName[i]);
+		standardFont->renderText(temp, 200+i*40, screenHeight - 700);
+		temp.clear();
+		if(letterInPlayerName == i)
+		{
+			standardFont->renderText("_", 200 + i * 40, screenHeight - 710);
 		}
 	}
-	standardFont->renderText("Name: " + playerName + s, 20, screenHeight - 700);
 	
 }
 
