@@ -269,15 +269,16 @@ void Game::renderSongMenu(){
 
 	// Draw leaderboard
 	standardFont->setScale(1.0f);
-	standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
-	standardFont->renderText("Leaderboard", screenWidth / 3 + 200, screenHeight - 416);
+	standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
+	standardFont->renderText("Leaderboard", screenWidth / 3 + 200, screenHeight - 420);
+    standardFont->setColor(glm::vec3(0.8f, 0.1f,0.1f));
 	std::fstream readerFile;
 	readerFile.open("Leaderboards/" + songs[activeMenuItem_SongSelect].name + ".txt", std::ios::in);
 	std::string line;
-	int i = 0;
+	int i = 100;
 	while (std::getline(readerFile, line)) {
-		standardFont->renderText(line, screenWidth / 3 + 200, screenHeight - 416 - i);
-		i = i + 50;
+        standardFont->renderText( line, screenWidth / 3 + 200, screenHeight - 300 - i);
+		 i = i + 100;
 	}
 }
 
