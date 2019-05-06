@@ -218,7 +218,7 @@ void Game::renderSongMenu(){
 	int i = 0;
     int i2 = 0;
     std::vector <std::pair<int, std::string>> scoreVector;
-    scoreVector.resize(8);
+    scoreVector.resize(3);
     while(std::getline(readerFile, line)){
         if(i >= scoreVector.size() ){
             break;
@@ -231,7 +231,7 @@ void Game::renderSongMenu(){
     std::sort(scoreVector.rbegin(),scoreVector.rend());
     for(int x = 0; x < scoreVector.size(); x++){
         standardFont->renderText(scoreVector[x].second + ": " + std::to_string(scoreVector[x].first), screenWidth / 3 + 200, screenHeight - 516 - i2);
-        i2 = i2 + 70;
+        i2 = i2 + 100;
     }
 }
 
@@ -435,8 +435,8 @@ void Game:: renderLeaderboard(){
 		Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
 	}
     standardFont->setScale(1.0f);
-    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
     standardFont->renderText(songs[activeElement].name +" Leaderboard", screenWidth/2 -180, screenHeight/2 + 400);
+        standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
     std::fstream readerFile;
     readerFile.open("Leaderboards/" + songs[activeElement].name +".txt", std::ios::in);
     std:: string line;
