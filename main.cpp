@@ -40,7 +40,8 @@ int main(void) {
     tsf_channel_set_presetnumber(soundfont->soundfont, 1, 1, false); //Super saw
     tsf_channel_set_presetnumber(soundfont->soundfont, 2, 2, false); //Synth brass
     tsf_channel_set_presetnumber(soundfont->soundfont, 3, 3, false); //Brighton synth
-    
+    tsf_channel_set_presetnumber(soundfont->soundfont, 4, 4, false); //strings
+    tsf_channel_set_presetnumber(soundfont->soundfont, 5, 5, false); //precussion (41-45 is kick)
     //----- Window Initialization -----//
     
     // Initialize GLFW
@@ -54,7 +55,7 @@ int main(void) {
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE); // To make MacOS happy
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE); // We don't want the old OpenGL
-
+    
     // Create a windowed mode window and its OpenGL context
     int screenWidth, screenHeight;
     GraphicsTools::getResolution(&screenWidth, &screenHeight);

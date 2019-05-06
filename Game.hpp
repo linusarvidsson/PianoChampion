@@ -44,7 +44,6 @@ enum GameState{
     LEADERBOARD
     
 };
-
 class Game{
     
 public:
@@ -87,6 +86,7 @@ private:
 	int activeBPM;
 	int defaultBPM;
     
+    
     // Logic arrays for the game mechanics
     bool currentNotes[128];
     
@@ -109,7 +109,6 @@ private:
     // Font data
     GLuint textShader;
     Font* standardFont;
-    Font* songFont;
     
     // Render functions
     void renderSongMenu();
@@ -122,6 +121,7 @@ private:
     
 	int notesHit();
     void leaderboardHandler();
+//    bool sortScore(const pair<std::string, double> &a, const pair<std::string, double> &b)
 
 };
 

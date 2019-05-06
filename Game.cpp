@@ -1,11 +1,14 @@
 #include "Game.hpp"
 #include <iostream>
 #include <fstream>
+#include <utility>
+
 // Constructor. Should be declared globally in main. Can not contain GL-related code before the window is initialized.
 Game::Game(){
     State = MAIN_MENU;
     midiin = new MidiInputReader();
 }
+
 // Destructor
 Game::~Game(){
     // Delete dynamically allocated objects
@@ -109,9 +112,6 @@ void Game::render(){
     
 }
 
-
-
-
 //-------------------------------------------//
 //--------------- MAIN MENU -----------------//
 //-------------------------------------------//
@@ -209,43 +209,37 @@ void Game::renderSongMenu(){
 	standardFont->setScale(1.0f);
 	standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
 	standardFont->renderText("Leaderboard", screenWidth / 3 + 200, screenHeight - 416);
+    
+    //Read and sort the Leaderboards
 	std::fstream readerFile;
 	readerFile.open("Leaderboards/" + songs[activeElement].name + ".txt", std::ios::in);
 	std::string line;
+    double k;
 	int i = 0;
-	while (std::getline(readerFile, line)) {
-		standardFont->renderText(line, screenWidth / 3 + 200, screenHeight - 416 - i);
-		i = i + 50;
-	}
+    int i2 = 0;
+    std::vector <std::pair<int, std::string>> scoreVector;
+    scoreVector.resize(8);
+    while(std::getline(readerFile, line)){
+        if(i >= scoreVector.size() ){
+            break;
+        }else{
+        readerFile >> line >> k;
+        scoreVector[i] = std::make_pair(k, line);
+        i++;
+        }
+    }
+    std::sort(scoreVector.rbegin(),scoreVector.rend());
+    for(int x = 0; x < scoreVector.size(); x++){
+        standardFont->renderText(scoreVector[x].second + ": " + std::to_string(scoreVector[x].first), screenWidth / 3 + 200, screenHeight - 516 - i2);
+        i2 = i2 + 70;
+    }
 }
-
-
 
 //-------------------------------------------//
 //------------- SONG SETTINGS ---------------//
 //-------------------------------------------//
 
-
-
-
 void Game::renderSongSettings() {
-    
-    /*if (Keys[GLFW_KEY_ENTER])
-    {
-        State = SONG_ACTIVE;
-        
-        // Load new selected song
-        delete activeTrack;
-        delete activeSong;
-        activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
-        activeSong = new Song(*activeTrack, colorShader, textureShader);
-        // Lengthens the start of track notes. Has to be done after creation of Song.
-        activeTrack->setStartOffset(0.1);
-        // Reset time
-        glfwSetTime(0);
-        
-        Keys[GLFW_KEY_ENTER] = GL_FALSE;
-    }*/
     
     if (Keys[GLFW_KEY_LEFT])
     {
@@ -260,9 +254,11 @@ void Game::renderSongSettings() {
     }else if(soundfont ==1 ){
         currentInstrument = "Supersaw Synthesizer";
     }else if(soundfont == 2){
-        currentInstrument = "Brass Synthesizer";
+        currentInstrument = "Saxofone";
     }else if (soundfont == 3){
         currentInstrument = "Brighton Synthesizer";
+    }else if (soundfont == 4){
+        currentInstrument = "Strings";
     }
     // Create an output string stream
     std::ostringstream streamObj;
@@ -331,7 +327,7 @@ void Game::renderSongSettings() {
         
             if (Keys[GLFW_KEY_RIGHT]){
                 soundfont++;
-                if(soundfont >3){
+                if(soundfont >4){
                     soundfont = 0;
                 }
                 Keys[GLFW_KEY_RIGHT] = GL_FALSE;
@@ -449,7 +445,6 @@ void Game:: renderLeaderboard(){
         standardFont->renderText(line, screenWidth/2 -180, screenHeight/2 +350- i);
         i= i + 50;
     }
-
 }
 
 
@@ -644,12 +639,12 @@ void Game:: renderPostGame(){
 //------------- OTHER FUNCTIONS -------------//
 //-------------------------------------------//
 
+
 void Game:: leaderboardHandler(){
     std::fstream file;
     std:: string line;
     file.open("Leaderboards/"+ songs[activeElement].name + ".txt",std::ios_base::app);
-    file << std::endl << playerName << ": " <<score.getScore() ;
-    
+    file << std::endl << playerName << " " << score.getScore();
 }
 
 void Game::displaySongPercent() {
