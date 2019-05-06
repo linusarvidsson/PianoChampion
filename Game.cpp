@@ -1,11 +1,14 @@
 #include "Game.hpp"
 #include <iostream>
 #include <fstream>
+#include <utility>
+
 // Constructor. Should be declared globally in main. Can not contain GL-related code before the window is initialized.
 Game::Game(){
     State = TITLE_SCREEN;
     midiin = new MidiInputReader();
 }
+
 // Destructor
 Game::~Game(){
     // Delete dynamically allocated objects
@@ -118,6 +121,7 @@ void Game::init(int displayWidth, int displayHeight){
     glUniform4f(glGetUniformLocation(particleShader, "color"), 1.0f, 1.0f, 1.0f, 1.0f);
     sparkle = new TextureQuad("Graphics/Images/sparkle.png", 0.15f, 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), particleShader, true, projection, view);
     particles = new ParticleSystem(particleShader, *sparkle, 100, glm::vec3(0.0f, -2.5f, 0.0001f));
+	playerName = "           ";
 }
 
 
@@ -172,9 +176,6 @@ void Game::render(){
     }
     
 }
-
-
-
 
 //-------------------------------------------//
 //-------------- TITLE SCREEN ---------------//
@@ -249,9 +250,11 @@ void Game::renderSongMenu(){
             if(i == activeMenuItem_SongSelect){
                 standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
                 standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
+				standardFont->renderText(">" , screenWidth/2 - screenWidth/9, screenHeight - (i % 8 + 2)*(screenHeight / 10));
                 standardFont->setColor(glm::vec3(sin*0.827f + (1-sin)*0.015f, sin*0.023f + (1-sin)*0.517f, 1.0f));
             }
             standardFont->renderText(songs[i].name, 20, screenHeight - (i%8+2)*(screenHeight/10));
+			//standardFont->renderText(">", screenWidth/3 , screenHeight - (i % 8 + 2)*(screenHeight / 10));
         }
     }
 
@@ -280,16 +283,30 @@ void Game::renderSongMenu(){
         standardFont->renderText( line, screenWidth / 3 + 200, screenHeight - 300 - i);
 		 i = i + 100;
 	}
+    double k;
+	int i = 0;
+    int i2 = 0;
+    std::vector <std::pair<int, std::string>> scoreVector;
+    scoreVector.resize(3);
+    while(std::getline(readerFile, line)){
+        if(i >= scoreVector.size() ){
+            break;
+        }else{
+        readerFile >> line >> k;
+        scoreVector[i] = std::make_pair(k, line);
+        i++;
+        }
+    }
+    std::sort(scoreVector.rbegin(),scoreVector.rend());
+    for(int x = 0; x < scoreVector.size(); x++){
+        standardFont->renderText(scoreVector[x].second + ": " + std::to_string(scoreVector[x].first), screenWidth / 3 + 200, screenHeight - 516 - i2);
+        i2 = i2 + 100;
+    }
 }
-
-
 
 //-------------------------------------------//
 //------------- SONG SETTINGS ---------------//
 //-------------------------------------------//
-
-
-
 
 void Game::renderSongSettings() {
     // Menu navigation
@@ -480,8 +497,8 @@ void Game::renderLeaderboard(){
 		Keys[GLFW_KEY_BACKSPACE] = GL_FALSE;
 	}
     standardFont->setScale(1.0f);
-    standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
-    standardFont->renderText(songs[activeMenuItem_SongSelect].name +" Leaderboard", screenWidth/2 -180, screenHeight/2 + 400);
+    standardFont->renderText(songs[activeElement].name +" Leaderboard", screenWidth/2 -180, screenHeight/2 + 400);
+        standardFont->setColor(glm::vec3(0.015f, 0.517f, 1.0f));
     std::fstream readerFile;
     readerFile.open("Leaderboards/" + songs[activeMenuItem_SongSelect].name +".txt", std::ios::in);
     std:: string line;
@@ -490,7 +507,6 @@ void Game::renderLeaderboard(){
         standardFont->renderText(line, screenWidth/2 -180, screenHeight/2 +350- i);
         i= i + 50;
     }
-
 }
 
 
@@ -580,7 +596,10 @@ void Game:: renderPostGame(){
         glfwSetTime(0);
         activeMenuItem_SongSelect = 0;
         score.reset();
-		playerName = "";
+		playerName.clear();
+		playerName = "           ";
+		letterInPlayerName = 0;
+		alfaBet = ' ';
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
     }
@@ -604,8 +623,20 @@ void Game:: renderPostGame(){
 
 	// If player presses up, currentLetter should be the previous letter in the alphabet.
 	if (Keys[GLFW_KEY_UP]) {
-		if (currentLetter > 'A'){
-			currentLetter--;
+		if (alfaBet == ' ')
+		{
+			alfaBet = 'Z';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet == 'A')
+		{
+			alfaBet = ' ';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet > 'A')
+		{
+			alfaBet--;
+			playerName[letterInPlayerName] = alfaBet;
 		}
         else{
             currentLetter = 'Z';
@@ -614,30 +645,65 @@ void Game:: renderPostGame(){
 	}
     // If player presses down, currentLetter should be the next letter in the alphabet.
 	else if (Keys[GLFW_KEY_DOWN]) {
-		if (currentLetter < 'Z' ){
-			currentLetter++;
+		if (alfaBet == ' ')
+		{
+			alfaBet = 'A';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet == 'Z')
+		{
+			alfaBet = ' ';
+			playerName[letterInPlayerName] = alfaBet;
+		}
+		else if (alfaBet < 'Z')
+		{
+			alfaBet++;
+			playerName[letterInPlayerName] = alfaBet;
 		}
         else{
             currentLetter = 'A';
         }
 		Keys[GLFW_KEY_DOWN] = GL_FALSE;
 	}
-    
-    // Convert current letter to a string.
-	std::string s(1, currentLetter);
-    // I player presses right. Add letter to playerName.
-    if (Keys[GLFW_KEY_RIGHT])
-    {
-        if (playerName.size() < 11)
-        {
-            playerName += s;
-            Keys[GLFW_KEY_RIGHT] = GL_FALSE;
-            currentLetter = 'A';
-        }
-    }
-    
-    // Render the progress of players name input.
-	standardFont->renderText("Name: " + playerName + s, 20, screenHeight - 700);
+
+	if (Keys[GLFW_KEY_RIGHT])
+	{
+
+		if (letterInPlayerName < 10)
+		{
+			playerName[letterInPlayerName] = alfaBet;
+			letterInPlayerName++;
+			alfaBet = playerName[letterInPlayerName];
+		}
+		Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+	}
+
+
+	if (Keys[GLFW_KEY_LEFT])
+	{
+		if (letterInPlayerName > 0)
+		{
+			playerName[letterInPlayerName] = alfaBet;
+			letterInPlayerName--;
+			alfaBet = playerName[letterInPlayerName];
+		}
+		Keys[GLFW_KEY_LEFT] = GL_FALSE;
+	}
+		
+	
+	standardFont->renderText("Name: ", 20, screenHeight - 700);
+
+	std::string temp;
+	for (int i = 0; i < 11; i++)
+	{
+		temp.append(1, playerName[i]);
+		standardFont->renderText(temp, 200+i*40, screenHeight - 700);
+		temp.clear();
+		if(letterInPlayerName == i)
+		{
+			standardFont->renderText("_", 200 + i * 40, screenHeight - 710);
+		}
+	}
 	
 }
 
@@ -647,12 +713,12 @@ void Game:: renderPostGame(){
 //------------- OTHER FUNCTIONS -------------//
 //-------------------------------------------//
 
+
 void Game:: leaderboardHandler(){
     std::fstream file;
     std:: string line;
-    file.open("Leaderboards/"+ songs[activeMenuItem_SongSelect].name + ".txt",std::ios_base::app);
-    file << std::endl << playerName << ": " <<score.getScore() ;
-    
+    file.open("Leaderboards/"+ songs[activeElement].name + ".txt",std::ios_base::app);
+    file << std::endl << playerName << " " << score.getScore();
 }
 
 void Game::displaySongPercent() {

@@ -45,7 +45,6 @@ enum GameState{
     LEADERBOARD
     
 };
-
 class Game{
     
 public:
@@ -119,7 +118,8 @@ private:
 	double durationMulti = 1;
 
 	//Stats data
-	char currentLetter = 'A';
+	char alfaBet = ' ';
+	int letterInPlayerName = 0;
 	std::string playerName;
     
     // Font data
@@ -139,6 +139,7 @@ private:
     
 	int notesHit();
     void leaderboardHandler();
+//    bool sortScore(const pair<std::string, double> &a, const pair<std::string, double> &b)
 
 };
 
