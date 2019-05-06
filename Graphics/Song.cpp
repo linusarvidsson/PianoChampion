@@ -10,10 +10,10 @@ Song::~Song(){
 }
 
 
-Song::Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader, glm::mat4 viewProjection_){
-    viewProjection = viewProjection_;
-    background = new TextureQuad("Graphics/Images/pianoklaviatur.png", 10.9f, 10.0f, glm::vec3(0.0f, 0.0f, -0.01f), textureShader, false, viewProjection);
-    strikeBar = new TextureQuad("Graphics/Images/strike_bar.png", 10.0f, 1.0f, glm::vec3(0.0f, -2.5f, 0.1f), textureShader, true, viewProjection);
+Song::Song(MidiTrack &track, GLuint &colorShader, GLuint &textureShader, ParticleSystem &particleSystem, glm::mat4 _projection, glm::mat4 _view){
+    projection = _projection;
+    view = _view;
+    particles = &particleSystem;
     noteShader = &colorShader;
     songTrack = &track;
 
@@ -32,15 +32,16 @@ void Song::initNotes(){
     
     for(int i = 0; i < songTrack->size(); i++){
         Note n_i = Note(songTrack->note(i)->keyNumber, (GLfloat)songTrack->note(i)->start, (GLfloat)songTrack->note(i)->end);
+        songTrack->note(i)->position = n_i.notePosition();
         
         // Vertex 1
-        noteVertices.push_back( glm::vec3(n_i.left(), n_i.start(), 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.left(), n_i.start(), n_i.height()) );
         // Vertex 2
-        noteVertices.push_back( glm::vec3(n_i.right(), n_i.start(), 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.right(), n_i.start(), n_i.height()) );
         // Vertex 3
-        noteVertices.push_back( glm::vec3(n_i.left(), n_i.end() - 0.03, 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.left(), n_i.end() - 0.03, n_i.height()) );
         // Vertex 4
-        noteVertices.push_back( glm::vec3(n_i.right(), n_i.end() - 0.03, 0.0f) );
+        noteVertices.push_back( glm::vec3(n_i.right(), n_i.end() - 0.03, n_i.height()) );
         
         // Color
         for (int vertex = 0; vertex < 4; vertex++){
@@ -81,17 +82,15 @@ void Song::initNotes(){
 }
 
 void Song::render(){
-    //----- Render Background-----//
-    
-    background->render();
+    //----- Render Piano -----//
+    renderPiano();
     
     //----- Render Notes -----/
-    
     glUseProgram(*noteShader);
     glBindVertexArray(noteVAO);
     
     // MVP for notes. Translates notes with time.
-    glm::mat4 noteTranslation = viewProjection * translate(glm::mat4(1.0f), glm::vec3(0.0f, -glfwGetTime() -0.1f, 0.0f)) * model;
+    glm::mat4 noteTranslation = projection * view * translate(model, glm::vec3(0.0f, -glfwGetTime() -0.1f, 0.0f));
     
     // Send the transformation to the currently bound shader,
     glUniformMatrix4fv(glGetUniformLocation(*noteShader, "MVP"), 1, GL_FALSE, &noteTranslation[0][0]);
@@ -100,46 +99,40 @@ void Song::render(){
     
     glBindVertexArray(0);
     
-    //----- Render Strike Bar & Piano -----//
-    renderPiano();
-    strikeBar->render();
-    
 }
 
 
-void Song::updateNotes(bool matchingKeys[]){
-    /*
-    // Automatic Note Color
-    for (int n = 0; n < songTrack->size(); n++){
-        // Update color data if note is played.
-        if(songTrack->note(n)->start < glfwGetTime() - 2.5f){
-            for(int v = 0; v < 4; v++){
-                noteColors[4*n + v] = glm::vec3(0.2f, 0.2f, 0.25f);
-            }
-        }
-    }
-    */
+void Song::updateNotes(bool matchingKeys[], GLfloat updateTime, GLfloat deltaTime){
     
     // Update Note Color
-    double updateTime = glfwGetTime();
     for (int n = 0; n < songTrack->size(); n++){
-        // Get non-triggered notes that should be played.
-        if(songTrack->note(n)->triggered == false && songTrack->note(n)->start <= updateTime - 2.5f && songTrack->note(n)->end > updateTime - 2.5f){
+        // Get notes that should be played.
+        if(songTrack->note(n)->start <= updateTime - 2.5f && songTrack->note(n)->end > updateTime - 2.5f){
             
-            // If the note is pressed. Update color and set to triggered.
+            // Check if note is pressed by player.
             if( matchingKeys[songTrack->note(n)->keyNumber] ){
-                songTrack->note(n)->triggered = true;
-                for(int v = 0; v < 4; v++){
-                    noteColors[4*n + v] = glm::vec3(0.2f, 0.2f, 0.25f);
+                // Update position of particle system and render.
+                particles->updateNotePosition(glm::vec3(songTrack->note(n)->position, 0.0f, 0.0f));
+                particles->update(deltaTime, 1);
+                particles->render( black[songTrack->note(n)->keyNumber] );
+    
+                
+                // If not already triggered. Color the note.
+                if(songTrack->note(n)->triggered == false){
+                    songTrack->note(n)->triggered = true;
+                    for(int v = 0; v < 4; v++){
+                        noteColors[4*n + v] = glm::vec3(0.2f, 0.2f, 0.25f);
+                    }
+                    // Bind the new data to the buffers
+                    glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
+                    glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
                 }
+            
             }
             
         }
     }
     
-    // Bind the new data to the buffers
-    glBindBuffer(GL_ARRAY_BUFFER, noteColorBuffer);
-    glBufferData(GL_ARRAY_BUFFER, noteColors.size() * sizeof(glm::vec3), &noteColors.front(), GL_STATIC_DRAW);
 }
 
 
@@ -218,7 +211,7 @@ void Song::renderPiano(){
     glBindVertexArray(pianoVAO);
     
     // MVP for notes. Translates notes with time.
-    glm::mat4 MVP = viewProjection * model;
+    glm::mat4 MVP = projection * view * model;
     
     // Send the transformation to the currently bound shader,
     glUniformMatrix4fv(glGetUniformLocation(*noteShader, "MVP"), 1, GL_FALSE, &MVP[0][0]);

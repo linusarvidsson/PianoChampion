@@ -97,7 +97,7 @@ GLuint GraphicsTools::loadShaders(const char * vertex_file_path,const char * fra
 
 
 
-void GraphicsTools::getResolution(int* displayWidth, int* displayHeight) {
+void GraphicsTools::getResolution(int *displayWidth, int *displayHeight) {
     const GLFWvidmode* mode = glfwGetVideoMode(glfwGetPrimaryMonitor());
     
     *displayWidth = mode->width;
@@ -105,7 +105,7 @@ void GraphicsTools::getResolution(int* displayWidth, int* displayHeight) {
 }
 
 
-GLuint GraphicsTools::loadTexture(const char* filepath, bool alpha){
+GLuint GraphicsTools::loadTexture(const char *filepath, bool alpha){
     GLuint texture;
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);

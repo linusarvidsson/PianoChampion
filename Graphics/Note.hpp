@@ -16,6 +16,7 @@ public:
     GLfloat right();
     GLfloat left();
     GLfloat height();
+    GLfloat notePosition();
     glm::vec3 color();
     bool isBlack();
     void pianoSettings();

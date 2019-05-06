@@ -17,6 +17,7 @@
 #include "Graphics/Song.hpp"
 #include "Graphics/GraphicsTools.hpp"
 #include "Graphics/TextureQuad.hpp"
+#include "Graphics/ParticleSystem.hpp"
 
 #include "midifile/MidiTrack.hpp"
 #include "GameSystems/ScoreHandler.hpp"
@@ -36,7 +37,7 @@ struct songItem{
 };
 
 enum GameState{
-    MAIN_MENU,
+    TITLE_SCREEN,
     SONG_SELECT,
 	SONG_SETTINGS,
     SONG_ACTIVE,
@@ -60,56 +61,71 @@ public:
     GLboolean Keys[1024];
     GameState State;
     double globalScore= 2;
-    
     ScoreHandler score;
-    int soundfont = 0;
+    
+    // Time variables
+    GLfloat deltaTime;
+    GLfloat frameTime = 0.0f;
+    GLfloat inactive = 0.0f;
     
     // Queues for MidiPlayer
-    std::queue<int> playerToBeTurnedOn;
-    std::queue<int> playerToBeTurnedOff;
+    std::queue<int> playerToBeTurnedOn, playerToBeTurnedOff;
     
+    // Switches input to computer keyboard
 	bool debugMode;
 
 private:
-    // Textures
-    TextureQuad* logo;
+    // Textures Quads
+    TextureQuad *sunset, *mountain1, *mountain2, *mountain3, *birds, *clouds1, *clouds2, *clouds3;
+    TextureQuad *logo, *strikeBar, *sparkle;
+    
+    
+    // Particle System
+    GLuint particleShader;
+    ParticleSystem *particles;
+    
     
     // Display data
     int screenWidth, screenHeight;
-    glm::mat4 viewProjection, ortho;
+    glm::mat4 ortho, projection, view;
     GLuint colorShader, textureShader;
+    
     
     // Song data
     std::vector<songItem> songs;
-    Song* activeSong;
-    MidiTrack* activeTrack;
-    std:: string currentInstrument = "Piano";
-	int activeBPM;
-	int defaultBPM;
+    Song *activeSong;
+    MidiTrack *activeTrack;
+	int activeBPM, defaultBPM;
+    
+    std::string difficulty = "NORMAL";
+    std::string hands = "BOTH";
+    std::vector<std::string> soundfonts;
+    int activeSoundfont = 0;
+    
     
     // Logic arrays for the game mechanics
     bool currentNotes[128];
     
+    
     //Midi in
     MidiInputReader *midiin;
 
-	int i = 0;
-	
+
     // Menu data
-    int activeElement;
-	int j = 0;
-	std::string difficulty = "NORMAL";
-	std::string hands = "BOTH";
+    int activeMenuItem_SongSelect;
+    int activeMenuItem_SongSettings;
+	int activeMenuItem_Settings = 0;
+
 	double durationMulti = 1;
 
 	//Stats data
-	char alfaBet = 'A';
+	char currentLetter = 'A';
 	std::string playerName;
     
     // Font data
     GLuint textShader;
-    Font* standardFont;
-    Font* songFont;
+    Font *standardFont;
+    Font *songFont;
     
     // Render functions
     void renderSongMenu();
@@ -119,6 +135,7 @@ private:
 	void displaySongPercent();
     void renderPostGame();
     void renderLeaderboard();
+    void renderBackground();
     
 	int notesHit();
     void leaderboardHandler();

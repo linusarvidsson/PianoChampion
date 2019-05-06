@@ -11,12 +11,14 @@ struct MidiNote {
     double end;
     int keyNumber;
     bool triggered;
+    bool perfectHit;
+    float position;
 };
 
 class MidiTrack{
     
 public:
-    MidiTrack(const std::string& filename, int track, int BPM);
+    MidiTrack(const std::string &filename, int track, int BPM);
     MidiTrack();
     
     int size();
@@ -26,7 +28,7 @@ public:
     float tps();
     double duration();
     
-    MidiNote* note(int index);
+    MidiNote *note(int index);
     void setStartOffset(double offset);
     void updateCurrentNotes(bool currentNotes[], double time);
     void updateQueues(double last_time, double current_time);

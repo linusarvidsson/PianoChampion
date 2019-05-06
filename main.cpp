@@ -128,6 +128,8 @@ int octave = 4;
 
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
 {
+    KeySlayer.inactive = 0.0f;
+    
     // When a user presses the escape key, we set the WindowShouldClose property to true, closing the application
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);

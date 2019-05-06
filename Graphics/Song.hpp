@@ -12,6 +12,7 @@
 #include "TextureQuad.hpp"
 #include "../midifile/MidiTrack.hpp"
 #include "Note.hpp"
+#include "ParticleSystem.hpp"
 
 static bool black[128] = {
     0,1,0,1,0,0,1,0,1,0,1,0,
@@ -30,30 +31,28 @@ static bool black[128] = {
 class Song{
 public:
     ~Song();
-    Song(MidiTrack& track, GLuint& colorShader, GLuint& textureShader, glm::mat4 viewProjection_);
+    Song(MidiTrack &track, GLuint &colorShader, GLuint &textureShader, ParticleSystem &particleSystem, glm::mat4 _projection, glm::mat4 _view);
     
-    void updateNotes(bool matchingKeys[]);
+    void updateNotes(bool matchingKeys[], GLfloat updateTime, GLfloat deltaTime);
     void updatePiano(bool playerInput[]);
     void render();
 
     
 private:
     // Note data
-    GLuint* noteShader;
+    GLuint *noteShader;
     GLuint noteVAO;
     GLuint noteVertexBuffer, noteColorBuffer, noteElementBuffer;
-    MidiTrack* songTrack;
+    MidiTrack *songTrack;
     std::vector<glm::vec3> noteVertices;
     std::vector<glm::vec3> noteColors;
     std::vector<GLuint> noteIndices;
     void initNotes();
     
     // Projection components
-    glm::mat4 model, viewProjection;
+    glm::mat4 model, view, projection;
     
-    // Background & Strike Bar
-    TextureQuad* background;
-    TextureQuad* strikeBar;
+    ParticleSystem *particles;
     
     // Piano data
     GLuint pianoVAO;

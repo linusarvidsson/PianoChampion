@@ -13,8 +13,8 @@ const GLfloat TextureQuad::uv[] = {
 };
 
 
-TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height, glm::vec3 position, GLuint& textureShader, bool alphaTexture, glm::mat4 viewProjection)
-    :quadWidth(width), quadHeight(height), alpha(alphaTexture), quadPosition(position)
+TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height, glm::vec3 position, GLuint& textureShader, bool alphaTexture, glm::mat4 _projection, glm::mat4 _view)
+    :quadWidth(width), quadHeight(height), alpha(alphaTexture), quadPosition(position), projection(_projection), view(_view)
 {
     texture = GraphicsTools::loadTexture(texturepath, alpha);
     shader = &textureShader;
@@ -25,8 +25,8 @@ TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height,
     vertices.push_back(glm::vec3( position.x - width/2.0f, position.y + height/2.0f, position.z ));
     vertices.push_back(glm::vec3( position.x + width/2.0f, position.y + height/2.0f, position.z ));
 
-    // Model view projection
-    MVP = viewProjection * glm::mat4(1.0f);
+    // Set default model
+    model = glm::mat4(1.0f);
     
     // VAO
     glGenVertexArrays(1, &VAO);
@@ -64,6 +64,8 @@ TextureQuad::~TextureQuad(){
 void TextureQuad::render(){
     if(alpha) glEnable(GL_BLEND);
     
+    glm::mat4 MVP = projection * view * model;
+    
     glUseProgram(*shader);
     glUniformMatrix4fv(glGetUniformLocation(*shader, "MVP"), 1, GL_FALSE, &MVP[0][0]);
     
@@ -92,18 +94,25 @@ void TextureQuad::updateVertices(){
     glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(glm::vec3), &vertices.front(), GL_STATIC_DRAW);
 }
 
-void TextureQuad::scale(GLuint width, GLuint height){
-    quadWidth = width;
-    quadHeight = height;
-    updateVertices();
-}
-
-void TextureQuad::scale(GLfloat scale){
+void TextureQuad::scaleQuad(GLfloat scale){
     quadWidth *= scale;
     quadHeight *= scale;
     updateVertices();
 }
+
 void TextureQuad::position(glm::vec3 position){
     quadPosition = position;
     updateVertices();
+}
+
+void TextureQuad::translate(GLfloat x, GLfloat y, GLfloat z){
+    model = glm::translate(model, glm::vec3(x, y, z));
+}
+
+void TextureQuad::scale(GLfloat scale){
+    model = glm::scale(model, glm::vec3(scale));
+}
+
+void TextureQuad::reset(){
+    model = glm::mat4(1.0f);
 }

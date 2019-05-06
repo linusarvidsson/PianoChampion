@@ -25,7 +25,7 @@ struct Character {
 class Font{
 public:
     ~Font();
-    Font(const char* fontPath, GLuint& shader, GLuint windowWidth, GLuint windowHeight);
+    Font(const char *fontPath, GLuint &shader, GLuint windowWidth, GLuint windowHeight);
     
     void renderText(std::string text, GLfloat x, GLfloat y);
     void setScale(GLfloat scale_);
@@ -40,7 +40,7 @@ private:
     GLfloat scale;
     glm::vec3 color;
     
-    void initFont(const char* fontPath);
+    void initFont(const char *fontPath);
 };
 
 

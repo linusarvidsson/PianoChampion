@@ -29,6 +29,7 @@ GLfloat Note::end() { return endPoint; }
 GLfloat Note::right() { return rightBorder; }
 GLfloat Note::left() { return leftBorder; }
 GLfloat Note::height() { return noteHeight; }
+GLfloat Note::notePosition() { return position; }
 glm::vec3 Note::color() { return noteColor; }
 bool Note::isBlack() { return black; }
 
@@ -69,20 +70,20 @@ void Note::setPosition(){
 void Note::blackOrWhite(){
     if ((int)(position * 10) % 2 == 0) {
         black = false;
+        noteHeight = 0.0001f;
         rightBorder = position + WHITE_WIDTH;
         leftBorder = position - WHITE_WIDTH;
     }
     else {
         black = true;
-        rightBorder = position + BLACK_WIDTH;
-        leftBorder = position - BLACK_WIDTH;
+        noteHeight = 0.0002f;
     }
 }
 
 // Korrigerar svarta tangenters placering. C#, D#, F# och A# är inte helt centrerade mellan två vita tangenter.
 void Note::setBlackOffset(){
-    GLfloat offsetCD = 0.06f;
-    GLfloat offsetFA = 0.058f;
+    GLfloat offsetCD = 0.006f;
+    GLfloat offsetFA = 0.0058f;
     
     if(localNote > 0){
         if (localNote - 12*octave == 1) position -= offsetCD;
@@ -96,17 +97,20 @@ void Note::setBlackOffset(){
         else if (localNote - 12*octave == -6) position -= offsetFA;
         else if (localNote - 12*octave == -2) position += offsetFA;
     }
+    
+    rightBorder = position + BLACK_WIDTH;
+    leftBorder = position - BLACK_WIDTH;
 }
 
 void Note::pianoSettings(){
     if(black){
         startPoint = -3.4f;
         endPoint = 5.0f; //Was -2.5
-        noteHeight = -0.001f;
+        noteHeight = -0.0001f;
     }
     else{
         startPoint = -3.8f;
         endPoint = 5.0f;
-        noteHeight = -0.002f;
+        noteHeight = -0.0002f;
     }
 }

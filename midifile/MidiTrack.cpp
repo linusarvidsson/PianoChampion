@@ -2,7 +2,7 @@
 #include <iostream>
 
 
-MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
+MidiTrack::MidiTrack(const std::string &filename, int track, int bpm){
     //trackPath = filename;
     MidiFile midifile;
     midifile.read(filename);
@@ -29,7 +29,7 @@ MidiTrack::MidiTrack(const std::string& filename, int track, int bpm){
     int current_note = 0;
     for (int event=0; event<midifile[track].size(); event++) {
         if (midifile[track][event].isNoteOn()){
-            trackNotes.push_back({midifile[track][event].tick / trackTPS, (midifile[track][event].tick + midifile[track][event].getTickDuration()) / trackTPS, midifile[track][event].getKeyNumber(), false});
+            trackNotes.push_back({midifile[track][event].tick / trackTPS, (midifile[track][event].tick + midifile[track][event].getTickDuration()) / trackTPS, midifile[track][event].getKeyNumber(), false, false, 0.0f});
             current_note++;
         }
     }
@@ -100,11 +100,14 @@ int MidiTrack::availableForBonus(double time, int key){
     MidiNote note;
     for(int n = 0; n < numNotes; n++){
         note = trackNotes[n];
-        if(note.start <= time && note.start + 0.3 >= time){
-            if (note.keyNumber == key && !note.triggered){
+        
+        if(!note.triggered){
+            if(note.start <= time && note.start + 0.3 >= time && note.keyNumber == key){
+                note.perfectHit = true;
                 return n;
             }
         }
+        
     }
     return 0;
 }
