@@ -11,7 +11,7 @@
 #include <iostream>
 #include <cstdlib>
 #include <queue>
-#include "rtmidi-master/RtMidi.h"
+#include "RtMidi.h"
 
 class MidiInputReader{
 public:
