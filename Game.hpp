@@ -89,7 +89,7 @@ private:
     std::vector<songItem> songs;
     Song* activeSong;
     MidiTrack* activeTrack;
-    HandState Hands = BOTH;
+    //HandState Hands = BOTH;
     std:: string currentInstrument = "Piano";
 	int activeBPM;
 	int defaultBPM;

@@ -77,6 +77,7 @@ void Game::init(int displayWidth, int displayHeight){
     standardFont = new Font("Graphics/Fonts/Orbitron-Black.ttf", textShader, screenWidth, screenHeight);
 
     logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 1789 * 0.5, 786 * 0.5, glm::vec3(screenWidth/2, screenHeight/2, 0.0f), textureShader, true, ortho);
+	playerName = "           ";
 }
 
 
@@ -231,7 +232,7 @@ void Game::renderSongMenu(){
 
 void Game::renderSongSettings() {
     
-    /*if (Keys[GLFW_KEY_ENTER])
+    if (Keys[GLFW_KEY_ENTER])
     {
         State = SONG_ACTIVE;
         
@@ -244,14 +245,14 @@ void Game::renderSongSettings() {
         //if (hands = BOTH)
         activeTrack = new MidiTrack("MusicLibrary/crab_rave_r.mid", songs[activeElement].track, activeBPM);
         backingTrack = new MidiTrack("MusicLibrary/crab_rave_l.mid", songs[activeElement].track, activeBPM);
-        activeSong = new Song(*activeTrack, colorShader, textureShader);
+        activeSong = new Song(*activeTrack, colorShader, textureShader, viewProjection);
         // Lengthens the start of track notes. Has to be done after creation of Song.
         activeTrack->setStartOffset(0.1);
         // Reset time
         glfwSetTime(0);
         
         Keys[GLFW_KEY_ENTER] = GL_FALSE;
-    }*/
+    }
     
     if (Keys[GLFW_KEY_LEFT])
     {
@@ -356,16 +357,16 @@ void Game::renderSongSettings() {
 
 				if (j == 1){
 
-					hands = "RIGHT >";
+					hands = "RIGHT";
 				}
 				else if (j == 2)
 				{
 					
-					hands = "LEFT >";
+					hands = "LEFT";
 				}
 				else if (j > 2) {
 					
-					hands = "BOTH >";
+					hands = "BOTH";
 					j = 0;
 				}
 
@@ -381,11 +382,26 @@ void Game::renderSongSettings() {
 
 				// Load new selected song
 				delete activeTrack;
+				delete backingTrack;
 				delete activeSong;
-				activeTrack = new MidiTrack(songs[activeElement].filepath, songs[activeElement].track, activeBPM);
+				if (hands == "BOTH")
+				{
+					activeTrack = new MidiTrack("MusicLibrary/crab_rave.mid", songs[activeElement].track, activeBPM);
+					backingTrack = new MidiTrack("MusicLibrary/crab_rave_l.mid", songs[activeElement].track, 0);
+				}
+				if (hands == "RIGHT")
+				{
+					activeTrack = new MidiTrack("MusicLibrary/crab_rave_r.mid", songs[activeElement].track, activeBPM);
+					backingTrack = new MidiTrack("MusicLibrary/crab_rave_l.mid", songs[activeElement].track, activeBPM);
+				}
+				if (hands == "LEFT")
+				{
+					activeTrack = new MidiTrack("MusicLibrary/crab_rave_l.mid", songs[activeElement].track, activeBPM);
+					backingTrack = new MidiTrack("MusicLibrary/crab_rave_r.mid", songs[activeElement].track, activeBPM);
+				}
+
 				activeSong = new Song(*activeTrack, colorShader, textureShader, viewProjection);
 				// Lengthens the start of track notes. Has to be done after creation of Song.
-				std::cout << activeTrack->note(activeTrack->size() - 1)->end;
 				activeTrack->setStartOffset(0.1);
 				// Reset time
 				glfwSetTime(0);
@@ -412,7 +428,7 @@ void Game::renderSongSettings() {
 	standardFont->renderText(activeElementDuration + "M", screenWidth / 3+200, screenHeight - 316);
     standardFont->renderText("Speed: " + difficulty, screenWidth/3+200, screenHeight-450);
     standardFont->renderText("Instrument: " + currentInstrument, screenWidth/3+200, screenHeight-550);
-	standardFont->renderText("Hands: " + hands, screenWidth / 3+200, screenHeight - 650);
+	standardFont->renderText("Hands: " + hands + " >", screenWidth / 3+200, screenHeight - 650);
 	standardFont->renderText("PLAY", screenWidth / 3+200, screenHeight - 750);
   
 
