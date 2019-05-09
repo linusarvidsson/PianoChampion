@@ -642,9 +642,17 @@ void Game:: renderPostGame(){
 
 void Game:: leaderboardHandler(){
     std::fstream file;
-    std:: string line;
+    std::string line;
     file.open("Leaderboards/"+ songs[activeElement].name + ".txt",std::ios_base::app);
-    file << std::endl << playerName << " " << score.getScore();
+	for (int i = 0; i < playerName.length(); i++)
+	{
+		if (playerName[i] == ' ')
+		{
+			playerName.erase(i, 1);
+			i--;
+		}
+	}
+	file << std::endl << playerName << " " << score.getScore();
 }
 
 void Game::displaySongPercent() {
