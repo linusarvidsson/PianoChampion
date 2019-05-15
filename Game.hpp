@@ -78,11 +78,12 @@ private:
     // Textures Quads
     TextureQuad *sunset, *mountain1, *mountain2, *mountain3, *birds, *clouds1, *clouds2, *clouds3;
     TextureQuad *logo, *strikeBar, *sparkle;
+    GLfloat barPosition = -2.6f;
     
     
     // Particle System
     GLuint particleShader;
-    ParticleSystem *particles;
+    ParticleSystem *particles, *bonusParticles;
     
     
     // Display data

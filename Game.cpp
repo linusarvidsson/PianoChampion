@@ -111,13 +111,14 @@ void Game::init(int displayWidth, int displayHeight){
     // Load logo texture
     logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 1789 * 0.5, 786 * 0.5, glm::vec3(screenWidth/2, screenHeight/2, 0.0f), textureShader, true, ortho, glm::mat4(1.0f));
     // Load strike bar, used when playing song.
-    strikeBar = new TextureQuad("Graphics/Images/strike_bar.png", 10.0f, 1.0f, glm::vec3(0.0f, -2.5f, 0.1f), textureShader, true, projection, view);
+    strikeBar = new TextureQuad("Graphics/Images/strike_bar.png", 10.0f, 1.0f, glm::vec3(0.0f, barPosition, 0.1f), textureShader, true, projection, view);
     
     // Set up the particle system
     glUseProgram(particleShader);
     glUniform4f(glGetUniformLocation(particleShader, "color"), 1.0f, 1.0f, 1.0f, 1.0f);
     sparkle = new TextureQuad("Graphics/Images/sparkle.png", 0.15f, 0.15f, glm::vec3(0.0f, 0.0f, 0.0f), particleShader, true, projection, view);
-    particles = new ParticleSystem(particleShader, *sparkle, 100, glm::vec3(0.0f, -2.5f, 0.0001f));
+    particles = new ParticleSystem(particleShader, *sparkle, 100, glm::vec3(0.0f, barPosition, 0.0001f), false);
+    bonusParticles = new ParticleSystem(particleShader, *sparkle, 100, glm::vec3(0.0f, barPosition, 0.0001f), true);
 }
 
 
@@ -416,7 +417,7 @@ void Game::renderSongSettings() {
             delete activeTrack;
             delete activeSong;
             activeTrack = new MidiTrack(songs[activeMenuItem_SongSelect].filepath, songs[activeMenuItem_SongSelect].track, activeBPM);
-            activeSong = new Song(*activeTrack, colorShader, textureShader, *particles, projection, view);
+            activeSong = new Song(*activeTrack, colorShader, textureShader, *particles, *bonusParticles, projection, view);
             // Lengthens the start of track notes. Has to be done after creation of Song.
             std::cout << activeTrack->note(activeTrack->size() - 1)->end;
             activeTrack->setStartOffset(0.1);
@@ -512,8 +513,8 @@ void Game::renderSong(){
     
     // Render game
     activeSong->updatePiano(playerInput);
-    activeSong->render();
-    activeSong->updateNotes(matchingKeys, frameTime, deltaTime);
+    activeSong->render(frameTime);
+    activeSong->updateNotes(matchingKeys, frameTime + barPosition, deltaTime);
     strikeBar->render();
     
     displaySongPercent();
@@ -524,7 +525,7 @@ void Game::renderSong(){
     }
     
     // Update the current notes array. The notes in the track that should currently be played.
-    activeTrack->updateCurrentNotes(currentNotes, frameTime - 2.5f);
+    activeTrack->updateCurrentNotes(currentNotes, frameTime + barPosition);
     // Check if the player input matches with current notes. Update matchingKeys.
     for(int i = 0; i < 128; i++){
         if(playerInput[i] && currentNotes[i])
@@ -534,7 +535,7 @@ void Game::renderSong(){
     }
     
     // Update score
-    score.scoreNotes(activeTrack, currentNotes, playerInput, frameTime, 0.03f);
+    score.scoreNotes(activeTrack, currentNotes, playerInput, frameTime + barPosition, deltaTime);
     
     // Render score and multiplier
     standardFont->setScale(0.5f);
