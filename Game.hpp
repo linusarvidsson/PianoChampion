@@ -45,7 +45,6 @@ enum GameState{
     LEADERBOARD
     
 };
-
 class Game{
     
 public:
@@ -75,6 +74,8 @@ public:
 	bool debugMode;
 
 private:
+    std::vector <std::pair<int, std::string>> scoreVector;
+    void updateScoreVector();
     // Textures Quads
     TextureQuad *sunset, *mountain1, *mountain2, *mountain3, *birds, *clouds1, *clouds2, *clouds3;
     TextureQuad *logo, *strikeBar, *sparkle;
@@ -107,7 +108,6 @@ private:
     // Logic arrays for the game mechanics
     bool currentNotes[128];
     
-    
     //Midi in
     MidiInputReader *midiin;
 
@@ -120,7 +120,8 @@ private:
 	double durationMulti = 1;
 
 	//Stats data
-	char currentLetter = 'A';
+	char currentLetter = ' ';
+	int letterInPlayerName = 0;
 	std::string playerName;
     
     // Font data
@@ -140,6 +141,7 @@ private:
     
 	int notesHit();
     void leaderboardHandler();
+//    bool sortScore(const pair<std::string, double> &a, const pair<std::string, double> &b)
 
 };
 
