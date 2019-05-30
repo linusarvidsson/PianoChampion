@@ -26,6 +26,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <cmath>
 
 struct songItem{
     std::string name;
@@ -78,7 +79,10 @@ private:
     void updateScoreVector();
     // Textures Quads
     TextureQuad *sunset, *mountain1, *mountain2, *mountain3, *birds, *clouds1, *clouds2, *clouds3;
-    TextureQuad *logo, *strikeBar, *sparkle;
+    TextureQuad *logo, *sign, *signBorder, *gradient;
+    TextureQuad *arrow;
+    TextureQuad *progressBar, *progressBorder;
+    TextureQuad *strikeBar, *sparkle;
     GLfloat barPosition = -2.6f;
     
     
@@ -127,7 +131,7 @@ private:
     // Font data
     GLuint textShader;
     Font *standardFont;
-    Font *songFont;
+    Font *neonFont;
     
     // Render functions
     void renderSongMenu();

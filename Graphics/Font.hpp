@@ -30,6 +30,7 @@ public:
     void renderText(std::string text, GLfloat x, GLfloat y);
     void setScale(GLfloat scale_);
     void setColor(glm::vec3 color_);
+    GLfloat getSize(std::string text);
     
 private:
     GLuint *shaderID;

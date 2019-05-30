@@ -18,6 +18,7 @@ TextureQuad::TextureQuad(const char* texturepath, GLfloat width, GLfloat height,
 {
     texture = GraphicsTools::loadTexture(texturepath, alpha);
     shader = &textureShader;
+    color = glm::vec4(1.0f);
     
     vertices.reserve(4);
     vertices.push_back(glm::vec3( position.x - width/2.0f, position.y - height/2.0f, position.z ));
@@ -68,6 +69,7 @@ void TextureQuad::render(){
     
     glUseProgram(*shader);
     glUniformMatrix4fv(glGetUniformLocation(*shader, "MVP"), 1, GL_FALSE, &MVP[0][0]);
+    glUniform4f(glGetUniformLocation(*shader, "color"), color.r, color.g, color.b, color.a);
     
     glBindVertexArray(VAO);
     
@@ -113,6 +115,22 @@ void TextureQuad::scale(GLfloat scale){
     model = glm::scale(model, glm::vec3(scale));
 }
 
+void TextureQuad::rotate(GLfloat angle){
+    model = glm::rotate(model, glm::radians(angle), glm::vec3(0.0f, 0.0f, 1.0f));
+}
+
 void TextureQuad::reset(){
     model = glm::mat4(1.0f);
+}
+
+void TextureQuad::setColor(glm::vec3 texColor){
+    color = glm::vec4(texColor.r, texColor.g, texColor.b, 1.0f);
+}
+
+void TextureQuad::setColor(glm::vec4 texColor){
+    color = texColor;
+}
+
+void TextureQuad::setColor(glm::vec3 texColor, GLfloat texAlpha){
+    color = glm::vec4(texColor.r, texColor.g, texColor.b, texAlpha);
 }

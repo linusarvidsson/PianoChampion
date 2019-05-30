@@ -22,7 +22,7 @@ void ParticleSystem::render(bool black){
         if (particle.life > 0.0f)
         {
             // Update color in shader
-            glUniform4f(glGetUniformLocation(*shader, "color"), particle.color.r, particle.color.g, particle.color.b, particle.color.a);
+            quad->setColor(particle.color);
             // Update Quad
             quad->reset();
             
