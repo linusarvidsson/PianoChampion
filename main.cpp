@@ -30,7 +30,8 @@ sfPlayer* soundfont;
 static void audioCallback(void* data, Uint8 *stream, int len);
 void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
 bool prevPlayerInput[128] = {false};
-double globalScore = 0; 
+double globalScore = 0;
+
 
 int main(void) {
     
@@ -159,6 +160,38 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
         if (action == GLFW_PRESS)
             octave--;
     }
+  
+if (KeySlayer.State != SONG_ACTIVE){
+    if(key == GLFW_KEY_DOWN){
+    if (action == GLFW_PRESS)
+        KeySlayer.playerInput[41] = true;
+    else if (action == GLFW_RELEASE)
+        KeySlayer.playerInput[41] = false;
+    }
+    if(key == GLFW_KEY_UP){
+        if (action == GLFW_PRESS)
+            KeySlayer.playerInput[41] = true;
+        else if (action == GLFW_RELEASE)
+            KeySlayer.playerInput[41] = false;
+    }
+    
+    if(key == GLFW_KEY_RIGHT){
+        if (action == GLFW_PRESS)
+            KeySlayer.playerInput[40] = true;
+        else if (action == GLFW_RELEASE)
+            KeySlayer.playerInput[40] = false;
+    }
+    
+    if(key == GLFW_KEY_LEFT){
+        if (action == GLFW_PRESS)
+            KeySlayer.playerInput[40] = true;
+        else if (action == GLFW_RELEASE)
+            KeySlayer.playerInput[40] = false;
+    }
+    
+}
+    
+
     
     if(key >= 65 && key <= 90){
         if(key == GLFW_KEY_A) {
@@ -263,55 +296,15 @@ void key_callback(GLFWwindow* window, int key, int scancode, int action, int mod
 
 static void audioCallback(void* data, Uint8 *stream, int len)
 {
-    //auto time = std::chrono::steady_clock::now();
-    //double current_time = (double)std::chrono::duration_cast<std::chrono::milliseconds>(time - start_time).count() / 1000;
-    //current_time -= 3.8;
-    
-    /*reader->getUserInput();
-    
-    // Turn on notes according to player input
-    for (int i = 0; i < reader->toBeTurnedOn.size(); i++) {
-        int key = reader->toBeTurnedOn[i];
-        if (midiFile[key]) {
-            tsf_channel_note_on(soundfont->soundfont, 0, key, 0.7);
-        } else {
-            tsf_channel_note_on(soundfont->soundfont, 0, key, 0.05);
-        }
-    } reader->toBeTurnedOn.clear();
-    
-    // Turn off notes according to player input
-    for (int i = 0; i < reader->toBeTurnedOff.size(); i++) {
-        int key = reader->toBeTurnedOff[i];
-        tsf_channel_note_off(soundfont->soundfont, 2, key);
-    } reader->toBeTurnedOff.clear();
-    
-    if (metronome_changed) {
-        if (metronome_midi[75]) {
-            tsf_channel_note_on(soundfont->soundfont, 2, 70, 0.4);
-        } else {
-            tsf_channel_note_off(soundfont->soundfont, 2, 70);
-        }
-    }
-    
-    // Turn on left hand notes
-    left_hand->updateQueues(last_time-0.05, current_time-0.05);
-    if (current_time < 70000) { //current_time is initialized to 729000 something on start which causes all notes to play and it's nasty
-        for (int i = 0; i < left_hand->toBeTurnedOn.size(); i++) {
-            int key = left_hand->toBeTurnedOn[i];
-            tsf_channel_note_on(soundfont->soundfont, 0, key, 0.4);
-        }
-        for (int i = 0; i < left_hand->toBeTurnedOff.size(); i++) {
-            int key = left_hand->toBeTurnedOff[i];
-            tsf_channel_note_off(soundfont->soundfont, 0, key);
-        }
-    }
-     */
-    //last_time = current_time;
-    
+    float velocity ;
     while (!KeySlayer.playerToBeTurnedOn.empty()){
         int key = KeySlayer.playerToBeTurnedOn.front();
-        float velocity = 0.1;
-        if (KeySlayer.matchingKeys[key]) velocity = 0.7;
+        if (KeySlayer.State != SONG_ACTIVE) {
+             velocity = 0.7;
+        } else {
+             velocity = 0.1;
+            if (KeySlayer.matchingKeys[key]) velocity = 0.7;
+        }
         tsf_channel_note_on(soundfont->soundfont, KeySlayer.returnSoundfont(), key, velocity);
         //std::cout << KeySlayer.playerToBeTurnedOn.front() << " ";
         KeySlayer.playerToBeTurnedOn.pop();

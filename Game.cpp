@@ -87,6 +87,7 @@ void Game::init(int displayWidth, int displayHeight){
     soundfonts.push_back("Brass Synthesizer");
     soundfonts.push_back("Brighton Synthesizer");
     
+    
     // Load shaders
     // Text shader is a shared shader used in the class Font.
     textShader = GraphicsTools::loadShaders( "Graphics/Shaders/TextVertexShader.vertexshader", "Graphics/Shaders/TextFragmentShader.fragmentshader" );
@@ -165,6 +166,7 @@ void Game::render(){
     }
     else if(State == LEADERBOARD){
         renderBackground();
+        renderLeaderboard();
         logo->render();
     }
     
@@ -212,6 +214,9 @@ void Game::renderMainMenu(){
 
 // Render function for the song menu
 void Game::renderSongMenu(){
+    
+    activeSoundfont = 5;
+
     // Menu navigation
     if(Keys[GLFW_KEY_RIGHT]){
         // Switch to song state
@@ -219,7 +224,6 @@ void Game::renderSongMenu(){
         activeBPM = songs[activeMenuItem_SongSelect].bpm;
 		defaultBPM = songs[activeMenuItem_SongSelect].bpm;
 		activeMenuItem_SongSettings = 0;
-        
         Keys[GLFW_KEY_RIGHT] = GL_FALSE;
     }
     else if(activeMenuItem_SongSelect > 0 && Keys[GLFW_KEY_UP]) {
@@ -293,6 +297,7 @@ void Game::renderSongMenu(){
 
 void Game::renderSongSettings() {
     // Menu navigation
+    
     if (Keys[GLFW_KEY_LEFT]){
         // Reset song settings if player goes back to song select
         State = SONG_SELECT;
@@ -303,7 +308,7 @@ void Game::renderSongSettings() {
     }
     if(Keys[GLFW_KEY_DOWN]){
         activeMenuItem_SongSettings++;
-        if(activeMenuItem_SongSettings >3){
+        if(activeMenuItem_SongSettings >4){
             activeMenuItem_SongSettings = 0;
             activeMenuItem_Settings = 0;
         }
@@ -312,7 +317,7 @@ void Game::renderSongSettings() {
     if(Keys[GLFW_KEY_UP]){
         activeMenuItem_SongSettings--;
         if(activeMenuItem_SongSettings <0){
-            activeMenuItem_SongSettings = 3;
+            activeMenuItem_SongSettings = 4;
             activeMenuItem_Settings = 0;
         }
         Keys[GLFW_KEY_UP] = GL_FALSE;
@@ -360,18 +365,16 @@ void Game::renderSongSettings() {
     //----- SELECT SOUNDFONT -----//
     if(activeMenuItem_SongSettings == 1){
         standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-        standardFont->renderText("Instrument: " + soundfonts[activeSoundfont], screenWidth / 3+200, screenHeight - 550);
+        standardFont->renderText("Instrument: " + soundfonts[willBeSoundfont], screenWidth / 3+200, screenHeight - 550);
         standardFont->setColor(glm::vec3(0.8f, 0.1f, 0.2f));
     
         if (Keys[GLFW_KEY_RIGHT]){
-            if(activeSoundfont < soundfonts.size()-1){
-                activeSoundfont++;
+            if(willBeSoundfont < soundfonts.size()-1){
+                willBeSoundfont++;
             }
             else{
-                activeSoundfont = 0;
+                willBeSoundfont = 0;
             }
-            
-            soundfonts[activeSoundfont] = soundfonts[activeSoundfont];
             
             Keys[GLFW_KEY_RIGHT] = GL_FALSE;
         }
@@ -411,8 +414,9 @@ void Game::renderSongSettings() {
         standardFont->renderText("PLAY", screenWidth / 3 + 200, screenHeight - 750);
         if (Keys[GLFW_KEY_RIGHT])
         {
+            
             State = SONG_ACTIVE;
-
+            activeSoundfont = willBeSoundfont;
             // Load new selected song
             delete activeTrack;
             delete activeSong;
@@ -428,6 +432,15 @@ void Game::renderSongSettings() {
             Keys[GLFW_KEY_RIGHT] = GL_FALSE;
         }
     }
+    
+    if(activeMenuItem_SongSettings== 4){
+        standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+        standardFont->renderText("Leaderboards", screenWidth / 3 + 200, screenHeight - 850);
+        if (Keys[GLFW_KEY_RIGHT]){
+        State = LEADERBOARD;
+        Keys[GLFW_KEY_RIGHT] = GL_FALSE;
+        }
+    }
 
 	// Create an output string stream
 	std::ostringstream streamObj;
@@ -435,15 +448,16 @@ void Game::renderSongSettings() {
 	streamObj << std::fixed << std::setprecision(2) << songs[activeMenuItem_SongSelect].duration*durationMulti;
 	std::string activeMenuItem_SongSelectDuration = streamObj.str();
 
-	
 	standardFont->setColor(glm::vec3(sin*0.827f + (1 - sin)*0.015f, sin*0.023f + (1 - sin)*0.517f, 1.0f));
 	standardFont->renderText(songs[activeMenuItem_SongSelect].name, screenWidth / 3 + 200, screenHeight - 216);
 	standardFont->renderText(songs[activeMenuItem_SongSelect].difficulty, screenWidth / 3 + 400, screenHeight - 316);
-	standardFont->renderText(activeMenuItem_SongSelectDuration + "M", screenWidth / 3+200, screenHeight - 316);
+	standardFont->renderText(activeMenuItem_SongSelectDuration + "min", screenWidth / 3+200, screenHeight - 316);
     standardFont->renderText("Speed: " + difficulty, screenWidth/3+200, screenHeight-450);
-    standardFont->renderText("Instrument: " + soundfonts[activeSoundfont], screenWidth/3+200, screenHeight-550);
+    standardFont->renderText("Instrument: " + soundfonts[willBeSoundfont], screenWidth/3+200, screenHeight-550);
 	standardFont->renderText("Hands: " + hands, screenWidth / 3+200, screenHeight - 650);
 	standardFont->renderText("PLAY", screenWidth / 3+200, screenHeight - 750);
+    standardFont->renderText("Leaderboards", screenWidth / 3+200, screenHeight - 850);
+
   
 
     
@@ -475,6 +489,8 @@ void Game::renderSongSettings() {
 //-------------------------------------------//
 
 void Game::renderSong(){
+    
+
     //Update user input
     if (!debugMode) {
         midiin->getUserInput();
@@ -549,6 +565,7 @@ void Game::renderSong(){
 //--------------- POST GAME -----------------//
 //-------------------------------------------//
 void Game:: renderPostGame(){
+    activeSoundfont = 5;
     // If player presses enter, reset and go back to song select.
     if (Keys[GLFW_KEY_ENTER]){
         leaderboardHandler();
@@ -668,6 +685,34 @@ void Game:: renderPostGame(){
 }
 
 
+void Game:: renderLeaderboard(){
+    activeSoundfont = 5;
+    if(Keys[GLFW_KEY_DOWN]){
+        
+        if(activeMenuItem_Leaderboard < scoreVector.size()-1) activeMenuItem_Leaderboard++;
+        Keys[GLFW_KEY_DOWN] = GL_FALSE;
+    }
+    if(Keys[GLFW_KEY_UP]){
+        
+        if(activeMenuItem_Leaderboard > 0) activeMenuItem_Leaderboard--;
+        Keys[GLFW_KEY_UP] = GL_FALSE;
+    }
+    
+   int listLocation = (int)activeMenuItem_Leaderboard/8;
+    for(int i = 0; i < scoreVector.size(); i++){
+        if(i >= listLocation*8 && i < (listLocation+1)*8){
+            if(i == activeMenuItem_Leaderboard){
+                standardFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
+                standardFont->renderText(std::to_string(i +1) + ". " + scoreVector[i].second + ": " + std::to_string(scoreVector[i].first), 20, screenHeight - 100 - (i%8)*100);
+                standardFont->setColor(glm::vec3(0.827f + 0.015f, 0.023f + 0.517f, 1.0f));
+            }
+            standardFont->renderText(std::to_string(i +1) + ". " + scoreVector[i].second + ": " + std::to_string(scoreVector[i].first), 20,  screenHeight - 100 - (i%8)*100 );
+        }
+    }
+}
+
+
+
 
 //-------------------------------------------//
 //------------- OTHER FUNCTIONS -------------//
@@ -706,8 +751,6 @@ void Game:: leaderboardHandler(){
     
     }
 }
-
-
 
 void Game::displaySongPercent() {
     

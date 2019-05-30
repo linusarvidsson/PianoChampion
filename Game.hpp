@@ -115,6 +115,7 @@ private:
     int activeMenuItem_SongSelect;
     int activeMenuItem_SongSettings;
 	int activeMenuItem_Settings = 0;
+    int activeMenuItem_Leaderboard= 0;
 
 	double durationMulti = 1;
 
@@ -127,6 +128,10 @@ private:
     GLuint textShader;
     Font *standardFont;
     Font *songFont;
+    
+    //OTHER
+    bool inSongSettings = false;
+    int willBeSoundfont = 0;
     
     // Render functions
     void renderSongMenu();
