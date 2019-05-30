@@ -310,8 +310,8 @@ static void audioCallback(void* data, Uint8 *stream, int len)
     
     while (!KeySlayer.playerToBeTurnedOn.empty()){
         int key = KeySlayer.playerToBeTurnedOn.front();
-        float velocity = 0.1;
-        if (KeySlayer.matchingKeys[key]) velocity = 0.7;
+        float velocity = 0.7;
+        //if (KeySlayer.matchingKeys[key]) velocity = 0.7;
         tsf_channel_note_on(soundfont->soundfont, KeySlayer.returnSoundfont(), key, velocity);
         //std::cout << KeySlayer.playerToBeTurnedOn.front() << " ";
         KeySlayer.playerToBeTurnedOn.pop();

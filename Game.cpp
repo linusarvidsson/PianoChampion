@@ -124,7 +124,7 @@ void Game::init(int displayWidth, int displayHeight){
     // Load logo texture
     logo = new TextureQuad("Graphics/Images/KeySlayerLogo.png", 1789 * 0.5f, 786 * 0.5f, glm::vec3(screenWidth/2, screenHeight/2, 0.0f), textureShader, true, ortho, glm::mat4(1.0f));
     // Load sign texture
-    gradient = new TextureQuad("Graphics/Images/menu_gradient.png", 800 * 0.8f, 1000 * 0.8f, glm::vec3(400 * 0.8f, screenHeight/2, -0.0002f), textureShader, true, ortho, glm::mat4(1.0f));
+    gradient = new TextureQuad("Graphics/Images/menu_gradient.png", screenHeight * 0.8f, screenHeight, glm::vec3(screenHeight * 0.4f, screenHeight/2, -0.0002f), textureShader, true, ortho, glm::mat4(1.0f));
     sign = new TextureQuad("Graphics/Images/sign.png", 800 * 0.8f, 600 * 0.8f, glm::vec3(screenWidth -330, 300, -0.0002f), textureShader, true, ortho, glm::mat4(1.0f));
     signBorder = new TextureQuad("Graphics/Images/sign_border.png", 800 * 0.8f, 600 * 0.8f, glm::vec3(screenWidth -330, 300, -0.0001f), textureShader, true, ortho, glm::mat4(1.0f));
     // Load strike bar, used when playing song.
@@ -145,6 +145,9 @@ void Game::init(int displayWidth, int displayHeight){
     bonusParticles = new ParticleSystem(particleShader, *sparkle, 100, glm::vec3(0.0f, barPosition, 0.0001f), true);
     updateScoreVector();
 }
+
+
+
 
 
 //-------------------------------------------//
