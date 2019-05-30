@@ -18,13 +18,14 @@ struct Particle {
 
 class ParticleSystem{
 public:
-    ParticleSystem(GLuint &particleShader, TextureQuad &particleQuad, GLuint _numParticles, glm::vec3 position);
+    ParticleSystem(GLuint &particleShader, TextureQuad &particleQuad, GLuint _numParticles, glm::vec3 position, bool _bonus);
     
     void update(GLfloat dt, GLuint newParticles);
     void updateNotePosition(glm::vec3 position);
     void render(bool black);
     
 private:
+    bool bonus;
     std::vector<Particle> particles;
     GLuint numParticles;
     GLuint *shader;

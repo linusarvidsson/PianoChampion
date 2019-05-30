@@ -29,13 +29,20 @@ public:
     void translate(GLfloat x, GLfloat y, GLfloat z);
     // Scale (Model projection)
     void scale(GLfloat scale);
+    // Rotate (Model projection)
+    void rotate(GLfloat angle);
     // Reset model
     void reset();
+    
+    void setColor(glm::vec3 texColor);
+    void setColor(glm::vec3 texColor, GLfloat texAlpha);
+    void setColor(glm::vec4 texColor);
     
 private:
     // Quad data
     GLfloat quadWidth, quadHeight;
     glm::vec3 quadPosition;
+    glm::vec4 color;
     std::vector<glm::vec3> vertices;
     static const GLuint indices[];
     

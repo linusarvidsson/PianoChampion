@@ -31,11 +31,11 @@ static bool black[128] = {
 class Song{
 public:
     ~Song();
-    Song(MidiTrack &track, GLuint &colorShader, GLuint &textureShader, ParticleSystem &particleSystem, glm::mat4 _projection, glm::mat4 _view);
+    Song(MidiTrack &track, GLuint &colorShader, GLuint &textureShader, ParticleSystem &particleSystem, ParticleSystem &bonusParticleSystem, glm::mat4 _projection, glm::mat4 _view);
     
     void updateNotes(bool matchingKeys[], GLfloat updateTime, GLfloat deltaTime);
     void updatePiano(bool playerInput[]);
-    void render();
+    void render(GLfloat time);
 
     
 private:
@@ -52,7 +52,7 @@ private:
     // Projection components
     glm::mat4 model, view, projection;
     
-    ParticleSystem *particles;
+    ParticleSystem *particles, *bonusParticles;
     
     // Piano data
     GLuint pianoVAO;

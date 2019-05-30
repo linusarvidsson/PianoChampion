@@ -10,10 +10,11 @@ Song::~Song(){
 }
 
 
-Song::Song(MidiTrack &track, GLuint &colorShader, GLuint &textureShader, ParticleSystem &particleSystem, glm::mat4 _projection, glm::mat4 _view){
+Song::Song(MidiTrack &track, GLuint &colorShader, GLuint &textureShader, ParticleSystem &particleSystem, ParticleSystem &bonusParticleSystem, glm::mat4 _projection, glm::mat4 _view){
     projection = _projection;
     view = _view;
     particles = &particleSystem;
+    bonusParticles = &bonusParticleSystem;
     noteShader = &colorShader;
     songTrack = &track;
 
@@ -81,7 +82,7 @@ void Song::initNotes(){
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, noteIndices.size() * sizeof(GLuint), &noteIndices.front(), GL_STATIC_DRAW);
 }
 
-void Song::render(){
+void Song::render(GLfloat time){
     //----- Render Piano -----//
     renderPiano();
     
@@ -90,7 +91,7 @@ void Song::render(){
     glBindVertexArray(noteVAO);
     
     // MVP for notes. Translates notes with time.
-    glm::mat4 noteTranslation = projection * view * translate(model, glm::vec3(0.0f, -glfwGetTime() -0.1f, 0.0f));
+    glm::mat4 noteTranslation = projection * view * translate(model, glm::vec3(0.0f, -time -0.1f, 0.0f));
     
     // Send the transformation to the currently bound shader,
     glUniformMatrix4fv(glGetUniformLocation(*noteShader, "MVP"), 1, GL_FALSE, &noteTranslation[0][0]);
@@ -107,14 +108,21 @@ void Song::updateNotes(bool matchingKeys[], GLfloat updateTime, GLfloat deltaTim
     // Update Note Color
     for (int n = 0; n < songTrack->size(); n++){
         // Get notes that should be played.
-        if(songTrack->note(n)->start <= updateTime - 2.5f && songTrack->note(n)->end > updateTime - 2.5f){
+        if(songTrack->note(n)->start <= updateTime && songTrack->note(n)->end > updateTime){
             
             // Check if note is pressed by player.
             if( matchingKeys[songTrack->note(n)->keyNumber] ){
                 // Update position of particle system and render.
-                particles->updateNotePosition(glm::vec3(songTrack->note(n)->position, 0.0f, 0.0f));
-                particles->update(deltaTime, 1);
-                particles->render( black[songTrack->note(n)->keyNumber] );
+                if(songTrack->note(n)->perfectHit){
+                    bonusParticles->updateNotePosition(glm::vec3(songTrack->note(n)->position, 0.0f, 0.0f));
+                    bonusParticles->update(deltaTime, 2);
+                    bonusParticles->render( black[songTrack->note(n)->keyNumber] );
+                }
+                else{
+                    particles->updateNotePosition(glm::vec3(songTrack->note(n)->position, 0.0f, 0.0f));
+                    particles->update(deltaTime, 1);
+                    particles->render( black[songTrack->note(n)->keyNumber] );
+                }
     
                 
                 // If not already triggered. Color the note.

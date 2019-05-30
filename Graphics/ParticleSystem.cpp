@@ -1,7 +1,7 @@
 #include "ParticleSystem.hpp"
 
-ParticleSystem::ParticleSystem(GLuint &particleShader, TextureQuad &particleQuad, GLuint _numParticles, glm::vec3 position)
-: shader(&particleShader), quad(&particleQuad), numParticles(_numParticles), sourcePosition(position)
+ParticleSystem::ParticleSystem(GLuint &particleShader, TextureQuad &particleQuad, GLuint _numParticles, glm::vec3 position, bool _bonus)
+: shader(&particleShader), quad(&particleQuad), numParticles(_numParticles), sourcePosition(position), bonus(_bonus)
 {
     for (GLuint i = 0; i < numParticles; i++){
         particles.push_back(Particle());
@@ -22,7 +22,7 @@ void ParticleSystem::render(bool black){
         if (particle.life > 0.0f)
         {
             // Update color in shader
-            glUniform4f(glGetUniformLocation(*shader, "color"), particle.color.r, particle.color.g, particle.color.b, particle.color.a);
+            quad->setColor(particle.color);
             // Update Quad
             quad->reset();
             
@@ -72,9 +72,31 @@ void ParticleSystem::respawnParticle(Particle &particle){
     particle.position.x = sourcePosition.x + random;
     particle.position.y = sourcePosition.y;
     
-    particle.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    if(bonus){
+        particle.color = glm::vec4(1.0f, 0.2f, 0.2f, 1.0f);
+        
+        random = rand() % 100;
+        if(random > 40){
+            particle.velocity = glm::vec3(0.0f, 1.5f, 0.0f);
+        }
+        else{
+            random = (rand() % 360) * 0.01745f;
+            particle.velocity = glm::vec3(cos(random) * 0.5f, sin(random) * 0.5f, 0.0f);
+        }
+    }
+    else{
+        particle.color = glm::vec4(1.0f, 1.0f, 1.0f, 1.0f);
+        
+        random = rand() % 100;
+        if(random > 40){
+            particle.velocity = glm::vec3(0.0f, 1.0f, 0.0f);
+        }
+        else{
+            random = (rand() % 360) * 0.01745f;
+            particle.velocity = glm::vec3(cos(random) * 0.3f, sin(random) * 0.3f, 0.0f);
+        }
+    }
     
-    particle.velocity = glm::vec3(0.0f, 1.0f, 0.0f);
 }
 
 // Stores the index of the last particle used (for quick access to next dead particle)

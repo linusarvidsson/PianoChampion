@@ -10,7 +10,7 @@ Font::Font(const char *fontPath, GLuint &shader, GLuint windowWidth, GLuint wind
     projection = glm::ortho(0.0f, static_cast<GLfloat>(windowWidth), 0.0f, static_cast<GLfloat>(windowHeight));
     initFont(fontPath);
     shaderID = &shader;
-    scale = 1.0f;
+    scale = 0.5f;
     color = glm::vec3(0.0f, 0.0f, 0.0f);
     
     // Set up text VAO and VBO
@@ -32,7 +32,7 @@ void Font::setColor(glm::vec3 color_){
 }
 
 void Font::setScale(GLfloat scale_){
-    scale = scale_;
+    scale = 0.5f * scale_;
 }
 
 
@@ -47,7 +47,7 @@ void Font::initFont(const char* fontPath){
         std::cout << "Failed to load font" << std::endl;
     
     // Font size
-    FT_Set_Pixel_Sizes(face, 0, 48);
+    FT_Set_Pixel_Sizes(face, 0, 100);
     
     // Disable byte-alignment restriction
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -145,3 +145,21 @@ void Font::renderText(std::string text, GLfloat x, GLfloat y)
     
     glDisable(GL_BLEND);
 }
+
+GLfloat Font::getSize(std::string text)
+{
+    GLfloat x = 0.0f;
+    
+    // Iterate through all characters
+    std::string::const_iterator c;
+    for (c = text.begin(); c != text.end(); c++)
+    {
+        Character ch = Characters[*c];
+        
+        // Now advance cursors for next glyph (note that advance is number of 1/64 pixels)
+        x += (ch.Advance >> 6) * scale; // Bitshift by 6 to get value in pixels (2^6 = 64 (divide amount of 1/64th pixels by 64 to get amount of pixels))
+    }
+    
+    return x;
+}
+

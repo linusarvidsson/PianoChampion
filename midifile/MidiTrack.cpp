@@ -97,13 +97,11 @@ int MidiTrack::countTriggeredNotes(){
 }
 
 int MidiTrack::availableForBonus(double time, int key){
-    MidiNote note;
+    
     for(int n = 0; n < numNotes; n++){
-        note = trackNotes[n];
-        
-        if(!note.triggered){
-            if(note.start <= time && note.start + 0.3 >= time && note.keyNumber == key){
-                note.perfectHit = true;
+        if(!trackNotes[n].triggered){
+            if(trackNotes[n].keyNumber == key && trackNotes[n].start <= time && trackNotes[n].start + 0.3 >= time){
+                trackNotes[n].perfectHit = true;
                 return n;
             }
         }
