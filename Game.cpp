@@ -413,6 +413,7 @@ void Game::renderSongSettings() {
     }
     if (Keys[GLFW_KEY_ENTER])
     {
+        activeSoundfont = willBeSoundfont;
         State = SONG_ACTIVE;
         
         // Load new selected song
@@ -530,7 +531,7 @@ void Game::renderSongSettings() {
     //----- SELECT SOUNDFONT -----//
     if(activeMenuItem_SongSettings == 1){
         neonFont->setColor(glm::vec3(1.0f, 1.0f, 1.0f));
-        neonFont->renderText(soundfonts[activeSoundfont], screenWidth -335 - neonFont->getSize(soundfonts[activeSoundfont])/2, 180);
+        neonFont->renderText(soundfonts[willBeSoundfont], screenWidth -335 - neonFont->getSize(soundfonts[willBeSoundfont])/2, 180);
         neonFont->setColor(neonColor);
         
         // Render arrows
@@ -556,14 +557,12 @@ void Game::renderSongSettings() {
             Keys[GLFW_KEY_RIGHT] = GL_FALSE;
         }
         if (Keys[GLFW_KEY_LEFT]){
-            if(activeSoundfont > 0){
-                activeSoundfont--;
+            if(willBeSoundfont > 0){
+                willBeSoundfont--;
             }
             else{
-                activeSoundfont = (int)soundfonts.size() - 1;
+                willBeSoundfont = (int)soundfonts.size() - 1;
             }
-            
-            soundfonts[activeSoundfont] = soundfonts[activeSoundfont];
             
             Keys[GLFW_KEY_LEFT] = GL_FALSE;
         }
@@ -628,15 +627,11 @@ void Game::renderSongSettings() {
     neonFont->renderText("____________", screenWidth -335 -neonFont->getSize("____________")/2, 280);
     
     neonFont->renderText(difficulty + " speed", screenWidth -335 -neonFont->getSize(difficulty + " speed")/2, 230);
-    neonFont->renderText(soundfonts[activeSoundfont], screenWidth -335 - neonFont->getSize(soundfonts[activeSoundfont])/2, 180);
+    neonFont->renderText(soundfonts[willBeSoundfont], screenWidth -335 - neonFont->getSize(soundfonts[willBeSoundfont])/2, 180);
     if(hands == "BOTH")
         neonFont->renderText(hands + " hands", screenWidth -335 -neonFont->getSize(hands + " hands")/2, 130);
     else
         neonFont->renderText(hands + " hand", screenWidth -335 -neonFont->getSize(hands + " hand")/2, 130);
-    /*
-            activeSoundfont = willBeSoundfont;
-	standardFont->renderText("PLAY", screenWidth / 3+200, screenHeight - 750);
-  */
     neonFont->setScale(0.6f + glm::sin(frameTime)*0.01f);
     neonFont->setColor(neonColor * 0.8f);
     neonFont->renderText("Press Select to Play", screenWidth -335 -neonFont->getSize("Press Select to Play")/2, 23);
